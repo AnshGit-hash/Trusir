@@ -1,0 +1,59 @@
+name: trusir
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.4 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  intl_phone_number_input: ^0.7.4
+  http: ^1.2.2
+  dio: ^5.7.0
+  path_provider: ^2.1.5
+  permission_handler: ^11.3.1
+  package_info_plus: ^8.1.1
+  flutter_svg: ^2.0.14
+  url_launcher: 
+  device_info_plus: 
+  shared_preferences: ^2.3.3
+  image_picker: ^1.1.2
+  intl:
+  table_calendar: 
+  flutter_local_notifications:
+  open_file:  
+  signature: ^5.5.0
+  path:
+  file_picker:
+  video_player: 
+  chewie: 
+  google_fonts: 
+  youtube_player_flutter: 
+  phonepe_payment_sdk: 
+  crypto: 
+  fluttertoast:
+  flutter_image_compress: 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_colorpicker: ^1.1.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Bold.ttf
+        - asset: assets/fonts/Poppins-Black.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+        - asset: assets/fonts/Poppins-Regular.ttf
