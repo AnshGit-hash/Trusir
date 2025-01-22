@@ -493,12 +493,21 @@ class _CoursePageState extends State<CoursePage> {
   bool isLoading = true;
 
   Future<List<Course>> fetchAllCourses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentClass = prefs.getString('class');
+    print(studentClass);
+
     final url = Uri.parse('$baseUrl/get-courses');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      final responseData = data.map((json) => Course.fromJson(json)).toList();
+      final responseData = data
+          .map((json) => Course.fromJson(json))
+          .where((course) =>
+              course.courseClass == studentClass) // Filter by student class
+          .toList();
+
       _courses = responseData;
       return _courses;
     } else {

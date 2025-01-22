@@ -103,13 +103,13 @@ class _ProfilePopupState extends State<ProfilePopup> {
     // Height for single profile (120) + padding (8 vertical each) = 136
     const double singleProfileHeight = 136;
     // Minimum height for one profile
-    const double minHeight = 150;
+    const double minHeight = 170;
     // Maximum height for multiple profiles
     const double maxHeight = 300;
-    
+
     // Calculate total height needed
     double calculatedHeight = profileCount * singleProfileHeight;
-    
+
     // Return height within constraints
     return calculatedHeight.clamp(minHeight, maxHeight);
   }
@@ -160,7 +160,8 @@ class _ProfilePopupState extends State<ProfilePopup> {
                                   ConnectionState.waiting) {
                                 return const SizedBox(
                                   height: 150,
-                                  child: Center(child: CircularProgressIndicator()),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
                                 );
                               } else if (snapshot.hasError) {
                                 return SizedBox(
