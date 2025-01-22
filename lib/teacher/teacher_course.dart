@@ -7,24 +7,8 @@ import 'package:trusir/student/course.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 
-class TeacherCourse {
-  final int id;
-  final String amount;
-  final String name;
-  final String subject;
-  final String image;
-
-  TeacherCourse({
-    required this.id,
-    required this.amount,
-    required this.name,
-    required this.subject,
-    required this.image,
-  });
-}
-
 class TeacherCourseCard extends StatelessWidget {
-  final TeacherCourse course;
+  final CourseDetail course;
 
   const TeacherCourseCard({super.key, required this.course});
 
@@ -86,7 +70,7 @@ class TeacherCourseCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      course.subject,
+                      course.courseName,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -108,7 +92,7 @@ class TeacherCourseCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'End to - 20/10/2024',
+              'Time Slot: ${course.timeSlot}',
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -119,7 +103,7 @@ class TeacherCourseCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '₹${course.amount}',
+                  '₹${course.price}',
                   style: const TextStyle(
                     fontSize: 22,
                     fontFamily: 'Poppins',
@@ -137,9 +121,9 @@ class TeacherCourseCard extends StatelessWidget {
                     ),
                     backgroundColor: Colors.deepPurpleAccent,
                   ),
-                  child: const Text(
-                    'Demo',
-                    style: TextStyle(
+                  child: Text(
+                    course.type,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontFamily: 'Poppins',
                     ),
@@ -163,7 +147,7 @@ class TeacherCoursePage extends StatefulWidget {
 
 class _TeacherCoursePageState extends State<TeacherCoursePage> {
   final apiBase = '$baseUrl/my-student';
-
+  List<CourseDetail> courses = [];
   List<StudentProfile> studentprofile = [];
   Future<void> fetchStudentProfiles({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -179,67 +163,39 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
         studentprofile =
             data.map((json) => StudentProfile.fromJson(json)).toList();
       });
-      print(studentprofile[0].userID);
     } else {
       throw Exception('Failed to load student profiles');
     }
   }
 
-  Future<List<CourseDetail>> fetchCourses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userID = prefs.getString('userID');
+  Future<List<CourseDetail>> fetchCourses(String userID) async {
     final url = Uri.parse('$baseUrl/get-courses/$userID');
     final response = await http.get(url);
-
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       final responseData =
           data.map((json) => CourseDetail.fromJson(json)).toList();
-      _courseDetails = responseData;
-      return _courseDetails;
+      courses = responseData;
+      return courses;
     } else {
       throw Exception('Failed to fetch courses');
     }
   }
 
-  List<CourseDetail> _courseDetails = [];
-
   @override
   void initState() {
     super.initState();
-    fetchStudentProfiles();
-    fetchCourses();
+    initializeData();
+  }
+
+  void initializeData() async {
+    await fetchStudentProfiles();
+    await fetchCourses(studentprofile[0].userID);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<TeacherCourse> courses = [
-      TeacherCourse(
-        id: 1,
-        amount: '1500',
-        name: 'Mathematics Basics',
-        subject: 'Mathematics',
-        image:
-            'https://admin.trusir.com/uploads/profile/profile_1736527860.jpg',
-      ),
-      TeacherCourse(
-        id: 2,
-        amount: '2000',
-        name: 'Science Experiments',
-        subject: 'Science',
-        image:
-            'https://admin.trusir.com/uploads/profile/profile_1736527860.jpg',
-      ),
-      TeacherCourse(
-        id: 3,
-        amount: '1800',
-        name: 'English Grammar',
-        subject: 'English',
-        image:
-            'https://admin.trusir.com/uploads/profile/profile_1736527860.jpg',
-      ),
-    ];
-
     bool isWeb = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
@@ -280,7 +236,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Container(
-            color: Colors.white,
+            color: Colors.grey[50],
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -299,7 +255,9 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
                         ),
                       ),
                       onPressed: () {
-                        // Handle student button click
+                        setState(() {
+                          fetchCourses(studentprofile[index].userID);
+                        });
                       },
                       child: Text(
                         studentprofile[index].name,
@@ -320,9 +278,10 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: isWeb ? 2 : 1,
-            mainAxisExtent: isWeb ? 550 : null,
-            childAspectRatio: 16 / 14),
+            // mainAxisExtent: isWeb ? 560 : null,
+            childAspectRatio: 16 / 14.5),
         padding: const EdgeInsets.symmetric(vertical: 8.0),
+        shrinkWrap: true,
         itemCount: courses.length,
         itemBuilder: (context, index) {
           final course = courses[index];

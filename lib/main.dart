@@ -27,10 +27,11 @@ void main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    systemNavigationBarColor:
-        Colors.grey[50], // Set the navigation bar color to grey
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+      systemNavigationBarColor:
+          Colors.grey[200], // Set the navigation bar color to grey
+      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.grey[50],
+      statusBarBrightness: Brightness.light));
   runApp(const MyApp());
 }
 

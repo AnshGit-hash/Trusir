@@ -31,27 +31,29 @@ class MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-                bottom: currentIndex == 2
-                    ? 0
-                    : 80), // Adjust for bottom nav bar height
-            child: pages[currentIndex],
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomBottomNavigationBar(
-              currentIndex: currentIndex,
-              onTap: onTabTapped,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(
+                  bottom: currentIndex == 2
+                      ? 0
+                      : 80), // Adjust for bottom nav bar height
+              child: pages[currentIndex],
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomBottomNavigationBar(
+                currentIndex: currentIndex,
+                onTap: onTabTapped,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
