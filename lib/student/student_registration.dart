@@ -100,7 +100,6 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
   String? medium;
   String? studentClass;
   dynamic additionals;
-
   String? subject;
   DateTime? selectedDOB;
   bool agreeToTerms = false;
@@ -973,7 +972,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                 studentForms[index].medium = value;
                               });
                             },
-                            items: additionals['mediums'],
+                            items: additionals['mediums'] ?? ['-Select-'],
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -986,7 +985,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                 studentForms[index].board = value;
                               });
                             },
-                            items: additionals['board'],
+                            items: additionals['board'] ?? ['-Select-'],
                           ),
                         ),
                         const SizedBox(width: 20),
