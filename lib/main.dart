@@ -169,22 +169,25 @@ class _SplashScreenState extends State<SplashScreen>
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
                       'assets/trusir_logo.png', // Replace with your logo asset path
-                      width: 200,
-                      height: 200,
+                      width: 150,
+                      height: 150,
                     ),
                   ),
-                  const SizedBox(height: 300),
-                  const Text(
-                    'Trusir',
-                    style: TextStyle(
-                        fontSize: 25,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w700),
-                  )
                 ],
               ),
             ),
           ),
+          const Positioned(
+              left: 150,
+              right: 0,
+              bottom: 110,
+              child: Text(
+                'Trusir',
+                style: TextStyle(
+                    fontSize: 25,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700),
+              ))
         ],
       ),
     );
