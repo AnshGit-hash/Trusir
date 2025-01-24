@@ -203,18 +203,16 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      isWeb
-                                          ? Text(
-                                              city,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: isWeb ? 19 : 16,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            )
-                                          : const SizedBox(),
+                                      Text(
+                                        city,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: isWeb ? 19 : 16,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      )
                                     ],
                                   ),
                                 ),
