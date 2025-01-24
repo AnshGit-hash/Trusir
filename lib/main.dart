@@ -108,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> navigateToInitialPage() async {
-    await Future.delayed(const Duration(seconds: 5)); // Wait for 2 seconds
+    await Future.delayed(const Duration(seconds: 2)); // Wait for 2 seconds
     final initialPage = await getInitialPage();
     if (mounted) {
       Navigator.of(context).pushReplacement(

@@ -172,12 +172,15 @@ class _NewCourseCardState extends State<NewCourseCard> {
                       height: isWeb ? 40 : null,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TeacherProfilePage(
-                                    userID: widget.course.teacherID)),
-                          );
+                          widget.course.teacherID == 'N/A'
+                              ? Fluttertoast.showToast(
+                                  msg: 'No Teachers Assigned Yet')
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => TeacherProfilePage(
+                                          userID: widget.course.teacherID)),
+                                );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
@@ -234,7 +237,17 @@ class _NewCourseCardState extends State<NewCourseCard> {
                             height: isWeb ? 40 : null,
                             child: ElevatedButton(
                               onPressed: () {
-                                // Handle Buy Now action
+                                widget.course.teacherID == 'N/A'
+                                    ? Fluttertoast.showToast(
+                                        msg: 'No Teachers Assigned Yet')
+                                    : Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                TeacherProfilePage(
+                                                    userID: widget
+                                                        .course.teacherID)),
+                                      );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,
