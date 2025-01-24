@@ -19,6 +19,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
   String gender = '';
   String address = '';
   String graduation = '';
+  String fatherName = '';
   String experience = '';
   String subjects = '';
   String language = '';
@@ -65,6 +66,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
           gender = data['gender'] ?? 'N/A';
           address = data['address'] ?? 'N/A';
           graduation = data['qualification'] ?? 'N/A';
+          fatherName = data['father_name'] ?? 'N/A';
           experience = data['experience'] ?? 'N/A';
           subjects = data['subject'] ?? 'N/A';
           language = data['medium'] ?? 'N/A';
@@ -247,6 +249,15 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                         const SizedBox(height: 10),
                         buildInfoRow(
                           isWeb,
+                          'assets/men.png',
+                          'Father Name',
+                          fatherName,
+                          imageBackgroundColor: Colors.orange.shade100,
+                          textBackgroundColor: Colors.orange.shade50,
+                        ),
+                        const SizedBox(height: 10),
+                        buildInfoRow(
+                          isWeb,
                           'assets/phone@2x.png',
                           'Phone Number',
                           '+91-$phoneNumber',
@@ -305,7 +316,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.blue.shade100,
                     textBackgroundColor: Colors.blue.shade50,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   buildInfoRow(
                     isWeb,
                     'assets/location@2x.png',
@@ -314,7 +325,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.green.shade100,
                     textBackgroundColor: Colors.green.shade50,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   buildInfoRow(
                     isWeb,
                     'assets/degree@2x.png',
@@ -323,7 +334,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.yellow.shade100,
                     textBackgroundColor: Colors.yellow.shade50,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   buildInfoRow(
                     isWeb,
                     'assets/medal@2x.png',
@@ -332,7 +343,16 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.red.shade100,
                     textBackgroundColor: Colors.red.shade50,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
+                  buildInfoRow(
+                    isWeb,
+                    'assets/men.png',
+                    'Father Name',
+                    fatherName,
+                    imageBackgroundColor: Colors.orange.shade100,
+                    textBackgroundColor: Colors.orange.shade50,
+                  ),
+                  const SizedBox(height: 5),
                   buildInfoRow(
                     isWeb,
                     'assets/pensp@3x.png',
@@ -341,16 +361,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.purple.shade100,
                     textBackgroundColor: Colors.purple.shade50,
                   ),
-                  const SizedBox(height: 10),
-                  buildInfoRow(
-                    isWeb,
-                    'assets/ab@2x.png',
-                    'Language',
-                    language,
-                    imageBackgroundColor: Colors.orange.shade100,
-                    textBackgroundColor: Colors.orange.shade50,
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   buildInfoRow(
                     isWeb,
                     'assets/phone@2x.png',
@@ -359,58 +370,34 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     imageBackgroundColor: Colors.teal.shade100,
                     textBackgroundColor: Colors.teal.shade50,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                 ],
               ),
       ),
     );
   }
 
- Widget buildInfoRow(
-  bool isWeb,
-  String iconPath,
-  String title,
-  String value, {
-  Color imageBackgroundColor = Colors.pink,
-  Color textBackgroundColor = Colors.white,
-}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 17.0, vertical: 5.0), // Increase vertical padding
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Icon Container
-        Container(
-          width: isWeb ? 80 : 55,
-          height: isWeb ? 80 : 63,
-          decoration: BoxDecoration(
-            color: imageBackgroundColor,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                offset: const Offset(3, 3),
-                blurRadius: 6,
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Image.asset(
-              iconPath,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        const SizedBox(width: 15), // Increased gap between containers
-        // Text Container
-        Flexible(
-          child: Container(
+  Widget buildInfoRow(
+    bool isWeb,
+    String iconPath,
+    String title,
+    String value, {
+    Color imageBackgroundColor = Colors.pink,
+    Color textBackgroundColor = Colors.white,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: 17.0, vertical: 5.0), // Increase vertical padding
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Icon Container
+          Container(
+            width: isWeb ? 80 : 55,
             height: isWeb ? 80 : 63,
-            width: isWeb ? 400 : 306,
             decoration: BoxDecoration(
-              color: textBackgroundColor,
-              borderRadius: BorderRadius.circular(15),
+              color: imageBackgroundColor,
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -420,22 +407,48 @@ class MyProfileScreenState extends State<Teacherpfpage> {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value.isNotEmpty ? value : 'Loading...',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: isWeb ? 20 : 16,
+              padding: const EdgeInsets.all(5.0),
+              child: Image.asset(
+                iconPath,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          const SizedBox(width: 15), // Increased gap between containers
+          // Text Container
+          Flexible(
+            child: Container(
+              height: isWeb ? 80 : 63,
+              width: isWeb ? 400 : 306,
+              decoration: BoxDecoration(
+                color: textBackgroundColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    offset: const Offset(3, 3),
+                    blurRadius: 6,
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value.isNotEmpty ? value : 'Loading...',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: isWeb ? 20 : 16,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

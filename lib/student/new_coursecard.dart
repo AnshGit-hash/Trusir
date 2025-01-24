@@ -36,7 +36,10 @@ class _NewCourseCardState extends State<NewCourseCard> {
     // double discount = int.parse(widget.course.price) /
     //     int.parse(widget.course.oldprice) *
     //     100;
-    double discount = int.parse(widget.course.price) / int.parse('1000') * 100;
+    double discount =
+        100 - int.parse(widget.course.price) / int.parse('3000') * 100;
+
+    String formattedDiscount = discount.toStringAsFixed(2);
     return Container(
       margin: EdgeInsets.symmetric(
           horizontal: isWeb ? 30 : 16, vertical: isWeb ? 15 : 8),
@@ -154,7 +157,7 @@ class _NewCourseCardState extends State<NewCourseCard> {
                   width: 7,
                 ),
                 Text(
-                  '$discount% OFF', // Placeholder for original price
+                  '$formattedDiscount% OFF', // Placeholder for original price
                   style: const TextStyle(
                     fontSize: 14,
                     fontFamily: 'Poppins',

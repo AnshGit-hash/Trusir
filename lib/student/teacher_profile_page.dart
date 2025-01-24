@@ -23,6 +23,7 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
   String language = '';
   String phoneNumber = '';
   String profilePhoto = '';
+  String fatherName = '';
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
           address = data['address'] ?? 'N/A';
           graduation = data['qualification'] ?? 'N/A';
           experience = data['experience'] ?? 'N/A';
+          fatherName = data['father_name'] ?? 'N/A';
           subjects = data['subject'] ?? 'N/A';
           language = data['medium'] ?? 'N/A';
           phoneNumber = data['phone'] ?? 'N/A';
@@ -181,18 +183,18 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
               textBackgroundColor: Colors.red.shade50,
             ),
             const SizedBox(height: 10),
+            // buildInfoRow(
+            //   'assets/pensp@3x.png',
+            //   'Subjects',
+            //   subjects,
+            //   imageBackgroundColor: Colors.purple.shade100,
+            //   textBackgroundColor: Colors.purple.shade50,
+            // ),
+            // const SizedBox(height: 10),
             buildInfoRow(
-              'assets/pensp@3x.png',
-              'Subjects',
-              subjects,
-              imageBackgroundColor: Colors.purple.shade100,
-              textBackgroundColor: Colors.purple.shade50,
-            ),
-            const SizedBox(height: 10),
-            buildInfoRow(
-              'assets/ab@2x.png',
-              'Language',
-              language,
+              'assets/men.png',
+              "Father's Name",
+              fatherName,
               imageBackgroundColor: Colors.orange.shade100,
               textBackgroundColor: Colors.orange.shade50,
             ),

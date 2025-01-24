@@ -50,6 +50,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
 
     const rowColors = [
       Color.fromARGB(255, 255, 199, 221),
+      Color.fromARGB(255, 216, 185, 255),
       Color.fromARGB(255, 199, 255, 215),
       Color.fromARGB(255, 199, 236, 255),
       Color.fromARGB(255, 255, 185, 185),
@@ -286,11 +287,19 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                         ),
                         const SizedBox(height: 15),
                         buildInfoRow(
+                          'assets/location@2x.png',
+                          'Address',
+                          address!,
+                          isLargeScreen,
+                          rowColors[1],
+                        ),
+                        const SizedBox(height: 15),
+                        buildInfoRow(
                           'assets/house@3x.png',
                           'School',
                           school!,
                           isLargeScreen,
-                          rowColors[1],
+                          rowColors[2],
                         ),
                         const SizedBox(height: 15),
                         buildInfoRow(
@@ -298,7 +307,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                           'Class',
                           studentClass!,
                           isLargeScreen,
-                          rowColors[2],
+                          rowColors[3],
                         ),
                         const SizedBox(height: 15),
                         buildInfoRow(
@@ -306,7 +315,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                           'Subjects',
                           subject!,
                           isLargeScreen,
-                          rowColors[3],
+                          rowColors[4],
                         ),
                         const SizedBox(height: 15),
                         buildInfoRow(
@@ -314,7 +323,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                           'Subjects',
                           '+91-$phone',
                           isLargeScreen,
-                          rowColors[4],
+                          rowColors[5],
                         ),
                       ],
                     ),
