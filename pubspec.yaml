@@ -28,7 +28,6 @@ dependencies:
   open_file:
   signature: ^5.5.0
   path:
-  file_picker:
   video_player:
   animated_splash_screen:
   chewie:
