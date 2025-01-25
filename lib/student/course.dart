@@ -297,6 +297,7 @@ class _CourseCardState extends State<CourseCard> {
   }
 
   void startTransaction() {
+    showLoadingDialog();
     PhonePePaymentSdk.startTransaction(body, callback, checksum, packageName)
         .then((response) {
       if (response != null) {
@@ -306,12 +307,14 @@ class _CourseCardState extends State<CourseCard> {
           checkStatus();
         } else {
           print("Payment Failed: ${response['error']}");
+          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => PaymentPopUpPage(
                     adjustedAmount: double.parse(widget.course.newAmount),
                     isSuccess: paymentstatus,
+                    transactionID: merchantTransactionID,
                     transactionType: transactionType)),
           );
           Fluttertoast.showToast(msg: "Payment Failed");
@@ -368,7 +371,7 @@ class _CourseCardState extends State<CourseCard> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = jsonDecode(response.body);
-
+        Navigator.pop(context);
         if (responseData["success"] &&
             responseData["code"] == "PAYMENT_SUCCESS" &&
             responseData["data"]["state"] == "COMPLETED") {
@@ -390,6 +393,7 @@ class _CourseCardState extends State<CourseCard> {
                   builder: (context) => PaymentPopUpPage(
                       adjustedAmount: double.parse(widget.course.newAmount),
                       isSuccess: paymentstatus,
+                      transactionID: merchantTransactionID,
                       transactionType: transactionType)),
             );
           }
@@ -397,7 +401,7 @@ class _CourseCardState extends State<CourseCard> {
             transactionType,
             adjustedAmount,
             widget.course.name,
-            responseData["data"]["merchantTransactionId"],
+            '${responseData["data"]["merchantTransactionId"]} , Bank Transaction Id: ${responseData["data"]["transactionId"]} ',
             widget.course.id,
           );
         } else {
@@ -418,6 +422,28 @@ class _CourseCardState extends State<CourseCard> {
         paymentstatus = false;
       });
     }
+  }
+
+  void showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissal by tapping outside
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false, // Disable back navigation
+          child: const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text(
+                    "Processing payment, \nplease wait...\nPlease don't press back"),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> postTransaction(String transactionName, int amount,

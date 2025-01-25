@@ -83,10 +83,10 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   }
 
   final List<Color> cardColors = [
-    Colors.blue.shade100,
-    Colors.yellow.shade100,
-    Colors.pink.shade100,
-    Colors.purple.shade100,
+    Colors.blue.shade200,
+    Colors.yellow.shade200,
+    Colors.pink.shade200,
+    Colors.purple.shade200,
   ];
 
   final Map<String, Map<String, double>> imageSizes = {
@@ -774,9 +774,21 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                               color: cardColor,
                                               borderRadius:
                                                   BorderRadius.circular(22),
-                                              border: Border.all(
-                                                color: borderColor,
-                                                width: 2,
+                                              gradient: SweepGradient(
+                                                colors: [
+                                                  cardColor,
+                                                  cardColor.withValues(
+                                                      alpha: 0.9),
+                                                  cardColor.withValues(
+                                                      alpha: 0.8),
+                                                  Colors.white54
+                                                      .withValues(alpha: 0.1),
+                                                  cardColor,
+                                                  cardColor
+                                                ],
+                                                center: Alignment.topRight,
+                                                startAngle: 0,
+                                                endAngle: 6,
                                               ),
                                               boxShadow: [
                                                 BoxShadow(

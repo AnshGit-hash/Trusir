@@ -228,22 +228,30 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                     Color cardColor =
                                         cardColors[index % cardColors.length];
 
+                                    // Extract transaction ID before the comma
+                                    String displayedTransactionId =
+                                        payment.transactionId.contains(',')
+                                            ? payment.transactionId
+                                                .split(',')
+                                                .first
+                                                .trim()
+                                            : payment.transactionId.trim();
+
                                     return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 15),
+                                      padding: const EdgeInsets.only(
+                                          left: 5, right: 5, bottom: 15),
                                       child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.5,
-                                        height: 140,
+                                        width: 386,
+                                        height: 100,
                                         decoration: BoxDecoration(
                                           color:
                                               cardColor, // Apply dynamic color
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
+                                          padding: const EdgeInsets.only(
+                                              left: 10.0, right: 10),
                                           child: Row(
                                             children: [
                                               Expanded(
@@ -261,12 +269,13 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                         style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w500,
                                                           color: Colors.black,
                                                         ),
                                                       ),
+                                                      // Display only the part of transactionId before the comma
                                                       Text(
-                                                        payment.transactionId,
+                                                        displayedTransactionId,
                                                         style: const TextStyle(
                                                           fontSize: 14,
                                                           color: Colors.grey,
@@ -280,7 +289,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                           fontSize: 14,
                                                           color: Colors.black,
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w500,
                                                         ),
                                                       ),
                                                     ],
@@ -301,7 +310,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                         style: const TextStyle(
                                                           fontSize: 16,
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w500,
                                                         ),
                                                       ),
                                                       Text(
@@ -318,7 +327,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                         style: const TextStyle(
                                                           fontSize: 14,
                                                           fontWeight:
-                                                              FontWeight.bold,
+                                                              FontWeight.w500,
                                                         ),
                                                       ),
                                                     ],
@@ -384,6 +393,13 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                   ...feepayment.asMap().entries.map((entry) {
                                     int index = entry.key;
                                     Fees payment = entry.value;
+                                    String displayedTransactionId =
+                                        payment.transactionId.contains(',')
+                                            ? payment.transactionId
+                                                .split(',')
+                                                .first
+                                                .trim()
+                                            : payment.transactionId.trim();
 
                                     // Cycle through colors using the modulus operator
                                     Color cardColor =
@@ -426,7 +442,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                         ),
                                                       ),
                                                       Text(
-                                                        payment.transactionId,
+                                                        displayedTransactionId,
                                                         style: const TextStyle(
                                                           fontSize: 14,
                                                           color: Colors.grey,
