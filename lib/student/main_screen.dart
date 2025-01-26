@@ -5,7 +5,8 @@ import 'package:trusir/student/setting.dart';
 import 'package:trusir/student/student_facilities.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final int index;
+  const MainScreen({super.key, required this.index});
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -14,11 +15,18 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      currentIndex = widget.index;
+    });
+  }
+
   // List of pages for each bottom navigation item
   final List<Widget> pages = [
     const Studentfacilities(), // Home page (Student Facilities)
     const CoursePage(), // Placeholder for Courses
-
     SettingsScreen(),
   ];
 

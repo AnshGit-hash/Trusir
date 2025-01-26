@@ -112,7 +112,9 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (role == 'teacher' && isNewUser) {
       return const TrusirLoginPage();
     } else if (role == 'student' && !isNewUser) {
-      return const MainScreen();
+      return const MainScreen(
+        index: 0,
+      );
     } else if (role == 'teacher' && !isNewUser) {
       return const TeacherMainScreen();
     } else {
