@@ -162,7 +162,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
               left: 120,
               right: 0,
               bottom: 110,
@@ -170,7 +170,8 @@ class _SplashScreenState extends State<SplashScreen>
                 'trusir.com',
                 style: TextStyle(
                     fontSize: 25,
-                    color: Colors.white,
+                    color: Colors.grey[100],
+                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.w700),
               ))
         ],
