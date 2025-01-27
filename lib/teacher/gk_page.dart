@@ -50,7 +50,7 @@ class GKDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Title: ${gk.title}',
+                gk.title,
                 style: const TextStyle(
                   fontFamily: "Poppins",
                   fontSize: 20,
@@ -59,7 +59,7 @@ class GKDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Course: ${gk.course}',
+                gk.course,
                 style: const TextStyle(
                   fontFamily: "Poppins",
                   fontSize: 16,
@@ -215,15 +215,19 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 8.0),
                                       child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    GKDetailPage(gk: gk),
-                                              ),
-                                            );
-                                          },
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  GKDetailPage(gk: gk),
+                                            ),
+                                          );
+                                        },
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          height:
+                                              130, // Set a fixed height for the card
                                           child: Card(
                                             elevation: 4,
                                             shape: RoundedRectangleBorder(
@@ -247,9 +251,10 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                                       errorBuilder: (context,
                                                           error, stackTrace) {
                                                         return const Icon(
-                                                            Icons.broken_image,
-                                                            color: Colors.grey,
-                                                            size: 50);
+                                                          Icons.broken_image,
+                                                          color: Colors.grey,
+                                                          size: 50,
+                                                        );
                                                       },
                                                     ),
                                                   ),
@@ -275,11 +280,11 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                                               const TextStyle(
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            fontSize: 16,
+                                                            fontSize: 14,
                                                             fontFamily:
                                                                 "Poppins",
                                                           ),
-                                                          maxLines: 2,
+                                                          maxLines: 1,
                                                           overflow: TextOverflow
                                                               .ellipsis,
                                                         ),
@@ -317,7 +322,9 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                                 ),
                                               ],
                                             ),
-                                          )),
+                                          ),
+                                        ),
+                                      ),
                                     );
                                   },
                                 ),
