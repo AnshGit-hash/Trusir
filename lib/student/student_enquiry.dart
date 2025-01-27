@@ -185,7 +185,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
         toolbarHeight: 50,
       ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+        padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,8 +193,8 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
               Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: screenWidth * 0.8,
-                    maxHeight: screenHeight * 0.3,
+                    maxWidth: screenWidth * 0.9,
+                    maxHeight: screenHeight * 0.4,
                   ),
                   child: Image.asset(
                     'assets/studentenquiry2.png',
@@ -202,14 +202,9 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              _buildTextFieldWithBackground(
-                  hintText: 'Student Name', controllers: _namecontroller),
               const SizedBox(height: 10),
               _buildTextFieldWithBackground(
-                  hintText: 'Class',
-                  controllers: _classcontroller,
-                  isClass: true),
+                  hintText: 'Student Name', controllers: _namecontroller),
               const SizedBox(height: 10),
 
               // Gender Selection
@@ -247,11 +242,17 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
               ),
               const SizedBox(height: 15),
               _buildTextFieldWithBackground(
+                  hintText: 'Class',
+                  controllers: _classcontroller,
+                  isClass: true),
+
+              const SizedBox(height: 10),
+              _buildTextFieldWithBackground(
                   hintText: 'City / Town', controllers: _citycontroller),
               const SizedBox(height: 10),
               _buildPinFieldWithBackground(
                   hintText: 'Pincode', controllers: _pincodecontroller),
-              SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.03),
               // Enquire Button
               Center(
                 child: GestureDetector(
@@ -260,7 +261,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
                   },
                   child: SizedBox(
                     width: kIsWeb ? 300.0 : 300.0,
-                    height: kIsWeb ? 80.0 : 60.0,
+                    height: kIsWeb ? 80.0 : 70.0,
                     child: Image.asset(
                       'assets/enquire.png',
                       fit: BoxFit.contain,
@@ -355,7 +356,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
             borderSide: const BorderSide(color: Colors.grey),
           ),
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
           isDense: true,
         ),
       ),
@@ -368,7 +369,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
     bool isClass = false,
   }) {
     return Container(
-      height: 50,
+      height: 55, // Matching height from above examples
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -406,8 +407,8 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
             borderRadius: BorderRadius.circular(22),
             borderSide: const BorderSide(color: Colors.grey),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 15), // Matching padding
           isDense: true,
         ),
       ),
