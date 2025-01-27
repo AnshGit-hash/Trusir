@@ -59,9 +59,9 @@ class StudentProfilePageState extends State<StudentProfilePage> {
                     },
                     child: Image.asset('assets/back_button.png', height: 50)),
                 const SizedBox(width: 20),
-                const Text(
-                  'My Profile',
-                  style: TextStyle(
+                Text(
+                  "${widget.name}'s Profile",
+                  style: const TextStyle(
                     color: Color(0xFF48116A),
                     fontSize: 25,
                     fontFamily: 'Poppins',
