@@ -347,6 +347,39 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       ),
                                     );
                                   }),
+                                  buildTile(context, const Color(0x80FFF59D),
+                                      'assets/list@3x.png', 'Attendance', () {
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => const TeacherAttendance(),
+                                    //   ),
+                                    // );
+                                  }),
+                                  buildTile(
+                                      context,
+                                      const Color(0xFFB3E5FC),
+                                      'assets/knowledge.png',
+                                      'General Knowledge', () {
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => const TeacherKnowledge(),
+                                    //   ),
+                                    // );
+                                  }),
+                                  buildTile(
+                                      context,
+                                      const Color(0x80FFF59D),
+                                      'assets/pensp@3x.png',
+                                      'Student Notice', () {
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => const TeacherNotice(),
+                                    //   ),
+                                    // );
+                                  }),
                                 ],
                               ),
                             ),
@@ -686,6 +719,39 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     ),
                                   );
                                 }),
+                                buildTile(context, const Color(0x80FFF59D),
+                                    'assets/list@3x.png', 'Attendance', () {
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => const TeacherAttendance(),
+                                  //   ),
+                                  // );
+                                }),
+                                buildTile(
+                                    context,
+                                    const Color(0xFFB3E5FC),
+                                    'assets/knowledge.png',
+                                    'General Knowledge', () {
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => const TeacherKnowledge(),
+                                  //   ),
+                                  // );
+                                }),
+                                buildTile(
+                                    context,
+                                    const Color(0x80FFF59D),
+                                    'assets/pensp@3x.png',
+                                    'Student Notice', () {
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => const TeacherNotice(),
+                                  //   ),
+                                  // );
+                                }),
                                 buildTile(context, const Color(0xFFB3E5FC),
                                     'assets/setting.png', 'Setting', () {
                                   Navigator.push(
@@ -895,17 +961,6 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
               startAngle: 0,
               endAngle: 6,
             ),
-
-            //  RadialGradient(
-            //   colors: [
-            //     color,
-            //     color.withValues(alpha: 0.9),
-            //     color.withValues(alpha: 0.8),
-            //     Colors.white.withValues(alpha: 0.3),
-            //   ],
-            //   center: Alignment.center,
-            //   radius: 0.8,
-            // ),
             boxShadow: [
               // Bottom-right shadow for the raised effect
               BoxShadow(
