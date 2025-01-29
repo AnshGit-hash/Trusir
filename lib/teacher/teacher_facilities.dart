@@ -42,7 +42,7 @@ class StudentProfile {
         subject: json['subject'],
         userID: json['userID'],
         studentClass: json['class'],
-        dob: json['DOB'],
+        dob: json['father_name'],
         school: json['school'],
         address: json['address']);
   }
@@ -460,7 +460,8 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                                           studentProfile.userID,
                                                       address: studentProfile
                                                           .address,
-                                                      dob: studentProfile.dob,
+                                                      fatherName:
+                                                          studentProfile.dob,
                                                       school:
                                                           studentProfile.school,
                                                       studentClass:
@@ -836,7 +837,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                                 image: studentProfile.image,
                                                 userID: studentProfile.userID,
                                                 address: studentProfile.address,
-                                                dob: studentProfile.dob,
+                                                fatherName: studentProfile.dob,
                                                 school: studentProfile.school,
                                                 studentClass:
                                                     studentProfile.studentClass,
