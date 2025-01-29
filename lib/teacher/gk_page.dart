@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
@@ -13,6 +14,18 @@ class GKDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String formatDate(String dateString) {
+      DateTime dateTime = DateTime.parse(dateString);
+      String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+      return formattedDate;
+    }
+
+    String formatTime(String dateString) {
+      DateTime dateTime = DateTime.parse(dateString);
+      String formattedTime = DateFormat('hh:mm a').format(dateTime);
+      return formattedTime; // Example: 11:40 PM
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[50],
@@ -69,7 +82,7 @@ class GKDetailPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 40.0),
                 child: Text(
-                  'Posted on: ${gk.createdAt}',
+                  'Posted on: ${formatDate(gk.createdAt)} ${formatTime(gk.createdAt)}',
                   style: const TextStyle(
                     fontFamily: "Poppins",
                     fontSize: 14,
@@ -99,6 +112,18 @@ class _StudentGKPageState extends State<StudentGKPage> {
   bool isLoading = false;
   bool hasMoreData = true;
   bool initialLoadComplete = false;
+
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+    return formattedDate;
+  }
+
+  String formatTime(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedTime = DateFormat('hh:mm a').format(dateTime);
+    return formattedTime; // Example: 11:40 PM
+  }
 
   @override
   void initState() {
@@ -305,7 +330,7 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                                         const SizedBox(
                                                             height: 5),
                                                         Text(
-                                                          'Posted on: ${gk.createdAt}',
+                                                          'Posted on: ${formatDate(gk.createdAt)}',
                                                           style: TextStyle(
                                                             fontFamily:
                                                                 "Poppins",
@@ -417,8 +442,7 @@ class GK {
       title: json['title'],
       course: json['description'],
       image: json['image'],
-      createdAt:
-          DateTime.parse(json['created_at']).toIso8601String().split('T')[0],
+      createdAt: json['created_at'],
     );
   }
 }
