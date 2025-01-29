@@ -3,12 +3,56 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
-import 'package:trusir/student/course.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 
+class MyCourseModel {
+  final int id;
+  final String courseID;
+  final String courseName;
+  final String teacherName;
+  final String teacherID;
+  final String studentID;
+  final String image;
+  final String studentName;
+  final String timeSlot;
+  final String type;
+  final String price;
+
+  MyCourseModel({
+    required this.id,
+    required this.courseID,
+    required this.courseName,
+    required this.teacherName,
+    required this.teacherID,
+    required this.studentID,
+    required this.image,
+    required this.studentName,
+    required this.timeSlot,
+    required this.type,
+    required this.price,
+  });
+
+  // Factory method for creating an instance from JSON
+  factory MyCourseModel.fromJson(Map<String, dynamic> json) {
+    return MyCourseModel(
+      id: json['id'],
+      courseID: json['courseID'],
+      courseName: json['courseName'],
+      teacherName: json['teacherName'],
+      teacherID: json['teacherID'],
+      studentID: json['StudentID'],
+      image: json['image'],
+      studentName: json['StudentName'],
+      timeSlot: json['timeSlot'],
+      type: json['type'],
+      price: json['price'],
+    );
+  }
+}
+
 class TeacherCourseCard extends StatelessWidget {
-  final CourseDetail course;
+  final MyCourseModel course;
 
   const TeacherCourseCard({super.key, required this.course});
 
@@ -156,7 +200,7 @@ class TeacherCoursePage extends StatefulWidget {
 
 class _TeacherCoursePageState extends State<TeacherCoursePage> {
   final apiBase = '$baseUrl/my-student';
-  List<CourseDetail> courses = [];
+  List<MyCourseModel> courses = [];
   List<StudentProfile> studentprofile = [];
   Future<void> fetchStudentProfiles({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -177,13 +221,13 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
     }
   }
 
-  Future<List<CourseDetail>> fetchCourses(String userID) async {
+  Future<List<MyCourseModel>> fetchCourses(String userID) async {
     final url = Uri.parse('$baseUrl/get-courses/$userID');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       final responseData =
-          data.map((json) => CourseDetail.fromJson(json)).toList();
+          data.map((json) => MyCourseModel.fromJson(json)).toList();
       courses = responseData;
       return courses;
     } else {
