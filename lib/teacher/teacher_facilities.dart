@@ -356,8 +356,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const Teacherattendance(userID: ''),
+                                        builder: (context) => Teacherattendance(
+                                          studentprofile: studentprofile,
+                                        ),
                                       ),
                                     );
                                   }),
@@ -369,8 +370,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AddGkTeacher(),
+                                        builder: (context) => AddGkTeacher(
+                                          studentprofile: studentprofile,
+                                        ),
                                       ),
                                     );
                                   }),
@@ -382,8 +384,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AddNoticeTeacher(),
+                                        builder: (context) => AddNoticeTeacher(
+                                          studentprofile: studentprofile,
+                                        ),
                                       ),
                                     );
                                   }),
@@ -732,9 +735,8 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const Teacherattendance(
-                                        userID: '',
+                                      builder: (context) => Teacherattendance(
+                                        studentprofile: studentprofile,
                                       ),
                                     ),
                                   );
@@ -747,8 +749,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const AddGkTeacher(),
+                                      builder: (context) => AddGkTeacher(
+                                        studentprofile: studentprofile,
+                                      ),
                                     ),
                                   );
                                 }),
@@ -760,8 +763,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          const AddNoticeTeacher(),
+                                      builder: (context) => AddNoticeTeacher(
+                                        studentprofile: studentprofile,
+                                      ),
                                     ),
                                   );
                                 }),
