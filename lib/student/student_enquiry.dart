@@ -105,6 +105,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
 
     try {
       final response = await http.post(url, headers: headers, body: body);
+
       if (!serviceable) {
         if (response.statusCode == 200) {
           Navigator.pushAndRemoveUntil(
@@ -118,15 +119,9 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
           Fluttertoast.showToast(
               msg: 'Failed to submit form: ${response.body}');
         }
-      } else {
+      } else if (serviceable) {
         if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const StudentHomepage(
-                      enablephone: true,
-                    )),
-          );
+          _showThankYouPopup(context);
           Fluttertoast.showToast(msg: 'Form Submitted Successfully');
         } else {
           Fluttertoast.showToast(
@@ -136,6 +131,87 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
     } catch (e) {
       print('Error occurred: $e');
     }
+  }
+
+  void _showThankYouPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/check.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Thank You!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Your enquiry has been submitted successfully.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const StudentHomepage(
+                          enablephone: true,
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const StudentHomepage(
+            enablephone: true,
+          ),
+        ),
+      );
+    });
   }
 
   @override
@@ -369,7 +445,6 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
     bool isClass = false,
   }) {
     return Container(
-      height: 55, // Matching height from above examples
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -407,8 +482,8 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
             borderRadius: BorderRadius.circular(22),
             borderSide: const BorderSide(color: Colors.grey),
           ),
-          contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 15), // Matching padding
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
           isDense: true,
         ),
       ),

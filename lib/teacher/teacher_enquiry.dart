@@ -118,12 +118,9 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
           Fluttertoast.showToast(
               msg: 'Failed to submit form: ${response.body}');
         }
-      } else {
+      } else if (serviceable) {
         if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Teacherhomepage()),
-          );
+          _showThankYouPopup(context);
           Fluttertoast.showToast(msg: 'Form Submitted Successfully');
         } else {
           Fluttertoast.showToast(
@@ -133,6 +130,83 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
     } catch (e) {
       print('Error occurred: $e');
     }
+  }
+
+  void _showThankYouPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/check.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Thank You!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Your enquiry has been submitted successfully.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Teacherhomepage(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Teacherhomepage(),
+        ),
+      );
+    });
   }
 
   @override
@@ -328,7 +402,6 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
     required TextEditingController controllers,
   }) {
     return Container(
-      height: 55,
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
