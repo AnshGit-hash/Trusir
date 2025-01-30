@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:intl/intl.dart';
 
 class Notice {
   final String noticetitle;
@@ -38,6 +39,18 @@ class _NoticeScreenState extends State<NoticeScreen> {
   int currentPage = 1;
   bool hasMore = true;
   final apiBase = '$baseUrl/api/my-notice';
+
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+    return formattedDate;
+  }
+
+  String formatTime(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedTime = DateFormat('hh:mm a').format(dateTime);
+    return formattedTime; // Example: 11:40 PM
+  }
 
   Future<void> fetchNotices({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -216,7 +229,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                                     ),
                                                     const SizedBox(height: 5),
                                                     Text(
-                                                      'Posted on : ${notice.date}',
+                                                      'Posted on : ${formatDate(notice.date)} ${formatTime(notice.date)}',
                                                       style: TextStyle(
                                                         fontSize: constraints
                                                                     .maxWidth >
