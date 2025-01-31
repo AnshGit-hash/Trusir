@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -386,7 +384,7 @@ class MyProfileScreenState extends State<Teacherpfpage> {
           // Text Container
           Flexible(
             child: Container(
-              height: isWeb ? 80 : max(60, containerHeight ?? 110),
+              height: isWeb ? 80 : 60,
               width: isWeb ? 400 : 306,
               decoration: BoxDecoration(
                 color: textBackgroundColor,
@@ -404,11 +402,16 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    value.isNotEmpty ? value : 'Loading...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: isWeb ? 20 : 16,
+                  child: ClipRect(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        value.isNotEmpty ? value : 'Loading...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: isWeb ? 20 : 16,
+                        ),
+                      ),
                     ),
                   ),
                 ),

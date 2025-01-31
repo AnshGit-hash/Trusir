@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/student/editprofilescreen.dart';
@@ -396,7 +394,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
           // Text container
           Flexible(
             child: Container(
-              height: isLargeScreen ? 100 : max(60, containerHeight ?? 110),
+              height: isLargeScreen ? 100 : 60,
               width: isLargeScreen ? 400 : 306,
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -414,12 +412,17 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                     left: 20, top: 10, bottom: 10, right: 20),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    value.isNotEmpty ? value : 'Loading...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontFamily: "Poppins",
-                      fontSize: isLargeScreen ? 22 : 16,
+                  child: ClipRect(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        value.isNotEmpty ? value : 'Loading...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                          fontSize: isLargeScreen ? 22 : 16,
+                        ),
+                      ),
                     ),
                   ),
                 ),
