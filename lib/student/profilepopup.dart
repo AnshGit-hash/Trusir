@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -190,8 +191,9 @@ class _ProfilePopupState extends State<ProfilePopup> {
                                             horizontal: 8.0, vertical: 4),
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color:
-                                                Colors.white.withOpacity(0.8),
+                                            color: data[index]['active'] == 1
+                                                ? Colors.white.withOpacity(0.8)
+                                                : Colors.grey,
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                             boxShadow: [
@@ -239,27 +241,35 @@ class _ProfilePopupState extends State<ProfilePopup> {
                                                 ),
                                               ],
                                             ),
-                                            onTap: () async {
-                                              setState(() {
-                                                final selected =
-                                                    data.removeAt(index);
-                                                data.insert(0, selected);
-                                                selectedProfile = selected;
-                                              });
+                                            onTap: data[index]['active'] == 1
+                                                ? () async {
+                                                    setState(() {
+                                                      final selected =
+                                                          data.removeAt(index);
+                                                      data.insert(0, selected);
+                                                      selectedProfile =
+                                                          selected;
+                                                    });
 
-                                              final SharedPreferences prefs =
-                                                  await SharedPreferences
-                                                      .getInstance();
-                                              prefs.setString('profiles',
-                                                  json.encode(data));
-                                              prefs.setString(
-                                                  'selectedProfile',
-                                                  json.encode(
-                                                      selectedProfile!));
+                                                    final SharedPreferences
+                                                        prefs =
+                                                        await SharedPreferences
+                                                            .getInstance();
+                                                    prefs.setString('profiles',
+                                                        json.encode(data));
+                                                    prefs.setString(
+                                                        'selectedProfile',
+                                                        json.encode(
+                                                            selectedProfile!));
 
-                                              await saveSelectedProfile(
-                                                  selectedProfile!);
-                                            },
+                                                    await saveSelectedProfile(
+                                                        selectedProfile!);
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Account Inactive!');
+                                                  },
                                           ),
                                         ),
                                       );
