@@ -46,6 +46,7 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
   bool isFemaleSelected = false;
   bool isLocationServiceable = false;
   List<Location> locations = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -75,6 +76,15 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
   }
 
   void _onEnquire() {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Fill all the Required Fields'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
     setState(() {
       widget.formData.name = widget._namecontroller.text;
       widget.formData.qualification = widget._qualificationcontroller.text;
@@ -257,93 +267,98 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
         toolbarHeight: 50,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: screenWidth * 0.9,
-                    maxHeight: screenHeight * 0.4,
-                  ),
-                  child: Image.asset(
-                    'assets/Teacher_Enquiry2.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              _buildTextFieldWithBackground(
-                  hintText: 'Teacher Name',
-                  controllers: widget._namecontroller),
-              const SizedBox(height: 15),
-
-              // Gender Selection
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildGenderCheckbox(
-                    label: "Male",
-                    value: isMaleSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        isMaleSelected = value!;
-                        if (value) {
-                          isFemaleSelected = false;
-                          widget.formData.gender = 'Male';
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  _buildGenderCheckbox(
-                    label: "Female",
-                    value: isFemaleSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        isFemaleSelected = value!;
-                        if (value) {
-                          isMaleSelected = false;
-                          widget.formData.gender = 'Female';
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              _buildTextFieldWithBackground(
-                  hintText: 'Qualification',
-                  controllers: widget._qualificationcontroller),
-              const SizedBox(height: 20),
-
-              _buildTextFieldWithBackground(
-                  hintText: 'City / Town', controllers: widget._citycontroller),
-              const SizedBox(height: 20),
-
-              _buildPinFieldWithBackground(
-                  hintText: 'Pincode', controllers: widget._pincodecontroller),
-              SizedBox(height: screenHeight * 0.03),
-
-              // Enquire Button
-              Center(
-                child: GestureDetector(
-                  onTap: _onEnquire,
-                  child: SizedBox(
-                    width: kIsWeb ? 300.0 : 300.0,
-                    height: kIsWeb ? 80.0 : 70.0,
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: screenWidth * 0.9,
+                      maxHeight: screenHeight * 0.4,
+                    ),
                     child: Image.asset(
-                      'assets/enquire.png',
+                      'assets/Teacher_Enquiry2.png',
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+
+                _buildTextFieldWithBackground(
+                    hintText: 'Teacher Name',
+                    controllers: widget._namecontroller),
+                const SizedBox(height: 15),
+
+                // Gender Selection
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildGenderCheckbox(
+                      label: "Male",
+                      value: isMaleSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          isMaleSelected = value!;
+                          if (value) {
+                            isFemaleSelected = false;
+                            widget.formData.gender = 'Male';
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 20),
+                    _buildGenderCheckbox(
+                      label: "Female",
+                      value: isFemaleSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          isFemaleSelected = value!;
+                          if (value) {
+                            isMaleSelected = false;
+                            widget.formData.gender = 'Female';
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                _buildTextFieldWithBackground(
+                    hintText: 'Qualification',
+                    controllers: widget._qualificationcontroller),
+                const SizedBox(height: 20),
+
+                _buildTextFieldWithBackground(
+                    hintText: 'City / Town',
+                    controllers: widget._citycontroller),
+                const SizedBox(height: 20),
+
+                _buildPinFieldWithBackground(
+                    hintText: 'Pincode',
+                    controllers: widget._pincodecontroller),
+                SizedBox(height: screenHeight * 0.03),
+
+                // Enquire Button
+                Center(
+                  child: GestureDetector(
+                    onTap: _onEnquire,
+                    child: SizedBox(
+                      width: kIsWeb ? 300.0 : 300.0,
+                      height: kIsWeb ? 80.0 : 70.0,
+                      child: Image.asset(
+                        'assets/enquire.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -373,6 +388,7 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
           }
           return null;
         },
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         controller: controllers,
         decoration: InputDecoration(
           labelText: hintText,
@@ -421,6 +437,7 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
           }
           return null;
         },
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         textCapitalization: TextCapitalization.words,
         controller: controllers,
         keyboardType: TextInputType.number,

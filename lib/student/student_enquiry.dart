@@ -43,6 +43,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
   bool isFemaleSelected = false;
   List<Location> locations = [];
   bool isLocationServicable = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -51,6 +52,15 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
   }
 
   void _onEnquire(BuildContext context) {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please Fill all the required fields.'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
     setState(() {
       formData.name = _namecontroller.text;
       formData.studentclass = _classcontroller.text;
@@ -263,89 +273,92 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
       body: Padding(
         padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: screenWidth * 0.9,
-                    maxHeight: screenHeight * 0.4,
-                  ),
-                  child: Image.asset(
-                    'assets/studentenquiry2.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildTextFieldWithBackground(
-                  hintText: 'Student Name', controllers: _namecontroller),
-              const SizedBox(height: 10),
-
-              // Gender Selection
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildGenderCheckbox(
-                    label: "Male",
-                    value: isMaleSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        isMaleSelected = value!;
-                        if (value) {
-                          isFemaleSelected = false;
-                          formData.gender = 'Male';
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  _buildGenderCheckbox(
-                    label: "Female",
-                    value: isFemaleSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        isFemaleSelected = value!;
-                        if (value) {
-                          isMaleSelected = false;
-                          formData.gender = 'Female';
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              _buildTextFieldWithBackground(
-                  hintText: 'Class',
-                  controllers: _classcontroller,
-                  isClass: true),
-
-              const SizedBox(height: 10),
-              _buildTextFieldWithBackground(
-                  hintText: 'City / Town', controllers: _citycontroller),
-              const SizedBox(height: 10),
-              _buildPinFieldWithBackground(
-                  hintText: 'Pincode', controllers: _pincodecontroller),
-              SizedBox(height: screenHeight * 0.03),
-              // Enquire Button
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    _onEnquire(context);
-                  },
-                  child: SizedBox(
-                    width: kIsWeb ? 300.0 : 300.0,
-                    height: kIsWeb ? 80.0 : 70.0,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: screenWidth * 0.9,
+                      maxHeight: screenHeight * 0.4,
+                    ),
                     child: Image.asset(
-                      'assets/enquire.png',
+                      'assets/studentenquiry2.png',
                       fit: BoxFit.contain,
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                _buildTextFieldWithBackground(
+                    hintText: 'Student Name', controllers: _namecontroller),
+                const SizedBox(height: 10),
+
+                // Gender Selection
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildGenderCheckbox(
+                      label: "Male",
+                      value: isMaleSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          isMaleSelected = value!;
+                          if (value) {
+                            isFemaleSelected = false;
+                            formData.gender = 'Male';
+                          }
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 20),
+                    _buildGenderCheckbox(
+                      label: "Female",
+                      value: isFemaleSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          isFemaleSelected = value!;
+                          if (value) {
+                            isMaleSelected = false;
+                            formData.gender = 'Female';
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                _buildTextFieldWithBackground(
+                    hintText: 'Class',
+                    controllers: _classcontroller,
+                    isClass: true),
+
+                const SizedBox(height: 10),
+                _buildTextFieldWithBackground(
+                    hintText: 'City / Town', controllers: _citycontroller),
+                const SizedBox(height: 10),
+                _buildPinFieldWithBackground(
+                    hintText: 'Pincode', controllers: _pincodecontroller),
+                SizedBox(height: screenHeight * 0.03),
+                // Enquire Button
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      _onEnquire(context);
+                    },
+                    child: SizedBox(
+                      width: kIsWeb ? 300.0 : 300.0,
+                      height: kIsWeb ? 80.0 : 70.0,
+                      child: Image.asset(
+                        'assets/enquire.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -404,6 +417,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
           }
           return null;
         },
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         textCapitalization: TextCapitalization.words,
         controller: controllers,
         keyboardType: TextInputType.number,
@@ -464,6 +478,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
           }
           return null;
         },
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         textCapitalization: TextCapitalization.words,
         keyboardType: isClass ? TextInputType.number : TextInputType.text,
         controller: controllers,

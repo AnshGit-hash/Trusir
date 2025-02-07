@@ -107,6 +107,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   final TextEditingController _phoneController = TextEditingController();
 
   List<Location> locations = [];
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Selected values
   String? selectedState;
@@ -129,6 +130,10 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   bool isadhaarfuploading = false;
   bool isadhaarbuploading = false;
   bool issignuploading = false;
+  bool isprofileEnabled = true;
+  bool isadhaarfEnabled = true;
+  bool isadhaarbEnabled = true;
+  bool issignEnabled = true;
   bool isAdditionalLoading = true;
   dynamic additionals;
   Set<String> selectedSlots = {}; // Store selected time slots
@@ -175,25 +180,58 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   }
 
   Future<void> handleUploadFromCamera(String? path) async {
+    setState(() {
+      if (path == 'photo') {
+        isprofileuploading = true;
+        isadhaarbEnabled = false;
+        isadhaarfEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'adhaarFront') {
+        isadhaarfuploading = true;
+        isadhaarbEnabled = false;
+        isprofileEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'adhaarBack') {
+        isadhaarbuploading = true;
+        isadhaarfEnabled = false;
+        isprofileEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'sign') {
+        issignuploading = true;
+        isadhaarbEnabled = false;
+        isprofileEnabled = false;
+        isadhaarfEnabled = false;
+      }
+    });
     final String result = await ImageUploadUtils.uploadSingleImageFromCamera();
 
     if (result != 'null') {
       setState(() {
-        setState(() {
-          if (path == 'photo') {
-            formData.photoPath = result;
-            isprofileuploading = false;
-          } else if (path == 'adhaarFront') {
-            formData.aadharFrontPath = result;
-            isadhaarfuploading = false;
-          } else if (path == 'adhaarBack') {
-            formData.aadharBackPath = result;
-            isadhaarbuploading = false;
-          } else if (path == 'sign') {
-            formData.signaturePath = result;
-            issignuploading = false;
-          }
-        });
+        if (path == 'photo') {
+          formData.photoPath = result;
+          isprofileuploading = false;
+          isadhaarbEnabled = true;
+          isadhaarfEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'adhaarFront') {
+          formData.aadharFrontPath = result;
+          isadhaarfuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'adhaarBack') {
+          formData.aadharBackPath = result;
+          isadhaarbuploading = false;
+          isadhaarfEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'sign') {
+          formData.signaturePath = result;
+          issignuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          isadhaarfEnabled = true;
+        }
       });
       Fluttertoast.showToast(msg: 'Image uploaded successfully!');
     } else {
@@ -201,37 +239,82 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
       setState(() {
         if (path == 'photo') {
           isprofileuploading = false;
+          isadhaarbEnabled = true;
+          isadhaarfEnabled = true;
+          issignEnabled = true;
         } else if (path == 'adhaarFront') {
           isadhaarfuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
         } else if (path == 'adhaarBack') {
           isadhaarbuploading = false;
+          isadhaarfEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
         } else if (path == 'sign') {
           issignuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          isadhaarfEnabled = true;
         }
       });
     }
   }
 
   Future<void> handleUploadFromGallery(String? path) async {
+    setState(() {
+      if (path == 'photo') {
+        isprofileuploading = true;
+        isadhaarbEnabled = false;
+        isadhaarfEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'adhaarFront') {
+        isadhaarfuploading = true;
+        isadhaarbEnabled = false;
+        isprofileEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'adhaarBack') {
+        isadhaarbuploading = true;
+        isadhaarfEnabled = false;
+        isprofileEnabled = false;
+        issignEnabled = false;
+      } else if (path == 'sign') {
+        issignuploading = true;
+        isadhaarbEnabled = false;
+        isprofileEnabled = false;
+        isadhaarfEnabled = false;
+      }
+    });
     final String result = await ImageUploadUtils.uploadSingleImageFromGallery();
 
     if (result != 'null') {
       setState(() {
-        setState(() {
-          if (path == 'photo') {
-            formData.photoPath = result;
-            isprofileuploading = false;
-          } else if (path == 'adhaarFront') {
-            formData.aadharFrontPath = result;
-            isadhaarfuploading = false;
-          } else if (path == 'adhaarBack') {
-            formData.aadharBackPath = result;
-            isadhaarbuploading = false;
-          } else if (path == 'sign') {
-            formData.signaturePath = result;
-            issignuploading = false;
-          }
-        });
+        if (path == 'photo') {
+          formData.photoPath = result;
+          isprofileuploading = false;
+          isadhaarbEnabled = true;
+          isadhaarfEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'adhaarFront') {
+          formData.aadharFrontPath = result;
+          isadhaarfuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'adhaarBack') {
+          formData.aadharBackPath = result;
+          isadhaarbuploading = false;
+          isadhaarfEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
+        } else if (path == 'sign') {
+          formData.signaturePath = result;
+          issignuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          isadhaarfEnabled = true;
+        }
       });
       Fluttertoast.showToast(msg: 'Image uploaded successfully!');
     } else {
@@ -239,12 +322,24 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
       setState(() {
         if (path == 'photo') {
           isprofileuploading = false;
+          isadhaarbEnabled = true;
+          isadhaarfEnabled = true;
+          issignEnabled = true;
         } else if (path == 'adhaarFront') {
           isadhaarfuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
         } else if (path == 'adhaarBack') {
           isadhaarbuploading = false;
+          isadhaarfEnabled = true;
+          isprofileEnabled = true;
+          issignEnabled = true;
         } else if (path == 'sign') {
           issignuploading = false;
+          isadhaarbEnabled = true;
+          isprofileEnabled = true;
+          isadhaarfEnabled = true;
         }
       });
     }
@@ -377,34 +472,62 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   }) async {
     final DateFormat dateFormatter = DateFormat('yyyy-MM-dd');
 
+    // Validate the form
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all required fields in the form.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return; // Stop execution if form validation fails
+    }
+
     for (final teacher in teacherFormsData) {
-      if ([
-        teacher.teacherName,
-        teacher.fathersName,
-        teacher.mothersName,
-        teacher.gender,
-        teacher.dob,
-        teacher.school,
-        teacher.medium,
-        teacher.preferredclass,
-        teacher.subject,
-        teacher.state,
-        teacher.city,
-        teacher.area,
-        teacher.pincode,
-        teacher.caddress,
-        teacher.timeslot,
-        teacher.photoPath,
-        teacher.aadharFrontPath,
-        teacher.aadharBackPath,
-      ].any((field) => field == null || field.toString().isEmpty)) {
+      if (teacher.photoPath == null || teacher.photoPath!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please fill all the fields to proceed.'),
+            content: Text('Profile Photo is required.'),
             duration: Duration(seconds: 2),
           ),
         );
-        return; // Stop execution if any field is invalid
+        return;
+      }
+      if (teacher.timeslot == null || teacher.timeslot!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please Select atleast one TimeSlot.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      if (teacher.aadharBackPath == null || teacher.aadharBackPath!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Adhaar Back Image is required.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      if (teacher.aadharFrontPath == null || teacher.aadharFrontPath!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Adhaar Front Image is required.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      if (teacher.signaturePath == null || teacher.signaturePath!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Signature is required.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
       }
     }
 
@@ -437,7 +560,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
           "time_slot": teacher.signaturePath, // Update dynamically if needed
           "profile": teacher.photoPath,
           "adhaar_front": teacher.aadharFrontPath,
-          "adhaar_back": teacher.aadharBackPath, // Adjust as needed
+          "adhaar_back": teacher.aadharBackPath,
           "agree_to_terms": teacher.agreetoterms,
         };
       }).toList(),
@@ -567,58 +690,991 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
       ),
       backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: isAdditionalLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : isWeb
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isAdditionalLoading
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : isWeb
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Image.asset(
+                                'assets/groupregister.png',
+                                width: 400,
+                              ),
+                            ),
+                            // Teacher's basic information
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildTextField('Teacher Name',
+                                    onChanged: (value) {
+                                  formData.teacherName = value;
+                                }),
+                                const SizedBox(width: 50),
+                                _buildTextField("Father's Name",
+                                    onChanged: (value) {
+                                  formData.fathersName = value;
+                                }),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildTextField("Mother's Name",
+                                    onChanged: (value) {
+                                  formData.mothersName = value;
+                                }),
+                                const SizedBox(width: 50),
+                                _buildPhoneField('Phone Number'),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Gender and DOB Row
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildDropdownField(
+                                    'Gender',
+                                    selectedValue: gender,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        gender = value;
+                                        formData.gender = gender;
+                                      });
+                                    },
+                                    items: ['Male', 'Female', 'Other'],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildDropdownField(
+                                    'Qualification',
+                                    selectedValue: formData.qualification,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        formData.qualification = value;
+                                      });
+                                    },
+                                    items: additionals['qualification'],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildDropdownField(
+                                    'Experience',
+                                    selectedValue: formData.experience,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        formData.experience = value;
+                                      });
+                                    },
+                                    items: additionals['experience'],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildTextFieldWithIcon(
+                                    'DOB',
+                                    Icons.calendar_today,
+                                    onTap: () => _selectDOB(context),
+                                    value: selectedDOB != null
+                                        ? "${selectedDOB!.day}/${selectedDOB!.month}/${selectedDOB!.year}"
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                _buildMultiSelectDropdownField(
+                                  'Preferred Board',
+                                  selectedValues: selectedBoard,
+                                  onChanged: (List<String> values) {
+                                    setState(() {
+                                      selectedBoard = values;
+                                      formData.board = selectedBoard.join(',');
+                                    });
+                                  },
+                                  items: additionals['board'],
+                                ),
+                                const SizedBox(width: 50),
+                                _buildTextField('School Name',
+                                    onChanged: (value) {
+                                  formData.school = value;
+                                }),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // Dropdowns
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildMultiSelectDropdownField(
+                                    'Preferred Class',
+                                    selectedValues: selectedClass,
+                                    onChanged: (List<String> values) {
+                                      setState(() {
+                                        selectedClass = values;
+                                        formData.preferredclass =
+                                            selectedClass.join(',');
+                                      });
+                                    },
+                                    items: _classes,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: _buildMultiSelectDropdownField(
+                                    'Preferred Medium',
+                                    selectedValues: selectedMedium,
+                                    onChanged: (List<String> values) {
+                                      setState(() {
+                                        selectedMedium = values;
+                                        formData.medium =
+                                            selectedMedium.join(',');
+                                      });
+                                    },
+                                    items: additionals['mediums'],
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: _buildMultiSelectDropdownField(
+                                    'Subject',
+                                    selectedValues: selectedSubjects,
+                                    onChanged: (List<String> values) {
+                                      setState(() {
+                                        selectedSubjects = values;
+                                        formData.subject =
+                                            selectedSubjects.join(',');
+                                      });
+                                    },
+                                    items: _courses,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    'State',
+                                    selectedValue: selectedState,
+                                    onChanged: (value) {
+                                      onStateChanged(value);
+                                    },
+                                    items: states,
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      if (selectedState == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text(
+                                              'Please select a state first.'),
+                                          duration: Duration(seconds: 2),
+                                        ));
+                                      } else {
+                                        null;
+                                      }
+                                    },
+                                    child: _buildDropdownField(
+                                      'City/Town',
+                                      selectedValue: selectedCity,
+                                      onChanged: (value) {
+                                        onCityChanged(value);
+                                      },
+                                      items: cities,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: _buildTextField('Mohalla/Area',
+                                      onChanged: (value) {
+                                    formData.area = value;
+                                  }),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      if (selectedState == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text(
+                                              'Please select a state first.'),
+                                          duration: Duration(seconds: 2),
+                                        ));
+                                      } else if (selectedCity == null) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text(
+                                              'Please select a city first.'),
+                                          duration: Duration(seconds: 2),
+                                        ));
+                                      } else {
+                                        null;
+                                      }
+                                    },
+                                    child: _buildDropdownField(
+                                      'Pincode',
+                                      selectedValue: selectedPincode,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedPincode = value;
+                                          formData.pincode = selectedPincode;
+                                        });
+                                      },
+                                      items: pincodes,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            // Address fields
+                            Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      _buildAddressField('Current Full Address',
+                                          onChanged: (value) {
+                                    formData.caddress = value;
+                                  }),
+                                ),
+                                const SizedBox(width: 50),
+                                Expanded(
+                                  child: _buildAddressField(
+                                      'Permanent Full Address',
+                                      onChanged: (value) {
+                                    formData.paddress = value;
+                                  }),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+
+                            // Upload Sections
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 10),
+                                      child: Text(
+                                        'Profile Photo',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    isprofileuploading
+                                        ? const CircularProgressIndicator()
+                                        : _buildFileUploadField('Upload Image',
+                                            width: 220,
+                                            onTap: isprofileEnabled
+                                                ? () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          insetPadding:
+                                                              const EdgeInsets
+                                                                  .all(16),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16.0),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .lightBlue
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromCamera(
+                                                                          'photo');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Camera",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                    height: 16),
+                                                                // Button for "I'm a Teacher"
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .orange
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromGallery(
+                                                                          'photo');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Upload File",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Let the previous Upload finish first');
+                                                  },
+                                            displayPath: formData.photoPath),
+                                  ],
+                                ),
+                                const SizedBox(width: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 10),
+                                      child: Text(
+                                        'Aadhar Card Front',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    isadhaarfuploading
+                                        ? const CircularProgressIndicator()
+                                        : _buildFileUploadField('Upload File',
+                                            width: 220,
+                                            onTap: isadhaarfEnabled
+                                                ? () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          insetPadding:
+                                                              const EdgeInsets
+                                                                  .all(16),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16.0),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .lightBlue
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromCamera(
+                                                                          'adhaarFront');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Camera",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                    height: 16),
+                                                                // Button for "I'm a Teacher"
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .orange
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromGallery(
+                                                                          'adhaarFront');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Upload File",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Let the previous Upload finish first');
+                                                  },
+                                            displayPath:
+                                                formData.aadharFrontPath),
+                                  ],
+                                ),
+                                const SizedBox(width: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 10),
+                                      child: Text(
+                                        'Aadhar Card Back',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    isadhaarbuploading
+                                        ? const CircularProgressIndicator()
+                                        : _buildFileUploadField('Upload File',
+                                            width: 220,
+                                            onTap: isadhaarbEnabled
+                                                ? () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          insetPadding:
+                                                              const EdgeInsets
+                                                                  .all(16),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16.0),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .lightBlue
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromCamera(
+                                                                          'adhaarBack');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Camera",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                    height: 16),
+                                                                // Button for "I'm a Teacher"
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .orange
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromGallery(
+                                                                          'adhaarBack');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Upload File",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Let the previous Upload finish first');
+                                                  },
+                                            displayPath:
+                                                formData.aadharBackPath),
+                                  ],
+                                ),
+                                const SizedBox(width: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 10),
+                                      child: Text(
+                                        'Signature',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    issignuploading
+                                        ? const CircularProgressIndicator()
+                                        : _buildFileUploadField('Upload Image',
+                                            onTap: issignEnabled
+                                                ? () {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Dialog(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          insetPadding:
+                                                              const EdgeInsets
+                                                                  .all(16),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(16.0),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .lightBlue
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromCamera(
+                                                                          'sign');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Camera",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                    height: 16),
+                                                                // Button for "I'm a Teacher"
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 50,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .orange
+                                                                        .shade100,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            22),
+                                                                  ),
+                                                                  child:
+                                                                      TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      handleUploadFromGallery(
+                                                                          'sign');
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                      "Upload File",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              'Poppins'),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Let the previous Upload finish first');
+                                                  },
+                                            width: 220,
+                                            displayPath:
+                                                formData.signaturePath),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 40),
+                            TimeSlotField(formData: formData, isWeb: isWeb),
+                            const SizedBox(height: 50),
+
+                            // Terms and Conditions Checkbox
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: agreeToTerms,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      agreeToTerms = value!;
+                                      formData.agreetoterms = agreeToTerms;
+                                    });
+                                  },
+                                ),
+                                const Text('I agree with the ',
+                                    style: TextStyle(fontSize: 20)),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const TermsAndConditionsPage(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Terms and Conditions',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      fontSize: 20,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 40),
+                            // Registration Fee
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Center(
+                                  child: Text(
+                                    'Free',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 20.0,
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Center(
+                                  child: Text(
+                                    '299 ',
+                                    style: TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      decorationColor: Colors.grey.shade700,
+                                      fontFamily: 'Poppins',
+                                      fontSize: 18,
+                                      color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Text(
+                                    ' Registration Fee',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 20.0,
+                                      color: Colors.purple.shade900,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            // Register Button
+                            _buildRegisterButton(context),
+                          ],
+                        ),
+                      )
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Center(
                             child: Image.asset(
                               'assets/groupregister.png',
-                              width: 400,
+                              width: 386,
+                              height: 261,
                             ),
                           ),
                           // Teacher's basic information
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildTextField('Teacher Name',
-                                  onChanged: (value) {
-                                formData.teacherName = value;
-                              }),
-                              const SizedBox(width: 50),
-                              _buildTextField("Father's Name",
-                                  onChanged: (value) {
-                                formData.fathersName = value;
-                              }),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildTextField("Mother's Name",
-                                  onChanged: (value) {
-                                formData.mothersName = value;
-                              }),
-                              const SizedBox(width: 50),
-                              _buildPhoneField('Phone Number'),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
+                          _buildTextField('Teacher Name', onChanged: (value) {
+                            formData.teacherName = value;
+                          }),
+                          const SizedBox(height: 14),
+                          _buildTextField("Father's Name", onChanged: (value) {
+                            formData.fathersName = value;
+                          }),
+                          const SizedBox(height: 14),
+                          _buildTextField("Mother's Name", onChanged: (value) {
+                            formData.mothersName = value;
+                          }),
+                          const SizedBox(height: 14),
                           // Gender and DOB Row
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(
-                                flex: 1,
                                 child: _buildDropdownField(
                                   'Gender',
                                   selectedValue: gender,
@@ -633,35 +1689,6 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               ),
                               const SizedBox(width: 20),
                               Expanded(
-                                flex: 2,
-                                child: _buildDropdownField(
-                                  'Qualification',
-                                  selectedValue: formData.qualification,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      formData.qualification = value;
-                                    });
-                                  },
-                                  items: additionals['qualification'],
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                flex: 2,
-                                child: _buildDropdownField(
-                                  'Experience',
-                                  selectedValue: formData.experience,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      formData.experience = value;
-                                    });
-                                  },
-                                  items: additionals['experience'],
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                flex: 1,
                                 child: _buildTextFieldWithIcon(
                                   'DOB',
                                   Icons.calendar_today,
@@ -673,654 +1700,700 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              _buildMultiSelectDropdownField(
-                                'Preferred Board',
-                                selectedValues: selectedBoard,
-                                onChanged: (List<String> values) {
-                                  setState(() {
-                                    selectedBoard = values;
-                                    formData.board = selectedBoard.join(',');
-                                  });
-                                },
-                                items: additionals['board'],
-                              ),
-                              const SizedBox(width: 50),
-                              _buildTextField('School Name',
-                                  onChanged: (value) {
-                                formData.school = value;
-                              }),
-                            ],
+                          const SizedBox(height: 14),
+                          _buildPhoneField('Phone Number'),
+                          const SizedBox(height: 14),
+                          _buildDropdownField(
+                            'Qualification',
+                            selectedValue: formData.qualification,
+                            onChanged: (value) {
+                              setState(() {
+                                formData.qualification = value;
+                              });
+                            },
+                            items: additionals['qualification'] ?? [],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 14),
+                          _buildDropdownField(
+                            'Experience',
+                            selectedValue: formData.experience,
+                            onChanged: (value) {
+                              setState(() {
+                                formData.experience = value;
+                              });
+                            },
+                            items: additionals['experience'] ?? [],
+                          ),
+                          const SizedBox(height: 14),
+                          _buildMultiSelectDropdownField(
+                            'Preferred Board',
+                            selectedValues: selectedBoard,
+                            onChanged: (List<String> values) {
+                              setState(() {
+                                selectedBoard = values;
+                                formData.board = selectedBoard.join(',');
+                              });
+                            },
+                            items: additionals['board'] ?? [],
+                          ),
+                          const SizedBox(height: 14),
+                          _buildTextField('School Name', onChanged: (value) {
+                            formData.school = value;
+                          }),
+                          const SizedBox(height: 14),
                           // Dropdowns
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildMultiSelectDropdownField(
-                                  'Preferred Class',
-                                  selectedValues: selectedClass,
-                                  onChanged: (List<String> values) {
-                                    setState(() {
-                                      selectedClass = values;
-                                      formData.preferredclass =
-                                          selectedClass.join(',');
-                                    });
-                                  },
-                                  items: _classes,
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: _buildMultiSelectDropdownField(
-                                  'Preferred Medium',
-                                  selectedValues: selectedMedium,
-                                  onChanged: (List<String> values) {
-                                    setState(() {
-                                      selectedMedium = values;
-                                      formData.medium =
-                                          selectedMedium.join(',');
-                                    });
-                                  },
-                                  items: additionals['mediums'],
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: _buildMultiSelectDropdownField(
-                                  'Subject',
-                                  selectedValues: selectedSubjects,
-                                  onChanged: (List<String> values) {
-                                    setState(() {
-                                      selectedSubjects = values;
-                                      formData.subject =
-                                          selectedSubjects.join(',');
-                                    });
-                                  },
-                                  items: _courses,
-                                ),
-                              ),
-                            ],
+                          _buildMultiSelectDropdownField(
+                            'Preferred Class',
+                            selectedValues: selectedClass,
+                            onChanged: (List<String> values) {
+                              setState(() {
+                                selectedClass = values;
+                                formData.preferredclass =
+                                    selectedClass.join(',');
+                              });
+                            },
+                            items: _classes,
                           ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildDropdownField(
-                                  'State',
-                                  selectedValue: selectedState,
-                                  onChanged: (value) {
-                                    onStateChanged(value);
-                                  },
-                                  items: states,
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (selectedState == null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                        content: Text(
-                                            'Please select a state first.'),
-                                        duration: Duration(seconds: 2),
-                                      ));
-                                    } else {
-                                      null;
-                                    }
-                                  },
-                                  child: _buildDropdownField(
-                                    'City/Town',
-                                    selectedValue: selectedCity,
-                                    onChanged: (value) {
-                                      onCityChanged(value);
-                                    },
-                                    items: cities,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: _buildTextField('Mohalla/Area',
-                                    onChanged: (value) {
-                                  formData.area = value;
-                                }),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (selectedState == null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                        content: Text(
-                                            'Please select a state first.'),
-                                        duration: Duration(seconds: 2),
-                                      ));
-                                    } else if (selectedCity == null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(const SnackBar(
-                                        content:
-                                            Text('Please select a city first.'),
-                                        duration: Duration(seconds: 2),
-                                      ));
-                                    } else {
-                                      null;
-                                    }
-                                  },
-                                  child: _buildDropdownField(
-                                    'Pincode',
-                                    selectedValue: selectedPincode,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedPincode = value;
-                                        formData.pincode = selectedPincode;
-                                      });
-                                    },
-                                    items: pincodes,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const SizedBox(height: 14),
+                          _buildMultiSelectDropdownField(
+                            'Preferred Medium',
+                            selectedValues: selectedMedium,
+                            onChanged: (List<String> values) {
+                              setState(() {
+                                selectedMedium = values;
+                                formData.medium = selectedMedium.join(',');
+                              });
+                            },
+                            items: additionals['mediums'] ?? [],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 14),
+                          _buildMultiSelectDropdownField(
+                            'Subject',
+                            selectedValues: selectedSubjects,
+                            onChanged: (List<String> values) {
+                              setState(() {
+                                selectedSubjects = values;
+                                formData.subject = selectedSubjects.join(',');
+                              });
+                            },
+                            items: _courses,
+                          ),
+                          const SizedBox(height: 14),
+                          _buildDropdownField(
+                            'State',
+                            selectedValue: selectedState,
+                            onChanged: (value) {
+                              onStateChanged(value);
+                            },
+                            items: states,
+                          ),
+                          const SizedBox(height: 14),
+                          GestureDetector(
+                            onTap: () {
+                              if (selectedState == null) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Please select a state first.'),
+                                  duration: Duration(seconds: 2),
+                                ));
+                              } else {
+                                null;
+                              }
+                            },
+                            child: _buildDropdownField(
+                              'City/Town',
+                              selectedValue: selectedCity,
+                              onChanged: (value) {
+                                onCityChanged(value);
+                              },
+                              items: cities,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _buildTextField('Mohalla/Area', onChanged: (value) {
+                            formData.area = value;
+                          }),
+                          const SizedBox(height: 14),
+                          GestureDetector(
+                            onTap: () {
+                              if (selectedState == null) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Please select a state first.'),
+                                  duration: Duration(seconds: 2),
+                                ));
+                              } else if (selectedCity == null) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(const SnackBar(
+                                  content: Text('Please select a city first.'),
+                                  duration: Duration(seconds: 2),
+                                ));
+                              } else {
+                                null;
+                              }
+                            },
+                            child: _buildDropdownField(
+                              'Pincode',
+                              selectedValue: selectedPincode,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedPincode = value;
+                                  formData.pincode = selectedPincode;
+                                });
+                              },
+                              items: pincodes,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
                           // Address fields
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildAddressField(
-                                    'Current Full Address', onChanged: (value) {
-                                  formData.caddress = value;
-                                }),
-                              ),
-                              const SizedBox(width: 50),
-                              Expanded(
-                                child:
-                                    _buildAddressField('Permanent Full Address',
-                                        onChanged: (value) {
-                                  formData.paddress = value;
-                                }),
-                              ),
-                            ],
-                          ),
+                          _buildAddressField('Current Full Address',
+                              onChanged: (value) {
+                            formData.caddress = value;
+                          }),
+                          const SizedBox(height: 14),
+                          _buildAddressField('Permanent Full Address',
+                              onChanged: (value) {
+                            formData.paddress = value;
+                          }),
                           const SizedBox(height: 20),
 
                           // Upload Sections
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Text(
-                                      'Profile Photo',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  isprofileuploading
-                                      ? const CircularProgressIndicator()
-                                      : _buildFileUploadField('Upload Image',
-                                          width: 220, onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.black
-                                                .withValues(alpha: 0.3),
-                                            builder: (BuildContext context) {
-                                              return Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                insetPadding:
-                                                    const EdgeInsets.all(16),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .lightBlue
-                                                              .shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromCamera(
-                                                                'photo');
-                                                          },
-                                                          child: const Text(
-                                                            "Camera",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      // Button for "I'm a Teacher"
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .orange.shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromGallery(
-                                                                'photo');
-                                                          },
-                                                          child: const Text(
-                                                            "Upload File",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        }, displayPath: formData.photoPath),
-                                ],
+                              const Padding(
+                                padding: EdgeInsets.only(right: 58),
+                                child: Text(
+                                  'Profile Photo',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              const SizedBox(width: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Text(
-                                      'Aadhar Card Front',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  isadhaarfuploading
-                                      ? const CircularProgressIndicator()
-                                      : _buildFileUploadField('Upload File',
-                                          width: 220, onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.black
-                                                .withValues(alpha: 0.3),
-                                            builder: (BuildContext context) {
-                                              return Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                insetPadding:
-                                                    const EdgeInsets.all(16),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .lightBlue
-                                                              .shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromCamera(
-                                                                'adhaarFront');
-                                                          },
-                                                          child: const Text(
-                                                            "Camera",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
+                              isprofileuploading
+                                  ? const CircularProgressIndicator()
+                                  : _buildFileUploadField('Upload Image',
+                                      width: 171,
+                                      onTap: isprofileEnabled
+                                          ? () {
+                                              showDialog(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.3),
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        const EdgeInsets.all(
+                                                            16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
                                                       ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      // Button for "I'm a Teacher"
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .orange.shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromGallery(
-                                                                'adhaarFront');
-                                                          },
-                                                          child: const Text(
-                                                            "Upload File",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .lightBlue
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromCamera(
+                                                                    'photo');
+                                                              },
+                                                              child: const Text(
+                                                                "Camera",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
                                                           ),
-                                                        ),
+                                                          const SizedBox(
+                                                              height: 16),
+                                                          // Button for "I'm a Teacher"
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromGallery(
+                                                                    'photo');
+                                                              },
+                                                              child: const Text(
+                                                                "Upload File",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                ),
+                                                    ),
+                                                  );
+                                                },
                                               );
+                                            }
+                                          : () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Let the previous Upload finish first');
                                             },
-                                          );
-                                        },
-                                          displayPath:
-                                              formData.aadharFrontPath),
-                                ],
-                              ),
-                              const SizedBox(width: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Text(
-                                      'Aadhar Card Back',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  isadhaarbuploading
-                                      ? const CircularProgressIndicator()
-                                      : _buildFileUploadField('Upload File',
-                                          width: 220, onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.black
-                                                .withValues(alpha: 0.3),
-                                            builder: (BuildContext context) {
-                                              return Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                insetPadding:
-                                                    const EdgeInsets.all(16),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .lightBlue
-                                                              .shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromCamera(
-                                                                'adhaarBack');
-                                                          },
-                                                          child: const Text(
-                                                            "Camera",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      // Button for "I'm a Teacher"
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .orange.shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromGallery(
-                                                                'adhaarBack');
-                                                          },
-                                                          child: const Text(
-                                                            "Upload File",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                          displayPath: formData.aadharBackPath),
-                                ],
-                              ),
-                              const SizedBox(width: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 10),
-                                    child: Text(
-                                      'Signature',
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  issignuploading
-                                      ? const CircularProgressIndicator()
-                                      : _buildFileUploadField('Upload Image',
-                                          onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            barrierColor: Colors.black
-                                                .withValues(alpha: 0.3),
-                                            builder: (BuildContext context) {
-                                              return Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                insetPadding:
-                                                    const EdgeInsets.all(16),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Container(
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .lightBlue
-                                                              .shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromCamera(
-                                                                'sign');
-                                                          },
-                                                          child: const Text(
-                                                            "Camera",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      // Button for "I'm a Teacher"
-                                                      Container(
-                                                        width: 200,
-                                                        height: 50,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .orange.shade100,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(22),
-                                                        ),
-                                                        child: TextButton(
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                            handleUploadFromGallery(
-                                                                'sign');
-                                                          },
-                                                          child: const Text(
-                                                            "Upload File",
-                                                            style: TextStyle(
-                                                                fontSize: 18,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontFamily:
-                                                                    'Poppins'),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                          width: 220,
-                                          displayPath: formData.signaturePath),
-                                ],
-                              ),
+                                      displayPath: formData.photoPath),
                             ],
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 10),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(right: 20),
+                                child: Text(
+                                  'Aadhar Card Front',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              isadhaarfuploading
+                                  ? const CircularProgressIndicator()
+                                  : _buildFileUploadField('Upload File',
+                                      width: 170,
+                                      onTap: isadhaarfEnabled
+                                          ? () {
+                                              showDialog(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.3),
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        const EdgeInsets.all(
+                                                            16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .lightBlue
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromCamera(
+                                                                    'adhaarFront');
+                                                              },
+                                                              child: const Text(
+                                                                "Camera",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 16),
+                                                          // Button for "I'm a Teacher"
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromGallery(
+                                                                    'adhaarFront');
+                                                              },
+                                                              child: const Text(
+                                                                "Upload File",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          : () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Let the previous Upload finish first');
+                                            },
+                                      displayPath: formData.aadharFrontPath),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(right: 20),
+                                child: Text(
+                                  'Aadhar Card Back',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              isadhaarbuploading
+                                  ? const CircularProgressIndicator()
+                                  : _buildFileUploadField('Upload File',
+                                      width: 170,
+                                      onTap: isadhaarbEnabled
+                                          ? () {
+                                              showDialog(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.3),
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        const EdgeInsets.all(
+                                                            16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .lightBlue
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromCamera(
+                                                                    'adhaarBack');
+                                                              },
+                                                              child: const Text(
+                                                                "Camera",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 16),
+                                                          // Button for "I'm a Teacher"
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromGallery(
+                                                                    'adhaarBack');
+                                                              },
+                                                              child: const Text(
+                                                                "Upload File",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          : () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Let the previous Upload finish first');
+                                            },
+                                      displayPath: formData.aadharBackPath),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(right: 79),
+                                child: Text(
+                                  'Signature',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              issignuploading
+                                  ? const CircularProgressIndicator()
+                                  : _buildFileUploadField('Upload Image',
+                                      onTap: issignEnabled
+                                          ? () {
+                                              showDialog(
+                                                context: context,
+                                                barrierColor: Colors.black
+                                                    .withValues(alpha: 0.3),
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    insetPadding:
+                                                        const EdgeInsets.all(
+                                                            16),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .lightBlue
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromCamera(
+                                                                    'sign');
+                                                              },
+                                                              child: const Text(
+                                                                "Camera",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                              height: 16),
+                                                          // Button for "I'm a Teacher"
+                                                          Container(
+                                                            width: 200,
+                                                            height: 50,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .orange
+                                                                  .shade100,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          22),
+                                                            ),
+                                                            child: TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                handleUploadFromGallery(
+                                                                    'sign');
+                                                              },
+                                                              child: const Text(
+                                                                "Upload File",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    color: Colors
+                                                                        .black,
+                                                                    fontFamily:
+                                                                        'Poppins'),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            }
+                                          : () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Let the previous Upload finish first');
+                                            },
+                                      width: 171,
+                                      displayPath: formData.signaturePath),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
                           TimeSlotField(formData: formData, isWeb: isWeb),
-                          const SizedBox(height: 50),
+                          const SizedBox(height: 5),
 
                           // Terms and Conditions Checkbox
                           Row(
@@ -1334,8 +2407,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                   });
                                 },
                               ),
-                              const Text('I agree with the ',
-                                  style: TextStyle(fontSize: 20)),
+                              const Text('I agree with the '),
                               GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -1350,14 +2422,12 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                   'Terms and Conditions',
                                   style: TextStyle(
                                     decoration: TextDecoration.underline,
-                                    fontSize: 20,
                                     color: Colors.blue,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 40),
                           // Registration Fee
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1407,713 +2477,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                           _buildRegisterButton(context),
                         ],
                       ),
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Image.asset(
-                            'assets/groupregister.png',
-                            width: 386,
-                            height: 261,
-                          ),
-                        ),
-                        // Teacher's basic information
-                        _buildTextField('Teacher Name', onChanged: (value) {
-                          formData.teacherName = value;
-                        }),
-                        const SizedBox(height: 14),
-                        _buildTextField("Father's Name", onChanged: (value) {
-                          formData.fathersName = value;
-                        }),
-                        const SizedBox(height: 14),
-                        _buildTextField("Mother's Name", onChanged: (value) {
-                          formData.mothersName = value;
-                        }),
-                        const SizedBox(height: 14),
-                        // Gender and DOB Row
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildDropdownField(
-                                'Gender',
-                                selectedValue: gender,
-                                onChanged: (value) {
-                                  setState(() {
-                                    gender = value;
-                                    formData.gender = gender;
-                                  });
-                                },
-                                items: ['Male', 'Female', 'Other'],
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: _buildTextFieldWithIcon(
-                                'DOB',
-                                Icons.calendar_today,
-                                onTap: () => _selectDOB(context),
-                                value: selectedDOB != null
-                                    ? "${selectedDOB!.day}/${selectedDOB!.month}/${selectedDOB!.year}"
-                                    : null,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildPhoneField('Phone Number'),
-                        const SizedBox(height: 14),
-                        _buildDropdownField(
-                          'Qualification',
-                          selectedValue: formData.qualification,
-                          onChanged: (value) {
-                            setState(() {
-                              formData.qualification = value;
-                            });
-                          },
-                          items: additionals['qualification'] ?? [],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildDropdownField(
-                          'Experience',
-                          selectedValue: formData.experience,
-                          onChanged: (value) {
-                            setState(() {
-                              formData.experience = value;
-                            });
-                          },
-                          items: additionals['experience'] ?? [],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildMultiSelectDropdownField(
-                          'Preferred Board',
-                          selectedValues: selectedBoard,
-                          onChanged: (List<String> values) {
-                            setState(() {
-                              selectedBoard = values;
-                              formData.board = selectedBoard.join(',');
-                            });
-                          },
-                          items: additionals['board'] ?? [],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField('School Name', onChanged: (value) {
-                          formData.school = value;
-                        }),
-                        const SizedBox(height: 14),
-                        // Dropdowns
-                        _buildMultiSelectDropdownField(
-                          'Preferred Class',
-                          selectedValues: selectedClass,
-                          onChanged: (List<String> values) {
-                            setState(() {
-                              selectedClass = values;
-                              formData.preferredclass = selectedClass.join(',');
-                            });
-                          },
-                          items: _classes,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildMultiSelectDropdownField(
-                          'Preferred Medium',
-                          selectedValues: selectedMedium,
-                          onChanged: (List<String> values) {
-                            setState(() {
-                              selectedMedium = values;
-                              formData.medium = selectedMedium.join(',');
-                            });
-                          },
-                          items: additionals['mediums'] ?? [],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildMultiSelectDropdownField(
-                          'Subject',
-                          selectedValues: selectedSubjects,
-                          onChanged: (List<String> values) {
-                            setState(() {
-                              selectedSubjects = values;
-                              formData.subject = selectedSubjects.join(',');
-                            });
-                          },
-                          items: _courses,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildDropdownField(
-                          'State',
-                          selectedValue: selectedState,
-                          onChanged: (value) {
-                            onStateChanged(value);
-                          },
-                          items: states,
-                        ),
-                        const SizedBox(height: 14),
-                        GestureDetector(
-                          onTap: () {
-                            if (selectedState == null) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text('Please select a state first.'),
-                                duration: Duration(seconds: 2),
-                              ));
-                            } else {
-                              null;
-                            }
-                          },
-                          child: _buildDropdownField(
-                            'City/Town',
-                            selectedValue: selectedCity,
-                            onChanged: (value) {
-                              onCityChanged(value);
-                            },
-                            items: cities,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField('Mohalla/Area', onChanged: (value) {
-                          formData.area = value;
-                        }),
-                        const SizedBox(height: 14),
-                        GestureDetector(
-                          onTap: () {
-                            if (selectedState == null) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text('Please select a state first.'),
-                                duration: Duration(seconds: 2),
-                              ));
-                            } else if (selectedCity == null) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text('Please select a city first.'),
-                                duration: Duration(seconds: 2),
-                              ));
-                            } else {
-                              null;
-                            }
-                          },
-                          child: _buildDropdownField(
-                            'Pincode',
-                            selectedValue: selectedPincode,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedPincode = value;
-                                formData.pincode = selectedPincode;
-                              });
-                            },
-                            items: pincodes,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        // Address fields
-                        _buildAddressField('Current Full Address',
-                            onChanged: (value) {
-                          formData.caddress = value;
-                        }),
-                        const SizedBox(height: 14),
-                        _buildAddressField('Permanent Full Address',
-                            onChanged: (value) {
-                          formData.paddress = value;
-                        }),
-                        const SizedBox(height: 20),
-
-                        // Upload Sections
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(right: 58),
-                              child: Text(
-                                'Profile Photo',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            isprofileuploading
-                                ? const CircularProgressIndicator()
-                                : _buildFileUploadField('Upload Image',
-                                    width: 171, onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor:
-                                          Colors.black.withValues(alpha: 0.3),
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          backgroundColor: Colors.transparent,
-                                          insetPadding:
-                                              const EdgeInsets.all(16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors
-                                                        .lightBlue.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromCamera(
-                                                          'photo');
-                                                    },
-                                                    child: const Text(
-                                                      "Camera",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Button for "I'm a Teacher"
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.orange.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromGallery(
-                                                          'photo');
-                                                    },
-                                                    child: const Text(
-                                                      "Upload File",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }, displayPath: formData.photoPath),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(right: 20),
-                              child: Text(
-                                'Aadhar Card Front',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            isadhaarfuploading
-                                ? const CircularProgressIndicator()
-                                : _buildFileUploadField('Upload File',
-                                    width: 170, onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor:
-                                          Colors.black.withValues(alpha: 0.3),
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          backgroundColor: Colors.transparent,
-                                          insetPadding:
-                                              const EdgeInsets.all(16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors
-                                                        .lightBlue.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromCamera(
-                                                          'adhaarFront');
-                                                    },
-                                                    child: const Text(
-                                                      "Camera",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Button for "I'm a Teacher"
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.orange.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromGallery(
-                                                          'adhaarFront');
-                                                    },
-                                                    child: const Text(
-                                                      "Upload File",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }, displayPath: formData.aadharFrontPath),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(right: 20),
-                              child: Text(
-                                'Aadhar Card Back',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            isadhaarbuploading
-                                ? const CircularProgressIndicator()
-                                : _buildFileUploadField('Upload File',
-                                    width: 170, onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor:
-                                          Colors.black.withValues(alpha: 0.3),
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          backgroundColor: Colors.transparent,
-                                          insetPadding:
-                                              const EdgeInsets.all(16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors
-                                                        .lightBlue.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromCamera(
-                                                          'adhaarBack');
-                                                    },
-                                                    child: const Text(
-                                                      "Camera",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Button for "I'm a Teacher"
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.orange.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromGallery(
-                                                          'adhaarBack');
-                                                    },
-                                                    child: const Text(
-                                                      "Upload File",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }, displayPath: formData.aadharBackPath),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(right: 79),
-                              child: Text(
-                                'Signature',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            issignuploading
-                                ? const CircularProgressIndicator()
-                                : _buildFileUploadField('Upload Image',
-                                    onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierColor:
-                                          Colors.black.withValues(alpha: 0.3),
-                                      builder: (BuildContext context) {
-                                        return Dialog(
-                                          backgroundColor: Colors.transparent,
-                                          insetPadding:
-                                              const EdgeInsets.all(16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors
-                                                        .lightBlue.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromCamera(
-                                                          'sign');
-                                                    },
-                                                    child: const Text(
-                                                      "Camera",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                // Button for "I'm a Teacher"
-                                                Container(
-                                                  width: 200,
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        Colors.orange.shade100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            22),
-                                                  ),
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      handleUploadFromGallery(
-                                                          'sign');
-                                                    },
-                                                    child: const Text(
-                                                      "Upload File",
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          color: Colors.black,
-                                                          fontFamily:
-                                                              'Poppins'),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                    width: 171,
-                                    displayPath: formData.signaturePath),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        TimeSlotField(formData: formData, isWeb: isWeb),
-                        const SizedBox(height: 5),
-
-                        // Terms and Conditions Checkbox
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: agreeToTerms,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  agreeToTerms = value!;
-                                  formData.agreetoterms = agreeToTerms;
-                                });
-                              },
-                            ),
-                            const Text('I agree with the '),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const TermsAndConditionsPage(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                'Terms and Conditions',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        // Registration Fee
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Center(
-                              child: Text(
-                                'Free',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 20.0,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Center(
-                              child: Text(
-                                '299 ',
-                                style: TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  decorationColor: Colors.grey.shade700,
-                                  fontFamily: 'Poppins',
-                                  fontSize: 18,
-                                  color: Colors.grey.shade700,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
-                            Center(
-                              child: Text(
-                                ' Registration Fee',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 20.0,
-                                  color: Colors.purple.shade900,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        // Register Button
-                        _buildRegisterButton(context),
-                      ],
-                    ),
+          ),
         ),
       ),
     );
@@ -2161,7 +2525,9 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
+        validator: _validateRequired,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         textCapitalization: TextCapitalization.words,
         onChanged: onChanged,
 
@@ -2214,7 +2580,9 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
+        validator: _validateRequired,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         textCapitalization: TextCapitalization.words,
         onChanged: onChanged,
         decoration: InputDecoration(
@@ -2253,7 +2621,9 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
               color: Colors.grey.shade200, blurRadius: 4, spreadRadius: 2),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
+        validator: _validatePhone,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         enabled: userSkipped,
         controller: _phoneController,
         keyboardType: TextInputType.phone,
@@ -2313,6 +2683,13 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
             ],
           ),
           child: DropdownButtonFormField<String>(
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (value) {
+              if (selectedValues.isEmpty) {
+                return 'Please select at least one option';
+              }
+              return null;
+            },
             decoration: InputDecoration(
               labelText: hintText,
               floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -2402,6 +2779,8 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
         ],
       ),
       child: DropdownButtonFormField<String>(
+        validator: _validateDropdown,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         value: selectedValue,
         onChanged: onChanged,
         decoration: InputDecoration(
@@ -2455,7 +2834,9 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
+        validator: _validateRequired,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         readOnly: true, // Ensures the field is not editable
         onTap: onTap,
         decoration: InputDecoration(
@@ -2491,7 +2872,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
       onTap: onTap,
       child: Container(
         height: 48,
-        width: 170,
+        width: 171,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
@@ -2522,6 +2903,29 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
         ),
       ),
     );
+  }
+
+  String? _validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Required';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Required';
+    } else if (value.length != 10 || !RegExp(r'^\d{10}$').hasMatch(value)) {
+      return 'Enter a valid 10-digit phone number';
+    }
+    return null;
+  }
+
+  String? _validateDropdown(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please select an option';
+    }
+    return null;
   }
 }
 
