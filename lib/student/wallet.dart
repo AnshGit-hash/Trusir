@@ -585,7 +585,7 @@ class _WalletPageState extends State<WalletPage> {
                       GestureDetector(
                           onTap: () {
                             _launchWhatsApp(
-                                '9801458766', 'Transactions Sharing');
+                                '+919801458766', 'Transactions Sharing');
                           },
                           child: _buildQuickAction(
                               Icons.share, "Share", Colors.green)),
@@ -766,17 +766,32 @@ class WalletTransactions extends StatelessWidget {
           ),
         ),
       ),
-      body: transactions.isEmpty
-          ? const Center(child: Text("No Wallet Transactions Found"))
-          : Column(
-              children: transactions.map((transaction) {
-                return _buildTransactionItem(
-                  transaction["transactionType"] ?? "Unknown Transaction",
-                  double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
-                  formatDate(transaction["created_at"]),
-                );
-              }).toList(),
+      body: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        child: transactions.isEmpty
+            ? const Center(child: Text("No Wallet Transactions Found"))
+            : Column(
+                children: transactions.map((transaction) {
+                  return _buildTransactionItem(
+                    transaction["transactionType"] ?? "Unknown Transaction",
+                    double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
+                    formatDate(transaction["created_at"]),
+                  );
+                }).toList(),
+              ),
+      ),
     );
   }
 
@@ -861,17 +876,32 @@ class Rewards extends StatelessWidget {
           ),
         ),
       ),
-      body: transactions.isEmpty
-          ? const Center(child: Text("No Wallet Transactions Found"))
-          : Column(
-              children: transactions.map((transaction) {
-                return _buildTransactionItem(
-                  transaction["transactionType"] ?? "Unknown Transaction",
-                  double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
-                  formatDate(transaction["created_at"]),
-                );
-              }).toList(),
+      body: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        child: transactions.isEmpty
+            ? const Center(child: Text("No Wallet Transactions Found"))
+            : Column(
+                children: transactions.map((transaction) {
+                  return _buildTransactionItem(
+                    transaction["transactionType"] ?? "Unknown Transaction",
+                    double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
+                    formatDate(transaction["created_at"]),
+                  );
+                }).toList(),
+              ),
+      ),
     );
   }
 
