@@ -783,6 +783,7 @@ class WalletTransactions extends StatelessWidget {
         child: transactions.isEmpty
             ? const Center(child: Text("No Wallet Transactions Found"))
             : Column(
+                mainAxisSize: MainAxisSize.min,
                 children: transactions.map((transaction) {
                   return _buildTransactionItem(
                     transaction["transactionType"] ?? "Unknown Transaction",
@@ -893,6 +894,7 @@ class Rewards extends StatelessWidget {
         child: transactions.isEmpty
             ? const Center(child: Text("No Wallet Transactions Found"))
             : Column(
+                mainAxisSize: MainAxisSize.min,
                 children: transactions.map((transaction) {
                   return _buildTransactionItem(
                     transaction["transactionType"] ?? "Unknown Transaction",
