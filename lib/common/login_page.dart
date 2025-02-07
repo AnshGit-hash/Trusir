@@ -75,19 +75,19 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
 
   final List<Map<String, String>> pageContent = [
     {
-      'title': 'Home Tuitions',
-      'subtitle': 'Get the tuition from the best \nteachers at your home',
-      'imagePath': 'assets/girlimage@4x.png',
-    },
-    {
-      'title': 'Special Education',
-      'subtitle': 'Education for your child at home \nwith personal attention',
-      'imagePath': 'assets/girlimage@4x.png',
+      'title': '',
+      'subtitle': '',
+      'imagePath': 'assets/002.png',
     },
     {
       'title': '',
       'subtitle': '',
-      'imagePath': 'assets/pamplate.png',
+      'imagePath': 'assets/003.png',
+    },
+    {
+      'title': '',
+      'subtitle': '',
+      'imagePath': 'assets/004.png',
     },
     {
       'title': 'Trusted Teachers',
@@ -95,9 +95,9 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       'imagePath': 'assets/girlimage@4x.png',
     },
     {
-      'title': 'Monthly Test Series',
-      'subtitle': 'Test series every month facility \nto test your kids',
-      'imagePath': 'assets/girlimage@4x.png',
+      'title': '',
+      'subtitle': '',
+      'imagePath': 'assets/005.png',
     },
   ];
 

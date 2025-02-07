@@ -108,7 +108,18 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
           feepayment.addAll(data.map((json) => Fees.fromJson(json)));
         }
 
-        // Calculate total amount while filtering out non-numeric values
+        // Sort the transactions by created_at in descending order (latest first)
+        feepayment.sort((a, b) {
+          DateTime dateA = DateTime.tryParse(jsonDecode(response.body)
+                      .firstWhere((e) => e['transactionID'] == a.transactionId)[
+                  'created_at']) ??
+              DateTime(0);
+          DateTime dateB = DateTime.tryParse(jsonDecode(response.body)
+                      .firstWhere((e) => e['transactionID'] == b.transactionId)[
+                  'created_at']) ??
+              DateTime(0);
+          return dateB.compareTo(dateA); // Descending order
+        });
 
         print(response.body);
 

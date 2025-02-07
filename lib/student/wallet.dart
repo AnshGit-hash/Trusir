@@ -69,14 +69,23 @@ class _WalletPageState extends State<WalletPage> {
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
 
-      // Filter transactions where transactionName is 'WALLET'
+      // Filter transactions where transactionName is 'WALLET' or 'ByAdmin'
+      List<Map<String, dynamic>> walletTransactions = data
+          .where((transaction) =>
+              transaction['transactionName'] == 'WALLET' ||
+              transaction['transactionName'] == 'ByAdmin')
+          .map((transaction) => transaction as Map<String, dynamic>)
+          .toList();
+
+      // Sort transactions by 'created_at' in descending order (latest first)
+      walletTransactions.sort((a, b) {
+        DateTime dateA = DateTime.parse(a['created_at']);
+        DateTime dateB = DateTime.parse(b['created_at']);
+        return dateB.compareTo(dateA); // Descending order
+      });
+
       setState(() {
-        walletTransactions = data
-            .where((transaction) =>
-                transaction['transactionName'] == 'WALLET' ||
-                transaction['transactionName'] == 'ByAdmin')
-            .map((transaction) => transaction as Map<String, dynamic>)
-            .toList();
+        this.walletTransactions = walletTransactions;
       });
 
       return walletTransactions;
@@ -445,8 +454,8 @@ class _WalletPageState extends State<WalletPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Rewards(
-                                      transactions: walletTransactions)),
+                                  builder: (context) =>
+                                      const Rewards(transactions: [])),
                             );
                           },
                           child: _buildActionButton(
@@ -892,7 +901,7 @@ class Rewards extends StatelessWidget {
           ],
         ),
         child: transactions.isEmpty
-            ? const Center(child: Text("No Wallet Transactions Found"))
+            ? const Center(child: Text("No Rewards Transactions Found"))
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: transactions.map((transaction) {
