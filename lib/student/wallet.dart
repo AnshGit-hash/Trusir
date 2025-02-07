@@ -8,6 +8,7 @@ import 'package:trusir/common/api.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/payment__status_popup.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({super.key});
@@ -228,6 +229,24 @@ class _WalletPageState extends State<WalletPage> {
     return base64body;
   }
 
+  Future<void> _launchWhatsApp(String phoneNumber, String message) async {
+    final Uri whatsappUri = Uri.parse(
+        "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}");
+
+    try {
+      final bool launched = await launchUrl(
+        whatsappUri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        throw Exception('Could not launch WhatsApp');
+      }
+    } catch (e) {
+      print("Error launching WhatsApp: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -411,8 +430,27 @@ class _WalletPageState extends State<WalletPage> {
                                     ));
                           },
                           child: _buildActionButton(Icons.add, "Add Money")),
-                      _buildActionButton(Icons.history, "History"),
-                      _buildActionButton(Icons.card_giftcard, "Rewards"),
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WalletTransactions(
+                                      transactions: walletTransactions)),
+                            );
+                          },
+                          child: _buildActionButton(Icons.history, "History")),
+                      GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Rewards(
+                                      transactions: walletTransactions)),
+                            );
+                          },
+                          child: _buildActionButton(
+                              Icons.card_giftcard, "Rewards")),
                     ],
                   ),
                 ],
@@ -544,7 +582,13 @@ class _WalletPageState extends State<WalletPage> {
                         child: _buildQuickAction(
                             Icons.card_giftcard, "Redeem", Colors.orange),
                       ),
-                      _buildQuickAction(Icons.share, "Share", Colors.green),
+                      GestureDetector(
+                          onTap: () {
+                            _launchWhatsApp(
+                                '9801458766', 'Transactions Sharing');
+                          },
+                          child: _buildQuickAction(
+                              Icons.share, "Share", Colors.green)),
                     ],
                   ),
                 ],
@@ -638,6 +682,196 @@ class _WalletPageState extends State<WalletPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTransactionItem(String description, double amount, String date) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: amount > 0
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              amount > 0 ? Icons.add : Icons.remove,
+              color: amount > 0 ? Colors.green : Colors.red,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "${amount > 0 ? '+' : ''}₹${amount.abs().toStringAsFixed(2)}",
+            style: TextStyle(
+              color: amount > 0 ? Colors.green : Colors.red,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WalletTransactions extends StatelessWidget {
+  final List<Map<String, dynamic>> transactions;
+  const WalletTransactions({super.key, required this.transactions});
+
+  @override
+  Widget build(BuildContext context) {
+    String formatDate(String dateString) {
+      DateTime dateTime = DateTime.parse(dateString);
+      String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+      return formattedDate;
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.grey[50],
+        title: const Text(
+          "Wallet Transactions",
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: transactions.isEmpty
+          ? const Center(child: Text("No Wallet Transactions Found"))
+          : Column(
+              children: transactions.map((transaction) {
+                return _buildTransactionItem(
+                  transaction["transactionType"] ?? "Unknown Transaction",
+                  double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
+                  formatDate(transaction["created_at"]),
+                );
+              }).toList(),
+            ),
+    );
+  }
+
+  Widget _buildTransactionItem(String description, double amount, String date) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: amount > 0
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              amount > 0 ? Icons.add : Icons.remove,
+              color: amount > 0 ? Colors.green : Colors.red,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "${amount > 0 ? '+' : ''}₹${amount.abs().toStringAsFixed(2)}",
+            style: TextStyle(
+              color: amount > 0 ? Colors.green : Colors.red,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Rewards extends StatelessWidget {
+  final List<Map<String, dynamic>> transactions;
+  const Rewards({super.key, required this.transactions});
+
+  @override
+  Widget build(BuildContext context) {
+    String formatDate(String dateString) {
+      DateTime dateTime = DateTime.parse(dateString);
+      String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+      return formattedDate;
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.grey[50],
+        title: const Text(
+          "Rewards",
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: transactions.isEmpty
+          ? const Center(child: Text("No Wallet Transactions Found"))
+          : Column(
+              children: transactions.map((transaction) {
+                return _buildTransactionItem(
+                  transaction["transactionType"] ?? "Unknown Transaction",
+                  double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
+                  formatDate(transaction["created_at"]),
+                );
+              }).toList(),
+            ),
     );
   }
 
