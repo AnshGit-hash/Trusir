@@ -241,6 +241,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                     child: Text(
                                       'Previous month',
                                       style: TextStyle(
+                                        fontFamily: 'Poppins',
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,

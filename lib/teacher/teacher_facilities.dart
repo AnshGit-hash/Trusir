@@ -91,10 +91,12 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   }
 
   final List<Color> cardColors = [
-    Colors.blue.shade200,
-    Colors.yellow.shade200,
-    Colors.pink.shade200,
-    Colors.purple.shade200,
+    const Color.fromARGB(255, 170, 224, 249),
+    const Color.fromARGB(255, 248, 169, 227),
+    const Color.fromARGB(255, 109, 216, 249),
+    const Color.fromARGB(255, 222, 151, 255),
+    const Color.fromARGB(255, 188, 180, 255),
+    const Color.fromARGB(255, 235, 177, 236),
   ];
 
   final Map<String, Map<String, double>> imageSizes = {
@@ -254,6 +256,8 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                               Text(
                                                 address,
                                                 style: const TextStyle(
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   fontFamily: 'Poppins',
                                                   color: Colors.white,
                                                   fontSize: 19,
@@ -264,6 +268,8 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                               Text(
                                                 phone,
                                                 style: const TextStyle(
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   color: Colors.white,
                                                   fontSize: 16,
                                                   fontFamily: 'Poppins',
@@ -325,8 +331,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                 mainAxisSpacing: 30,
                                 childAspectRatio: tileWidth / tileHeight * 1.5,
                                 children: [
-                                  buildTile(context, const Color(0xFFB3E5FC),
-                                      'assets/myprofile.png', 'My Profile', () {
+                                  buildTile(
+                                      context,
+                                      const Color.fromARGB(255, 170, 224, 249),
+                                      'assets/myprofile.png',
+                                      'My Profile', () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -335,8 +344,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       ),
                                     );
                                   }),
-                                  buildTile(context, const Color(0x80FFF59D),
-                                      'assets/noticesp@3x.png', 'Notice', () {
+                                  buildTile(
+                                      context,
+                                      const Color.fromARGB(255, 248, 169, 227),
+                                      'assets/noticesp@3x.png',
+                                      'Notice', () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -345,8 +357,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       ),
                                     );
                                   }),
-                                  buildTile(context, const Color(0xFFB3E5FC),
-                                      'assets/setting.png', 'Setting', () {
+                                  buildTile(
+                                      context,
+                                      const Color.fromARGB(255, 109, 216, 249),
+                                      'assets/setting.png',
+                                      'Setting', () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -355,8 +370,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       ),
                                     );
                                   }),
-                                  buildTile(context, const Color(0x80FFF59D),
-                                      'assets/list@3x.png', 'Attendance', () {
+                                  buildTile(
+                                      context,
+                                      const Color.fromARGB(255, 222, 151, 255),
+                                      'assets/list@3x.png',
+                                      'Attendance', () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -368,7 +386,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color(0xFFB3E5FC),
+                                      const Color.fromARGB(255, 188, 180, 255),
                                       'assets/knowledge.png',
                                       'General Knowledge', () {
                                     Navigator.push(
@@ -382,7 +400,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color(0x80FFF59D),
+                                      const Color.fromARGB(255, 235, 177, 236),
                                       'assets/pensp@3x.png',
                                       'Student Notice', () {
                                     Navigator.push(
@@ -650,6 +668,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                             const EdgeInsets.only(top: 5.0),
                                         child: Text(
                                           address,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontFamily: 'Poppins',
                                             color: Colors.white,
@@ -663,6 +682,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                             const EdgeInsets.only(top: 2.0),
                                         child: Text(
                                           phone,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: isWeb ? 16 : 11,
@@ -728,8 +748,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   ? tileWidth / tileHeight * 1.5
                                   : tileWidth / tileHeight,
                               children: [
-                                buildTile(context, const Color(0xFFB3E5FC),
-                                    'assets/myprofile.png', 'My Profile', () {
+                                buildTile(
+                                    context,
+                                    const Color.fromARGB(255, 170, 224, 249),
+                                    'assets/myprofile.png',
+                                    'My Profile', () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -738,8 +761,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     ),
                                   );
                                 }),
-                                buildTile(context, const Color(0x80FFF59D),
-                                    'assets/noticesp@3x.png', 'Notice', () {
+                                buildTile(
+                                    context,
+                                    const Color.fromARGB(255, 248, 169, 227),
+                                    'assets/noticesp@3x.png',
+                                    'Notice', () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -748,8 +774,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     ),
                                   );
                                 }),
-                                buildTile(context, const Color(0x80FFF59D),
-                                    'assets/list@3x.png', 'Attendance', () {
+                                buildTile(
+                                    context,
+                                    const Color.fromARGB(255, 109, 216, 249),
+                                    'assets/list@3x.png',
+                                    'Attendance', () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -761,7 +790,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                 }),
                                 buildTile(
                                     context,
-                                    const Color(0xFFB3E5FC),
+                                    const Color.fromARGB(255, 222, 151, 255),
                                     'assets/knowledge.png',
                                     'General Knowledge', () {
                                   Navigator.push(
@@ -775,7 +804,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                 }),
                                 buildTile(
                                     context,
-                                    const Color.fromARGB(128, 240, 157, 255),
+                                    const Color.fromARGB(255, 188, 180, 255),
                                     'assets/pensp@3x.png',
                                     'Student Notice', () {
                                   Navigator.push(
@@ -787,8 +816,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                     ),
                                   );
                                 }),
-                                buildTile(context, const Color(0xFFB3E5FC),
-                                    'assets/setting.png', 'Setting', () {
+                                buildTile(
+                                    context,
+                                    const Color.fromARGB(255, 235, 177, 236),
+                                    'assets/setting.png',
+                                    'Setting', () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -1041,7 +1073,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Poppins',

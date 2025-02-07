@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 
@@ -37,6 +38,17 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
   bool isLoadingMore = false;
   int currentPage = 1;
   bool hasMore = true;
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+    return formattedDate;
+  }
+
+  String formatTime(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedTime = DateFormat('hh:mm a').format(dateTime);
+    return formattedTime; // Example: 11:40 PM
+  }
 
   Future<void> fetchNotices({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -155,76 +167,84 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                               Color cardColor =
                                   cardColors[index % cardColors.length];
 
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 10,
-                                  top: 20,
-                                  right: 10,
-                                ),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Container(
-                                      width: 386,
-                                      height: 150,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: cardColor,
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 55, top: 20),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              notice.noticetitle,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              'Posted on : ${notice.date}',
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              notice.notice,
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
+                              return Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 7,
                                       top: 10,
-                                      left: 10,
-                                      child: Image.asset(
-                                        'assets/bell.png',
-                                        width: 36,
-                                        height: 36,
-                                      ),
+                                      right: 7,
                                     ),
-                                  ],
-                                ),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Container(
+                                          width: 386,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            color: cardColor,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 55, top: 13, bottom: 10),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  notice.noticetitle,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Text(
+                                                  'Posted on : ${formatDate(notice.date)} ${formatTime(notice.date)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color.fromARGB(
+                                                        255, 133, 133, 133),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                Text(
+                                                  notice.notice,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 13,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 15,
+                                          left: 10,
+                                          child: Image.asset(
+                                            'assets/bell.png',
+                                            width: 30,
+                                            height: 30,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               );
                             }),
                             hasMore
                                 ? Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 20),
+                                        vertical: 10),
                                     child: isLoadingMore
                                         ? const CircularProgressIndicator()
                                         : TextButton(
@@ -239,9 +259,8 @@ class _TeacherNoticeScreenState extends State<TeacherNoticeScreen> {
                                           ),
                                   )
                                 : const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 8.0),
-                                    child: Text('No More Notices'),
+                                    padding: EdgeInsets.symmetric(vertical: 20),
+                                    child: Text('No more Notices'),
                                   ),
                           ],
                         ),

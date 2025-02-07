@@ -250,6 +250,8 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),
         ),
+        dialogWidth: _calculateDialogWidth(), // Dynamic width
+        dialogHeight: _calculateDialogHeight(), // Dynamic height
         onConfirm: (values) {
           setState(() {
             selectedStudents = List<String>.from(values);
@@ -258,6 +260,24 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
         chipDisplay: MultiSelectChipDisplay(),
       ),
     );
+  }
+
+// Function to calculate dialog width based on text length
+  double _calculateDialogWidth() {
+    double baseWidth = 200; // Minimum width
+    double maxWidth = 400; // Maximum width
+    double avgTextLength = names.isNotEmpty
+        ? names.map((e) => e.length).reduce((a, b) => a + b) / names.length
+        : 10;
+    return (baseWidth + avgTextLength * 10).clamp(baseWidth, maxWidth);
+  }
+
+// Function to calculate dialog height based on list size
+  double _calculateDialogHeight() {
+    int minItems = 1;
+    int maxItems = 10;
+    int itemCount = names.length.clamp(minItems, maxItems);
+    return (10.0 * itemCount) + 50; // Adjusting height dynamically
   }
 
   Widget _buildTextField(TextEditingController controller, String hint,

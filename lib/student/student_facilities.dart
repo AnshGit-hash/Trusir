@@ -190,7 +190,9 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 5.0),
+                                  padding: const EdgeInsets.only(
+                                    top: 5.0,
+                                  ),
                                   child: Row(
                                     children: [
                                       Text(
@@ -198,7 +200,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: isWeb ? 19 : 16,
+                                          fontSize: isWeb ? 19 : 15,
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -208,7 +210,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: isWeb ? 19 : 16,
+                                          fontSize: isWeb ? 19 : 15,
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -220,6 +222,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                   padding: const EdgeInsets.only(top: 2.0),
                                   child: Text(
                                     phone,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontFamily: 'Poppins',

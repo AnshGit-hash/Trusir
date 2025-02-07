@@ -173,96 +173,87 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                   int index = entry.key;
                                   Notice notice = entry.value;
 
+                                  // Cycle through colors using the modulus operator
                                   Color cardColor =
                                       cardColors[index % cardColors.length];
 
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 20,
-                                    ),
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: constraints.maxWidth > 600
-                                            ? 600
-                                            : constraints.maxWidth - 40,
-                                      ),
-                                      child: Card(
-                                        color: cardColor,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                  return Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 7,
+                                          top: 10,
+                                          right: 7,
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 15,
-                                                  top: 5,
-                                                ),
-                                                child: Image.asset(
-                                                  'assets/bell.png',
-                                                  width: 36,
-                                                  height: 36,
-                                                ),
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Container(
+                                              width: 386,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                color: cardColor,
                                               ),
-                                              Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 55,
+                                                    top: 13,
+                                                    bottom: 10),
                                                 child: Column(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
                                                       notice.noticetitle,
-                                                      style: TextStyle(
-                                                        fontSize: constraints
-                                                                    .maxWidth >
-                                                                600
-                                                            ? 18
-                                                            : 16,
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        fontFamily: 'Poppins',
                                                         fontWeight:
-                                                            FontWeight.w700,
+                                                            FontWeight.w600,
                                                         color: Colors.black,
                                                       ),
                                                     ),
                                                     const SizedBox(height: 5),
                                                     Text(
                                                       'Posted on : ${formatDate(notice.date)} ${formatTime(notice.date)}',
-                                                      style: TextStyle(
-                                                        fontSize: constraints
-                                                                    .maxWidth >
-                                                                600
-                                                            ? 13
-                                                            : 11,
+                                                      style: const TextStyle(
+                                                        fontSize: 13,
+                                                        fontFamily: 'Poppins',
                                                         fontWeight:
-                                                            FontWeight.w400,
-                                                        color: Colors.grey,
+                                                            FontWeight.w500,
+                                                        color: Color.fromARGB(
+                                                            255, 133, 133, 133),
                                                       ),
                                                     ),
                                                     const SizedBox(height: 5),
                                                     Text(
                                                       notice.notice,
-                                                      style: TextStyle(
-                                                        fontSize: constraints
-                                                                    .maxWidth >
-                                                                600
-                                                            ? 13
-                                                            : 11,
+                                                      style: const TextStyle(
+                                                        fontFamily: 'Poppins',
                                                         fontWeight:
                                                             FontWeight.w500,
+                                                        fontSize: 13,
                                                         color: Colors.black,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                            Positioned(
+                                              top: 15,
+                                              left: 10,
+                                              child: Image.asset(
+                                                'assets/bell.png',
+                                                width: 30,
+                                                height: 30,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   );
                                 }),
                                 hasMore

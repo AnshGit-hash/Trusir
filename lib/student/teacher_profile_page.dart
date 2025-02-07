@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -84,6 +82,13 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    const rowColors = [
+      Color.fromARGB(255, 255, 199, 221),
+      Color.fromARGB(255, 216, 185, 255),
+      Color.fromARGB(255, 199, 255, 215),
+      Color.fromARGB(255, 199, 236, 255),
+      Color.fromARGB(255, 255, 185, 185),
+    ];
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -153,50 +158,20 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
                 ],
               ),
             ),
-            buildInfoRow(
-              'assets/men.png',
-              'Father Name',
-              63,
-              fatherName,
-              imageBackgroundColor: Colors.orange.shade100,
-              textBackgroundColor: Colors.orange.shade50,
-            ),
+            buildInfoRow('assets/men@4x.png', 'Father Name', 63, fatherName,
+                rowColors[0]),
             const SizedBox(height: 10),
-            buildInfoRow(
-              'assets/degree@2x.png',
-              'Graduation',
-              63,
-              graduation,
-              imageBackgroundColor: Colors.yellow.shade100,
-              textBackgroundColor: Colors.yellow.shade50,
-            ),
+            buildInfoRow('assets/degree@2x.png', 'Graduation', 63, graduation,
+                rowColors[1]),
             const SizedBox(height: 10),
-            buildInfoRow(
-              'assets/medal@2x.png',
-              'Experience',
-              63,
-              experience,
-              imageBackgroundColor: Colors.red.shade100,
-              textBackgroundColor: Colors.red.shade50,
-            ),
+            buildInfoRow('assets/medal@2x.png', 'Experience', 63, experience,
+                rowColors[2]),
             const SizedBox(height: 10),
-            buildInfoRow(
-              'assets/phone@2x.png',
-              'Phone Number',
-              63,
-              '+91-$phoneNumber',
-              imageBackgroundColor: Colors.teal.shade100,
-              textBackgroundColor: Colors.teal.shade50,
-            ),
+            buildInfoRow('assets/phone@2x.png', 'Phone Number', 63,
+                '+91-$phoneNumber', rowColors[3]),
             const SizedBox(height: 10),
-            buildInfoRow(
-              'assets/location@2x.png',
-              'Address',
-              null,
-              address,
-              imageBackgroundColor: Colors.green.shade100,
-              textBackgroundColor: Colors.green.shade50,
-            ),
+            buildInfoRow('assets/location@2x.png', 'Address', null, address,
+                rowColors[4]),
             const SizedBox(height: 20),
           ],
         ),
@@ -204,25 +179,20 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
     );
   }
 
-  Widget buildInfoRow(
-    String iconPath,
-    String title,
-    double? containerHeight,
-    String value, {
-    Color imageBackgroundColor = Colors.pink,
-    Color textBackgroundColor = Colors.white,
-  }) {
+  Widget buildInfoRow(String iconPath, String title, double? containerHeight,
+      String value, Color backgroundColor) {
     return Padding(
-      padding: const EdgeInsets.only(left: 17.0, right: 17),
+      padding: const EdgeInsets.only(left: 18.0, right: 22),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Icon container
           Container(
             width: 55,
             height: 63,
             decoration: BoxDecoration(
-              color: imageBackgroundColor,
-              borderRadius: BorderRadius.circular(20),
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -232,21 +202,22 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(5.0),
+              padding: const EdgeInsets.all(6.0),
               child: Image.asset(
                 iconPath,
                 fit: BoxFit.contain,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 15),
+          // Text container
           Flexible(
             child: Container(
-              height: max(60, containerHeight ?? 110),
+              height: 60,
               width: 306,
               decoration: BoxDecoration(
-                color: textBackgroundColor,
-                borderRadius: BorderRadius.circular(25),
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.3),
@@ -257,20 +228,17 @@ class MyProfileScreenState extends State<TeacherProfilePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.only(
-                  left: 20,
-                  top: 10,
-                  bottom: 10,
-                  right: 20,
-                ),
+                    left: 20, top: 10, bottom: 10, right: 20),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: ClipRRect(
+                  child: ClipRect(
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Text(
                         value.isNotEmpty ? value : 'Loading...',
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
                           fontSize: 16,
                         ),
                       ),

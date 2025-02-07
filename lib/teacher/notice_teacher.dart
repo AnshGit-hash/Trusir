@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
@@ -146,89 +149,55 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
   }
 
   Widget _buildMultiSelectDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Select Students",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            offset: const Offset(2, 2),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: MultiSelectDialogField(
+        items: names.map((e) => MultiSelectItem(e, e)).toList(),
+        title: const Text("Select Students"),
+        selectedColor: Colors.purple,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
         ),
-        const SizedBox(height: 5),
-        Wrap(
-          children: selectedStudents.map((student) {
-            return Chip(
-              label: Text(student),
-              deleteIcon: const Icon(Icons.close),
-              onDeleted: () {
-                setState(() {
-                  selectedUserIDs.remove(nameUserMap[student]);
-                  selectedStudents.remove(student);
-                });
-              },
-            );
-          }).toList(),
-        ),
-        ElevatedButton(
-          onPressed: () => _showMultiSelectDialog(),
-          child: const Text("Choose Students"),
-        ),
-      ],
+        dialogWidth: _calculateDialogWidth(), // Dynamic width
+        dialogHeight: _calculateDialogHeight(), // Dynamic height
+        onConfirm: (values) {
+          setState(() {
+            selectedStudents = List<String>.from(values);
+          });
+        },
+        chipDisplay: MultiSelectChipDisplay(),
+      ),
     );
   }
 
-  void _showMultiSelectDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        List<String> tempSelected = List.from(selectedStudents);
+// Function to calculate dialog width based on text length
+  double _calculateDialogWidth() {
+    double baseWidth = 200; // Minimum width
+    double maxWidth = 400; // Maximum width
+    double avgTextLength = names.isNotEmpty
+        ? names.map((e) => e.length).reduce((a, b) => a + b) / names.length
+        : 10;
+    return (baseWidth + avgTextLength * 10).clamp(baseWidth, maxWidth);
+  }
 
-        return AlertDialog(
-          title: const Text("Select Students"),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: names.map((student) {
-                    return CheckboxListTile(
-                      title: Text(student),
-                      value: tempSelected.contains(student),
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value == true) {
-                            tempSelected.add(student);
-                          } else {
-                            tempSelected.remove(student);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  selectedStudents = List.from(tempSelected);
-                  selectedUserIDs =
-                      selectedStudents.map((e) => nameUserMap[e]!).toList();
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
+// Function to calculate dialog height based on list size
+  double _calculateDialogHeight() {
+    int minItems = 1;
+    int maxItems = 10;
+    int itemCount = names.length.clamp(minItems, maxItems);
+    return (10.0 * itemCount) + 50; // Adjusting height dynamically
   }
 
   Widget _buildDescriptionField() {

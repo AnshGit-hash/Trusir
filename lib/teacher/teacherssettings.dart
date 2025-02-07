@@ -125,93 +125,91 @@ class Teacherssettings extends StatelessWidget {
   }
 
   Widget _settingscard(
-      bool isWeb,
-      BuildContext context,
-      double containerSize,
-      double imageSize,
-      double newContainerheight,
-      double newcontainerwidth,
-      String image,
-      Color color,
-      VoidCallback onTap,
-      String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 15.0, right: 15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: containerSize,
-            height: containerSize,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(3, 3),
-                  blurRadius: 6,
-                ),
-              ],
-            ),
-            child: Center(
-              child: SizedBox(
-                width: imageSize,
-                height: imageSize,
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.contain,
-                ),
+    bool isWeb,
+    BuildContext context,
+    double containerSize,
+    double imageSize,
+    double newContainerheight,
+    double newcontainerwidth,
+    String image,
+    Color color,
+    VoidCallback onTap,
+    String title,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: containerSize,
+          height: containerSize,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                offset: const Offset(2, 2),
+                blurRadius: 6,
+              ),
+            ], // Slightly increased border radius
+          ),
+          child: Center(
+            child: SizedBox(
+              width: imageSize,
+              height: imageSize,
+              child: Image.asset(
+                image,
+                fit: BoxFit.contain, // Changed to contain for better scaling
               ),
             ),
           ),
-          SizedBox(width: isWeb ? 50 : 10),
-          Flexible(
-            child: GestureDetector(
-              onTap: onTap,
-              child: Container(
-                height: newContainerheight,
-                width: newcontainerwidth,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      offset: const Offset(2, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 20, top: 10, bottom: 10, right: 5),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: "Poppins",
-                            fontSize: 16,
-                          ),
+        ),
+        SizedBox(width: isWeb ? 50 : 10),
+        Flexible(
+          child: GestureDetector(
+            onTap: onTap,
+            child: Container(
+              height: newContainerheight,
+              width: newcontainerwidth,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(25),
+                    offset: const Offset(2, 2),
+                    blurRadius: 4,
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 20, top: 10, bottom: 10, right: 5),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize:
+                              isWeb ? 18 : 16, // Increased font size for web
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Icon(Icons.arrow_forward_ios_rounded),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(right: 15),
+                        child: Icon(Icons.arrow_forward_ios_rounded),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

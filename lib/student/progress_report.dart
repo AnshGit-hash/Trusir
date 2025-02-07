@@ -413,6 +413,7 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                       Text(
                         'Current Month',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: Colors.white,
@@ -421,6 +422,7 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                       Text(
                         '24 Jan 2025 - Today',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                           color: Colors.white,

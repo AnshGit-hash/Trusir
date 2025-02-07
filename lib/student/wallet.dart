@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/phonepe_payment.dart';
@@ -16,6 +17,12 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
+  String formatDate(String dateString) {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+    return formattedDate;
+  }
+
   double balance = 0;
   List<Map<String, dynamic>> walletTransactions = [];
   PaymentService paymentService = PaymentService();
@@ -64,7 +71,9 @@ class _WalletPageState extends State<WalletPage> {
       // Filter transactions where transactionName is 'WALLET'
       setState(() {
         walletTransactions = data
-            .where((transaction) => transaction['transactionName'] == 'WALLET')
+            .where((transaction) =>
+                transaction['transactionName'] == 'WALLET' ||
+                transaction['transactionName'] == 'ByAdmin')
             .map((transaction) => transaction as Map<String, dynamic>)
             .toList();
       });
@@ -87,6 +96,7 @@ class _WalletPageState extends State<WalletPage> {
 
   String? phone;
   TextEditingController amountController = TextEditingController();
+  TextEditingController promoController = TextEditingController();
   String transactionType = '';
 
   void checkStatus() async {
@@ -452,8 +462,88 @@ class _WalletPageState extends State<WalletPage> {
                         child: _buildQuickAction(
                             Icons.school, "Buy Course", Colors.blue),
                       ),
-                      // _buildQuickAction(
-                      //     Icons.card_giftcard, "Redeem", Colors.orange),
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Rewards",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: "Poppins"),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          TextField(
+                                            controller: promoController,
+                                            decoration: InputDecoration(
+                                              hintText: "Enter Promo",
+                                              border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 40.0, right: 40),
+                                            child: SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  // Pass the entered amount to the parent
+                                                  Navigator.pop(context);
+                                                  // Close dialog after confirming
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.deepPurple,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8),
+                                                  textStyle: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                  ),
+                                                  elevation: 6,
+                                                  shadowColor:
+                                                      Colors.deepPurpleAccent,
+                                                ),
+                                                child: const Text(
+                                                  "Confirm",
+                                                  style: TextStyle(
+                                                      fontFamily: "Poppins"),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ));
+                        },
+                        child: _buildQuickAction(
+                            Icons.card_giftcard, "Redeem", Colors.orange),
+                      ),
                       _buildQuickAction(Icons.share, "Share", Colors.green),
                     ],
                   ),
@@ -485,7 +575,7 @@ class _WalletPageState extends State<WalletPage> {
                               "Unknown Transaction",
                           double.tryParse(transaction["amount"] ?? "0.0") ??
                               0.0,
-                          transaction["created_at"] ?? "Unknown Date",
+                          formatDate(transaction["created_at"]),
                         );
                       }).toList(),
                     ),
