@@ -363,33 +363,58 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
   }
 
   void walletPayment(String amount, int courseID) async {
-    bool success =
-        await paymentService.updateWalletBalance(context, '0', userID, amount);
-
-    if (success) {
-      postTransaction('WALLET', int.parse(amount), transactionType,
-          'transactionID', courseID);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => PaymentPopUpPage(
-                isWallet: false,
-                adjustedAmount: double.parse(amount),
-                isSuccess: true,
-                transactionID: 'transactionID',
-                transactionType: 'WALLET')),
-      );
+    if (double.parse(amount) > double.parse(balance!)) {
+      bool success = await paymentService.updateWalletBalance(
+          context, '0', userID, balance!);
+      if (success) {
+        merchantTransactionID =
+            paymentService.generateUniqueTransactionId(userID!);
+        body = getChecksum(
+          int.parse('${double.parse(amount) - double.parse(balance!)}00'),
+        ).toString();
+        paymentService.startTransaction(body, checksum, checkStatus,
+            showLoadingDialog, paymentstatusnavigation);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentPopUpPage(
+                  isWallet: false,
+                  adjustedAmount: double.parse(amount),
+                  isSuccess: false,
+                  transactionID: 'transactionID',
+                  transactionType: 'WALLET')),
+        );
+      }
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => PaymentPopUpPage(
-                isWallet: false,
-                adjustedAmount: double.parse(amount),
-                isSuccess: false,
-                transactionID: 'transactionID',
-                transactionType: 'WALLET')),
-      );
+      bool success = await paymentService.updateWalletBalance(
+          context, '0', userID, amount);
+
+      if (success) {
+        postTransaction('WALLET', int.parse(amount), transactionType,
+            'transactionID', courseID);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentPopUpPage(
+                  isWallet: false,
+                  adjustedAmount: double.parse(amount),
+                  isSuccess: true,
+                  transactionID: 'transactionID',
+                  transactionType: 'WALLET')),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentPopUpPage(
+                  isWallet: false,
+                  adjustedAmount: double.parse(amount),
+                  isSuccess: false,
+                  transactionID: 'transactionID',
+                  transactionType: 'WALLET')),
+        );
+      }
     }
   }
 
@@ -500,7 +525,9 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
             );
           }
           postTransaction(
-            transactionType,
+            double.parse(widget.course['new_amount']) > double.parse(balance!)
+                ? 'Wallet & $transactionType'
+                : transactionType,
             adjustedAmount,
             widget.course['name'],
             '${responseData["data"]["merchantTransactionId"]} , Bank Transaction Id: ${responseData["data"]["transactionId"]} ',

@@ -97,9 +97,13 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      final List<Course> courses = data.map<Course>((courseJson) {
-        return Course.fromJson(courseJson as Map<String, dynamic>);
-      }).toList();
+      final List<Course> courses = data
+          .map<Course>((courseJson) =>
+              Course.fromJson(courseJson as Map<String, dynamic>))
+          .where((course) =>
+              course.teacherID.isNotEmpty &&
+              course.teacherID != 'N/A') // Filter out invalid teacherID
+          .toList();
 
       // Use a Set to filter out duplicates
       final Set<String> uniqueCourseNames = {};
@@ -107,8 +111,7 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
 
       for (var course in courses) {
         if (uniqueCourseNames.add(course.courseName)) {
-          // Only add the course if its name is not already in the set
-          uniqueCourses.add(course);
+          uniqueCourses.add(course); // Add only unique courses
         }
       }
 

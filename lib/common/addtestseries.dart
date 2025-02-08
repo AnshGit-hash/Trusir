@@ -176,12 +176,13 @@ class _AddtestseriesState extends State<Addtestseries> {
           final Set<String> uniqueCourses = {};
 
           for (var course in data) {
-            // Extract the subject and class
             final subject = course['courseName'] as String;
-            // Adjust based on API response
+            final teacherID = course['teacherID'];
 
-            // Add unique combinations to the sets
-            uniqueCourses.add(subject);
+            // Filter out courses where teacherID is 'N/A' or null
+            if (teacherID != null && teacherID != 'N/A') {
+              uniqueCourses.add(subject);
+            }
           }
 
           // Convert sets back to lists

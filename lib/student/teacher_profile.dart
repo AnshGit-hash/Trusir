@@ -16,6 +16,7 @@ class TeacherProfileScreen extends StatefulWidget {
 class TeacherProfileScreenState extends State<TeacherProfileScreen> {
   List<Teacher> teachers = [];
   bool isLoading = true;
+  String? studentClass;
 
   @override
   void initState() {
@@ -26,6 +27,7 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
   Future<void> fetchTeachers() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userID = prefs.getString('userID');
+    studentClass = prefs.getString('class');
     final response = await http.get(Uri.parse('$baseUrl/teacher/$userID'));
 
     if (response.statusCode == 200) {
@@ -176,7 +178,12 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
                                               BorderRadius.circular(4),
                                         ),
                                         child: Text(
-                                          teacher.teacherClass,
+                                          teacher.teacherClass
+                                              .split(',')
+                                              .where((cls) =>
+                                                  cls.trim() == studentClass)
+                                              .join(
+                                                  ', '), // Show only matching class
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
