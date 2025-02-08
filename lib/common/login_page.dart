@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/menu.dart';
 import 'package:http/http.dart' as http;
@@ -26,8 +27,8 @@ class ResponsiveDimensions {
   double get verticalPadding => safeHeight * 0.02;
 
   // Image dimensions - can be adjusted as needed
-  double get carouselImageHeight => safeHeight * 0.4;
-  double get carouselImageWidth => screenWidth * 0.9;
+  double get carouselImageHeight => safeHeight * 0.5;
+  double get carouselImageWidth => screenWidth;
   double get flagIconSize => screenWidth * 0.06;
 }
 
@@ -37,7 +38,7 @@ class TrusirLoginPage extends StatefulWidget {
 
   const TrusirLoginPage({
     super.key,
-    this.carouselImageHeightRatio = 0.4,
+    this.carouselImageHeightRatio = 0.5,
   });
 
   @override
@@ -77,11 +78,6 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
     {
       'title': '',
       'subtitle': '',
-      'imagePath': 'assets/002.png',
-    },
-    {
-      'title': '',
-      'subtitle': '',
       'imagePath': 'assets/003.png',
     },
     {
@@ -98,6 +94,11 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       'title': '',
       'subtitle': '',
       'imagePath': 'assets/005.png',
+    },
+    {
+      'title': '',
+      'subtitle': '',
+      'imagePath': 'assets/002.png',
     },
   ];
 
@@ -288,9 +289,9 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(responsive, false),
-        SizedBox(height: responsive.safeHeight * 0.04),
+        SizedBox(height: responsive.safeHeight * 0.03),
         _buildCarousel(responsive, false),
-        SizedBox(height: responsive.safeHeight * 0.04),
+        SizedBox(height: responsive.safeHeight * 0.02),
         _buildPageIndicators(responsive, false),
         SizedBox(height: responsive.safeHeight * 0.04),
         _buildPhoneInput(responsive, false),
@@ -310,8 +311,8 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
 
   Widget _buildCarousel(ResponsiveDimensions responsive, bool isWeb) {
     return SizedBox(
-      height: isWeb ? 600 : 400,
-      width: isWeb ? 800 : 600,
+      height: isWeb ? 600 : 450,
+      width: isWeb ? 800 : 700,
       child: PageView.builder(
         physics:
             const BouncingScrollPhysics(), // Standard touch physics for mobile
@@ -352,7 +353,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                             style: TextStyle(
                               fontSize: isWeb ? 30 : 25,
                               fontWeight: FontWeight.w900,
-                              color: const Color.fromRGBO(72, 17, 106, 1),
+                              color: HexColor('#6e0096'),
                               fontFamily: 'Poppins',
                             ),
                           ),
@@ -363,7 +364,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                             style: TextStyle(
                               fontSize: isWeb ? 22 : responsive.subtitleSize,
                               fontWeight: FontWeight.bold,
-                              color: const Color.fromRGBO(194, 32, 84, 1),
+                              color: HexColor('#b617d4'),
                               fontFamily: 'Poppins-semi bold',
                             ),
                           ),
@@ -403,7 +404,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                         style: TextStyle(
                           fontSize: isWeb ? 30 : 25,
                           fontWeight: FontWeight.w900,
-                          color: const Color.fromRGBO(72, 17, 106, 1),
+                          color: HexColor('#6e0096'),
                           fontFamily: 'Poppins',
                         ),
                       ),
@@ -414,7 +415,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                         style: TextStyle(
                           fontSize: isWeb ? 22 : responsive.subtitleSize,
                           fontWeight: FontWeight.bold,
-                          color: const Color.fromRGBO(194, 32, 84, 1),
+                          color: HexColor('#b617d4'),
                           fontFamily: 'Poppins-semi bold',
                         ),
                       ),
