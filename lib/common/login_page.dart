@@ -143,11 +143,11 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
           backgroundColor: MaterialStateProperty.resolveWith<Color>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.pressed)) {
-                return Colors.grey[100]!; // Color when pressed
+                return Colors.grey[200]!; // Color when pressed
               } else if (states.contains(MaterialState.hovered)) {
                 return Colors.grey[200]!; // Color when hovered
               }
-              return Colors.grey[50]!; // Default color
+              return Colors.grey[200]!; // Default color
             },
           ),
           elevation: MaterialStateProperty.all(0),
@@ -221,7 +221,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
     );
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.grey[200],
       resizeToAvoidBottomInset: true, // Adjust the layout when keyboard appears
       body: SafeArea(
         child: LayoutBuilder(
@@ -472,7 +472,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
               ? responsive.safeHeight * 0.1
               : responsive.safeHeight * 0.08,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(35),
             boxShadow: const [
               BoxShadow(
