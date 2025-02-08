@@ -98,23 +98,23 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-
       setState(() {
         if (page == 1) {
           // Initial fetch and filter out 'ByAdmin' transactions
           feepayment = data
               .map((json) => Fees.fromJson(json))
               .where((fee) =>
-                  fee.paymentMethod != 'ByAdmin' ||
+                  fee.paymentMethod != 'ByAdmin' &&
                   fee.paymentMethod != 'By Admin')
               .toList();
         } else {
           // Append new data and filter out 'ByAdmin' transactions
           feepayment.addAll(data.map((json) => Fees.fromJson(json)).where(
               (fee) =>
-                  fee.paymentMethod != 'ByAdmin' ||
+                  fee.paymentMethod != 'ByAdmin' &&
                   fee.paymentMethod != 'By Admin'));
         }
+        print(feepayment);
 
         // Sort transactions by created_at in descending order (latest first)
         feepayment.sort((a, b) {
