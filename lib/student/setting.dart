@@ -50,7 +50,7 @@ class SettingsScreen extends StatelessWidget {
         'route': const AboutUsPage(),
       },
       {
-        'image': 'assets/phone@2x.png',
+        'image': 'assets/phone@3x.png',
         'color': Colors.indigo.shade200,
         'title': 'Contact Us',
         'route': const Contactus(),

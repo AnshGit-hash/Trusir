@@ -274,7 +274,7 @@ class StudentHomepage extends StatelessWidget {
                     Center(
                       child: Image.asset(
                         height: isWeb ? 220 : null,
-                        'assets/t2.jpg',
+                        'assets/t2.png',
                         fit: BoxFit.cover,
                       ),
                     ),

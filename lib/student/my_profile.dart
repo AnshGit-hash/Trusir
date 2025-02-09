@@ -178,7 +178,7 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                                   height: 50,
                                 ),
                                 buildInfoRow(
-                                  'assets/men.png',
+                                  'assets/men@4x.png',
                                   'Father Name',
                                   fatherName!,
                                   isLargeScreen,
