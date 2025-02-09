@@ -2482,67 +2482,94 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   }
 
   void _showTermsPopup() {
-    bool acceptTerms = agreeToTerms; // Local state for the popup checkbox
-
     showDialog(
       context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Terms and Conditions"),
-          content: SingleChildScrollView(
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  "Here are the terms and conditions...\n\n"
-                  "1. You must agree to all the terms.\n"
-                  "2. You cannot violate any rules.\n"
-                  "3. The agreement is final.\n\n"
-                  "Please read carefully before accepting.",
+                  "Please read and accept the",
+                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  "Gold+ Terms",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const SizedBox(
+                  height: 500,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '"Interest Rate" means, with respect to the relevant Leased Precious Metal, such rate, in percentage, used in the calculation of Interest, as specified in the Lease Terms.\n\n'
+                          '"Interest-Free Period" means, with respect to the Lease Terms, the period (if applicable) indicated by Gullak to the Lessor as it may deem fit in its sole discretion, for which interest shall not be payable.\n\n'
+                          '"Repayment Date" shall mean the date on which the request is raised by You for withdrawing the Leased Precious Metal, either wholly or partially in accordance with the Lease Terms or the maturity date of the respective Lease Scheme, whichever is earlier.\n\n'
+                          '"Security" shall mean the security provided by Lessee to Augmont-Bullion in such form and... '
+                          '"Interest Rate" means, with respect to the relevant Leased Precious Metal, such rate, in percentage, used in the calculation of Interest, as specified in the Lease Terms.\n\n'
+                          '"Interest-Free Period" means, with respect to the Lease Terms, the period (if applicable) indicated by Gullak to the Lessor as it may deem fit in its sole discretion, for which interest shall not be payable.\n\n'
+                          '"Repayment Date" shall mean the date on which the request is raised by You for withdrawing the Leased Precious Metal, either wholly or partially in accordance with the Lease Terms or the maturity date of the respective Lease Scheme, whichever is earlier.\n\n'
+                          '"Security" shall mean the security provided by Lessee to Augmont-Bullion in such form and... ',
+                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        return Checkbox(
-                          value: acceptTerms,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              acceptTerms = value!;
-                            });
-                          },
-                        );
-                      },
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      agreeToTerms = true;
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.purple[700], // Match the button color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const Text("I accept the terms"),
-                  ],
+                    minimumSize: const Size(double.infinity, 45),
+                  ),
+                  child: const Text(
+                    "I accept",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog without accepting
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                if (acceptTerms) {
-                  setState(() {
-                    agreeToTerms = true;
-                  });
-                  Navigator.pop(context);
-                } else {
-                  Fluttertoast.showToast(
-                      msg: 'Please Accept the Terms and Conditions first!');
-                }
-              },
-              child: const Text("Accept"),
-            ),
-          ],
         );
       },
     );
