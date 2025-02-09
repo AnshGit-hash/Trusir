@@ -139,42 +139,55 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
 
   Widget _buildSkipButton() {
     return Center(
-      child: ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
-                return Colors.grey[200]!; // Color when pressed
-              } else if (states.contains(MaterialState.hovered)) {
-                return Colors.grey[200]!; // Color when hovered
-              }
-              return Colors.grey[200]!; // Default color
-            },
-          ),
-          elevation: MaterialStateProperty.all(0),
-          padding: MaterialStateProperty.all(
-            const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-          ),
-        ),
-        onPressed: () => showPopupDialog(context),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Skip',
-              style: TextStyle(
-                color: Color.fromRGBO(72, 17, 106, 1),
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
+            ],
+            border: Border.all(width: 3, color: Colors.grey),
+            borderRadius: BorderRadius.circular(35)),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return Colors.grey[200]!; // Color when pressed
+                } else if (states.contains(MaterialState.hovered)) {
+                  return Colors.grey[200]!; // Color when hovered
+                }
+                return Colors.grey[200]!; // Default color
+              },
             ),
-            SizedBox(width: 2),
-            Icon(
-              Icons.fast_forward,
-              color: Color.from(alpha: 1, red: 0.659, green: 0, blue: 0),
-              size: 19,
+            elevation: MaterialStateProperty.all(0),
+            padding: MaterialStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
             ),
-          ],
+          ),
+          onPressed: () => showPopupDialog(context),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Skip',
+                style: TextStyle(
+                  color: Color.fromRGBO(72, 17, 106, 1),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 2),
+              Icon(
+                Icons.fast_forward,
+                color: Color.from(alpha: 1, red: 0.659, green: 0, blue: 0),
+                size: 19,
+              ),
+            ],
+          ),
         ),
       ),
     );

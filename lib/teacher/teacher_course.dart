@@ -306,57 +306,61 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
                 color: Colors.grey[50],
               ),
               padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(
-                    studentprofile.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.grey[200],
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            fetchCourses(studentprofile[index].userID);
-                          });
-                        },
-                        child: Text(
-                          studentprofile[index].name,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+              child: studentprofile.isEmpty
+                  ? const Center(child: Text('No Students Assigned yet'))
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: List.generate(
+                          studentprofile.length,
+                          (index) => Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.grey[200],
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  fetchCourses(studentprofile[index].userID);
+                                });
+                              },
+                              child: Text(
+                                studentprofile[index].name,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ),
       ),
-      body: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isWeb ? 2 : 1,
-            // mainAxisExtent: isWeb ? 560 : null,
-            childAspectRatio: 16 / 14.5),
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        shrinkWrap: true,
-        itemCount: courses.length,
-        itemBuilder: (context, index) {
-          final course = courses[index];
-          return TeacherCourseCard(course: course);
-        },
-      ),
+      body: courses.isEmpty
+          ? const Center(child: Text('No Courses'))
+          : GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isWeb ? 2 : 1,
+                  // mainAxisExtent: isWeb ? 560 : null,
+                  childAspectRatio: 16 / 14.5),
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              shrinkWrap: true,
+              itemCount: courses.length,
+              itemBuilder: (context, index) {
+                final course = courses[index];
+                return TeacherCourseCard(course: course);
+              },
+            ),
     );
   }
 }

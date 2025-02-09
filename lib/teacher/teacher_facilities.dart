@@ -444,7 +444,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   child: studentprofile.isEmpty
                                       ? const Center(
                                           child: Text(
-                                              'No Students Enrolled for this course yet'))
+                                              'No Students Enrolled for Any course yet'))
                                       : GridView.builder(
                                           physics:
                                               const BouncingScrollPhysics(),
@@ -856,7 +856,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                             child: studentprofile.isEmpty
                                 ? const Center(
                                     child: Text(
-                                        'No Students Enrolled for this course yet'))
+                                        'No Students Enrolled for Any course yet'))
                                 : GridView.builder(
                                     physics: const BouncingScrollPhysics(),
                                     gridDelegate:

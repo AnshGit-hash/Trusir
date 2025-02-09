@@ -125,6 +125,11 @@ class _TeacherattendanceState extends State<Teacherattendance> {
 
   void extractStudentData(List<StudentProfile> students, List<String> names,
       Map<String, String> nameUserIDMap) {
+    if (students.isEmpty) {
+      names = [];
+      initializeData();
+      return;
+    }
     for (var student in students) {
       names.add(student.name);
       nameUserIDMap[student.name] = student.userID;
@@ -462,7 +467,9 @@ class _TeacherattendanceState extends State<Teacherattendance> {
         ),
         body: SingleChildScrollView(
             child: Column(children: [
-          _buildStudentList(),
+          names.isEmpty
+              ? const Center(child: Text('No Students Assigned Yet'))
+              : _buildStudentList(),
           // Calendar Section
           Padding(
             padding:

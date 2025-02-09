@@ -2401,22 +2401,20 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               Checkbox(
                                 value: agreeToTerms,
                                 onChanged: (bool? value) {
-                                  setState(() {
-                                    agreeToTerms = value!;
-                                    formData.agreetoterms = agreeToTerms;
-                                  });
+                                  if (!agreeToTerms) {
+                                    _showTermsPopup(); // Show popup first before allowing agreement
+                                  } else {
+                                    setState(() {
+                                      agreeToTerms =
+                                          false; // Allow unchecking directly
+                                    });
+                                  }
                                 },
                               ),
                               const Text('I agree with the '),
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const TermsAndConditionsPage(),
-                                    ),
-                                  );
+                                  _showTermsPopup(); // Open popup when clicking on Terms
                                 },
                                 child: const Text(
                                   'Terms and Conditions',
@@ -2480,6 +2478,73 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showTermsPopup() {
+    bool acceptTerms = agreeToTerms; // Local state for the popup checkbox
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Terms and Conditions"),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Here are the terms and conditions...\n\n"
+                  "1. You must agree to all the terms.\n"
+                  "2. You cannot violate any rules.\n"
+                  "3. The agreement is final.\n\n"
+                  "Please read carefully before accepting.",
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    StatefulBuilder(
+                      builder: (context, setState) {
+                        return Checkbox(
+                          value: acceptTerms,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              acceptTerms = value!;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    const Text("I accept the terms"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog without accepting
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (acceptTerms) {
+                  setState(() {
+                    agreeToTerms = true;
+                  });
+                  Navigator.pop(context);
+                } else {
+                  Fluttertoast.showToast(
+                      msg: 'Please Accept the Terms and Conditions first!');
+                }
+              },
+              child: const Text("Accept"),
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
@@ -126,9 +127,9 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTextField('Title', _titleController),
-                  const SizedBox(height: 20),
                   _buildMultiSelectDropdown(),
+                  const SizedBox(height: 20),
+                  _buildTextField('Title', _titleController),
                   const SizedBox(height: 20),
                   _buildDescriptionField(),
                 ],
@@ -149,35 +150,52 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
   }
 
   Widget _buildMultiSelectDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            offset: const Offset(2, 2),
-            blurRadius: 4,
+    bool hasStudents = names.isNotEmpty;
+
+    return GestureDetector(
+      onTap: hasStudents ? null : () {}, // Prevents tapping when no students
+      child: AbsorbPointer(
+        absorbing: !hasStudents, // Disables interaction
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                offset: const Offset(2, 2),
+                blurRadius: 4,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: MultiSelectDialogField(
-        items: names.map((e) => MultiSelectItem(e, e)).toList(),
-        title: const Text("Select Students"),
-        selectedColor: Colors.purple,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          child: MultiSelectDialogField(
+            items: hasStudents
+                ? names.map((e) => MultiSelectItem(e, e)).toList()
+                : [],
+            title: const Text("Select Students"),
+            selectedColor: Colors.purple,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+            ),
+            buttonText: hasStudents
+                ? const Text("Select Students")
+                : const Text(
+                    "No students assigned yet",
+                    style: TextStyle(color: Colors.grey), // Gray out text
+                  ),
+            dialogWidth: _calculateDialogWidth(),
+            dialogHeight: _calculateDialogHeight(),
+            onConfirm: (values) {
+              setState(() {
+                selectedStudents = List<String>.from(values);
+              });
+            },
+            chipDisplay: MultiSelectChipDisplay(),
+            listType: MultiSelectListType.LIST,
+          ),
         ),
-        dialogWidth: _calculateDialogWidth(), // Dynamic width
-        dialogHeight: _calculateDialogHeight(), // Dynamic height
-        onConfirm: (values) {
-          setState(() {
-            selectedStudents = List<String>.from(values);
-          });
-        },
-        chipDisplay: MultiSelectChipDisplay(),
       ),
     );
   }
