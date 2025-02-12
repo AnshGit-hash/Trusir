@@ -47,12 +47,18 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
   final apiBase = '$baseUrl/api/my-notice';
 
   String formatDate(String dateString) {
+    if (dateString == 'currentDate') {
+      return 'Invalid Date Format';
+    }
     DateTime dateTime = DateTime.parse(dateString);
     String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
     return formattedDate;
   }
 
   String formatTime(String dateString) {
+    if (dateString == 'currentDate') {
+      return 'Invalid Time Format';
+    }
     DateTime dateTime = DateTime.parse(dateString);
     String formattedTime = DateFormat('hh:mm a').format(dateTime);
     return formattedTime; // Example: 11:40 PM

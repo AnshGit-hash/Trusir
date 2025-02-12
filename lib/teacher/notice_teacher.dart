@@ -22,7 +22,6 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
   final TextEditingController _descriptionController = TextEditingController();
 
   List<String> selectedStudents = [];
-  List<String> selectedUserIDs = [];
   List<String> names = [];
   List<StudentProfile> students = [];
   Map<String, String> nameUserMap = {};
@@ -43,12 +42,13 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
     final url = Uri.parse('$baseUrl/api/add-notice');
 
     try {
-      for (var userID in selectedUserIDs) {
+      for (String student in selectedStudents) {
+        String? studentUserID = nameUserMap[student];
         final payload = {
           'title': _titleController.text,
           'description': _descriptionController.text,
           'posted_on': currentDate,
-          'to': userID,
+          'to': studentUserID,
           'from': teacherUserID,
         };
 
@@ -59,7 +59,7 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
         );
 
         if (response.statusCode != 200 && response.statusCode != 201) {
-          print("Failed to post notice for $userID: ${response.body}");
+          print("Failed to post notice for $studentUserID: ${response.body}");
         }
       }
 

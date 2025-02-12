@@ -34,6 +34,7 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
     setState(() {
       students = widget.studentprofile;
       extractStudentData(students, names, nameUserMap);
+      print(nameUserMap);
     });
   }
 
@@ -102,12 +103,12 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userID');
-
+    print(userId);
     for (String student in selectedStudents) {
       String? studentUserID = nameUserMap[student];
-      if (studentUserID == null) continue;
+      print(studentUserID);
 
-      final url = Uri.parse('$baseUrl/api/tecaher-gks/$userId/$studentUserID');
+      final url = Uri.parse('$baseUrl/api/teacher-gks/$userId/$studentUserID');
       final headers = {'Content-Type': 'application/json'};
       final body = json.encode(formData.toJson());
 

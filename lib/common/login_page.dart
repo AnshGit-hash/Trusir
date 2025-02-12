@@ -119,13 +119,6 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
             );
           } else {
             sendOTP(phonenum);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OTPScreen(
-                          phonenum: phonenum,
-                        )));
-            storePhoneNo();
           }
         },
         child: Image.asset(
