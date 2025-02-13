@@ -122,7 +122,7 @@ class EnquiryPage extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        _launchWhatsApp('919797472922', 'Hi');
+                        _launchWhatsApp('919234945401', 'Hi');
                       },
                       child: Image.asset(
                         'assets/whatsapp@3x.png',
@@ -135,7 +135,7 @@ class EnquiryPage extends StatelessWidget {
                     // Call Button
                     GestureDetector(
                       onTap: () {
-                        openDialer('9797472922');
+                        openDialer('9234945401');
                       },
                       child: Image.asset(
                         'assets/call.png',

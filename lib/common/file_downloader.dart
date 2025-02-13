@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -27,7 +25,6 @@ class FileDownloader {
       String finalFilename = '$filename$fileExtension';
 
       final filePath = await getAppSpecificDownloadPath(finalFilename);
-      await _requestPermissions();
       await _requestNotificationPermission();
       final dio = Dio();
       await dio.download(url, filePath);
@@ -81,32 +78,6 @@ class FileDownloader {
   static Future<void> _requestNotificationPermission() async {
     if (await Permission.notification.isDenied) {
       await Permission.notification.request();
-    }
-  }
-
-  static Future<void> _requestPermissions() async {
-    if (await Permission.storage.isGranted) return;
-
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-
-      if (androidInfo.version.sdkInt < 30) {
-        return; // Skip permissions for Android versions below API 30
-      }
-
-      if (await Permission.photos.isGranted ||
-          await Permission.videos.isGranted) {
-        return;
-      }
-
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.photos,
-        Permission.videos,
-      ].request();
-
-      if (statuses.values.any((status) => !status.isGranted)) {
-        openAppSettings();
-      }
     }
   }
 }

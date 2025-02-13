@@ -742,7 +742,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    _launchWhatsApp('919797472922', 'Hi');
+                                    _launchWhatsApp('919234945401', 'Hello');
                                   },
                                   child: Padding(
                                     padding: EdgeInsets.all(
@@ -830,7 +830,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    openDialer('9801458766');
+                                    openDialer('9234945401');
                                   },
                                   child: Padding(
                                     padding: EdgeInsets.all(

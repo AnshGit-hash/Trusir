@@ -12,8 +12,7 @@ import 'package:trusir/main.dart';
 
 class ImageUploadUtils {
   static Future<void> requestPermissions() async {
-    if (await Permission.storage.isGranted &&
-        await Permission.camera.isGranted) {
+    if (await Permission.camera.isGranted) {
       return;
     }
 
@@ -24,17 +23,12 @@ class ImageUploadUtils {
         return;
       }
 
-      if (await Permission.photos.isGranted ||
-          await Permission.videos.isGranted ||
-          await Permission.camera.isGranted) {
+      if (await Permission.camera.isGranted) {
         return;
       }
 
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.photos,
-        Permission.videos,
-        Permission.camera
-      ].request();
+      Map<Permission, PermissionStatus> statuses =
+          await [Permission.camera].request();
 
       if (statuses.values.any((status) => !status.isGranted)) {
         openAppSettings();
