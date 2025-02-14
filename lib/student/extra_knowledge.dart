@@ -976,7 +976,7 @@ class SubCategoryList extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
+          return const Center(child: Text("No subcategories found."));
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
