@@ -367,7 +367,9 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                       AutovalidateMode
                                                           .onUserInteraction,
                                                   validator: (value) =>
-                                                      'Required',
+                                                      value == null
+                                                          ? 'Required'
+                                                          : null,
                                                   controller: amountController,
                                                   keyboardType:
                                                       TextInputType.number,
