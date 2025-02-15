@@ -366,10 +366,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      value == null
-                                                          ? 'Required'
-                                                          : null,
+                                                  validator: _validateRequired,
                                                   controller: amountController,
                                                   keyboardType:
                                                       TextInputType.number,
@@ -395,8 +392,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller: accountController,
                                                   keyboardType:
                                                       TextInputType.number,
@@ -413,8 +409,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller: nameController,
                                                   decoration: InputDecoration(
                                                     hintText: "Name",
@@ -429,8 +424,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller: branchController,
                                                   decoration: InputDecoration(
                                                     hintText: "Branch",
@@ -445,8 +439,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller:
                                                       bankNameController,
                                                   decoration: InputDecoration(
@@ -462,8 +455,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller: ifscController,
                                                   decoration: InputDecoration(
                                                     hintText: "IFSC Code",
@@ -478,8 +470,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                   autovalidateMode:
                                                       AutovalidateMode
                                                           .onUserInteraction,
-                                                  validator: (value) =>
-                                                      'Required',
+                                                  validator: _validateRequired,
                                                   controller: upiController,
                                                   decoration: InputDecoration(
                                                     hintText: "UPI Id",
@@ -750,6 +741,13 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
         ),
       ),
     );
+  }
+
+  String? _validateRequired(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Required';
+    }
+    return null;
   }
 
   Widget _buildActionButton(IconData icon, String label) {
