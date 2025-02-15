@@ -39,6 +39,7 @@ dependencies:
   flutter_image_compress:
   multi_select_flutter:
   hexcolor:
+  connectivity_plus:
 dev_dependencies:
   flutter_test:
     sdk: flutter

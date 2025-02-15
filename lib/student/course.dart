@@ -19,31 +19,35 @@ class Course {
   final String pincode;
   final String newAmount;
   final String image;
+  final String medium;
+  final String board;
 
-  Course({
-    required this.id,
-    required this.amount,
-    required this.active,
-    required this.name,
-    required this.subject,
-    required this.pincode,
-    required this.courseClass,
-    required this.newAmount,
-    required this.image,
-  });
+  Course(
+      {required this.id,
+      required this.amount,
+      required this.active,
+      required this.name,
+      required this.subject,
+      required this.pincode,
+      required this.courseClass,
+      required this.newAmount,
+      required this.image,
+      required this.medium,
+      required this.board});
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
-      id: json['id'],
-      amount: json['amount'],
-      active: json['active'],
-      name: json['name'],
-      subject: json['subject'],
-      courseClass: json['class'],
-      pincode: json['pincode'],
-      newAmount: json['new_amount'],
-      image: json['image'],
-    );
+        id: json['id'],
+        amount: json['amount'],
+        active: json['active'],
+        name: json['name'],
+        subject: json['subject'],
+        courseClass: json['class'],
+        pincode: json['pincode'],
+        newAmount: json['new_amount'],
+        image: json['image'],
+        medium: json['medium'] ?? 'N/A',
+        board: json['board'] ?? 'N/A');
   }
 }
 
@@ -219,6 +223,8 @@ class _CoursePageState extends State<CoursePage> {
     final prefs = await SharedPreferences.getInstance();
     final String? userPincode = prefs.getString('pincode');
     final String? userClass = prefs.getString('class');
+    final String? medium = prefs.getString('medium');
+    final String? board = prefs.getString('board');
     setState(() {
       isLoading = true;
     });
@@ -230,10 +236,17 @@ class _CoursePageState extends State<CoursePage> {
         final filteredAllCourses = _courses.where((course) {
           final noMatchingDetail = !_courseDetails.any((detail) =>
               int.parse(detail.courseID) == course.id); // No match for courseID
-          return noMatchingDetail &&
-              course.pincode == userPincode &&
-              course.active == 1 && // Match pincode
-              course.courseClass == userClass; // Match class
+          return board == 'N/A'
+              ? noMatchingDetail &&
+                  course.pincode == userPincode &&
+                  course.active == 1 && // Match pincode
+                  course.courseClass == userClass
+              : noMatchingDetail &&
+                  course.pincode == userPincode &&
+                  course.active == 1 && // Match pincode
+                  course.courseClass == userClass &&
+                  course.board == board &&
+                  course.medium == medium; // Match class
         }).toList();
         if (index == 0) {
           myCourses = _courseDetails

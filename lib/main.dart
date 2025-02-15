@@ -6,6 +6,8 @@ import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:trusir/common/notificationhelper.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:trusir/no_connection.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -29,16 +31,17 @@ void main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor:
-          Colors.grey[200], // Set the navigation bar color to grey
+      systemNavigationBarColor: Colors.grey[200], // Set navigation bar color
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.light));
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -46,10 +49,30 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+    return StreamBuilder<ConnectivityResult>(
+      stream: Connectivity().onConnectivityChanged.map((event) => event.first),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          final result = snapshot.data;
+          if (result == ConnectivityResult.none) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: NoConnectionScreen(), // Show no connection screen
+            );
+          } else {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              home: const SplashScreen(), // Show SplashScreen if online
+            );
+          }
+        } else {
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: SplashScreen(), // Default screen while checking
+          );
+        }
+      },
     );
   }
 }
@@ -116,7 +139,9 @@ class _SplashScreenState extends State<SplashScreen>
         index: 0,
       );
     } else if (role == 'teacher' && !isNewUser) {
-      return const TeacherMainScreen();
+      return const TeacherMainScreen(
+        index: 0,
+      );
     } else {
       return const TrusirLoginPage();
     }

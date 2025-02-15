@@ -26,7 +26,9 @@ class Teacherssettings extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TeacherMainScreen(),
+                        builder: (context) => const TeacherMainScreen(
+                          index: 0,
+                        ),
                       ),
                     );
                   },

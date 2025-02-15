@@ -53,6 +53,7 @@ class EditSplashScreenState extends State<EditSplashScreen> {
           await prefs.setString('role', responseData['role']);
           await prefs.setString('school', responseData['school']);
           await prefs.setString('medium', responseData['medium']);
+          await prefs.setString('board', responseData['board'] ?? 'N/A');
           await prefs.setString('state', responseData['state']);
           await prefs.setString('city', responseData['city']);
           await prefs.setString('address', responseData['address']);
@@ -99,7 +100,10 @@ class EditSplashScreenState extends State<EditSplashScreen> {
         } else if (responseData['role'] == 'teacher') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const TeacherMainScreen()),
+            MaterialPageRoute(
+                builder: (context) => const TeacherMainScreen(
+                      index: 0,
+                    )),
           );
         }
         print(responseData);

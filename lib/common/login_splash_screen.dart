@@ -57,6 +57,7 @@ class LoginSplashScreenState extends State<LoginSplashScreen> {
           await prefs.setString('role', responseData['role'] ?? 'N/A');
           await prefs.setString('school', responseData['school'] ?? 'N/A');
           await prefs.setString('medium', responseData['medium'] ?? 'N/A');
+          await prefs.setString('board', responseData['board'] ?? 'N/A');
           await prefs.setString('state', responseData['state'] ?? 'N/A');
           await prefs.setString('city', responseData['city'] ?? 'N/A');
           await prefs.setString('address', responseData['address'] ?? 'N/A');
@@ -110,7 +111,7 @@ class LoginSplashScreenState extends State<LoginSplashScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => const TeacherMainScreen()),
+                  builder: (context) => const TeacherMainScreen(index: 0)),
             );
           }
           Fluttertoast.showToast(msg: 'Login Successful!');

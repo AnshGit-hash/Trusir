@@ -7,6 +7,7 @@ import 'package:trusir/common/api.dart';
 import 'package:trusir/teacher/notice_teacher.dart';
 import 'package:trusir/teacher/gk_teacher.dart';
 import 'package:trusir/teacher/student_profile.dart';
+import 'package:trusir/teacher/teacher_fee_payment.dart';
 import 'package:trusir/teacher/teacher_notice.dart';
 import 'package:trusir/teacher/teacher_pf_page.dart';
 import 'package:trusir/teacher/teacherattendance.dart';
@@ -325,7 +326,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                               padding: const EdgeInsets.all(5.0),
                               child: GridView.count(
                                 shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 crossAxisCount: 4,
                                 crossAxisSpacing: 30,
                                 mainAxisSpacing: 30,
@@ -356,6 +357,18 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                             const TeacherNoticeScreen(),
                                       ),
                                     );
+                                  }),
+                                  buildTile(
+                                      context,
+                                      const Color.fromARGB(255, 222, 151, 255),
+                                      'assets/money.png',
+                                      'Fee Payment', () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TeacherFeePaymentScreen(),
+                                        ));
                                   }),
                                   buildTile(
                                       context,
@@ -739,7 +752,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                           builder: (context, constraints) {
                             return GridView.count(
                               shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
+                              physics: const AlwaysScrollableScrollPhysics(),
                               crossAxisCount:
                                   constraints.maxWidth > 600 ? 4 : 3,
                               crossAxisSpacing: isWeb ? 30 : 15,
@@ -787,6 +800,18 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       ),
                                     ),
                                   );
+                                }),
+                                buildTile(
+                                    context,
+                                    const Color.fromARGB(255, 222, 151, 255),
+                                    'assets/money.png',
+                                    'Fee Payment', () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const TeacherFeePaymentScreen(),
+                                      ));
                                 }),
                                 buildTile(
                                     context,

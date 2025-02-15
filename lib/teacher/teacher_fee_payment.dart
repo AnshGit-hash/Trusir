@@ -5,7 +5,7 @@ import 'package:trusir/common/api.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import 'package:trusir/student/wallet.dart';
+import 'package:trusir/teacher/teacher_wallet.dart';
 
 // import 'package:trusir/student/student_payment_page.dart';
 
@@ -49,14 +49,15 @@ class Fees {
   }
 }
 
-class FeePaymentScreen extends StatefulWidget {
-  const FeePaymentScreen({super.key});
+class TeacherFeePaymentScreen extends StatefulWidget {
+  const TeacherFeePaymentScreen({super.key});
 
   @override
-  State<FeePaymentScreen> createState() => _FeePaymentScreenState();
+  State<TeacherFeePaymentScreen> createState() =>
+      _TeacherFeePaymentScreenState();
 }
 
-class _FeePaymentScreenState extends State<FeePaymentScreen> {
+class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
   List<Fees> feepayment = [];
   bool isLoading = true;
   bool isLoadingMore = false;
@@ -200,7 +201,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const WalletPage(),
+                  builder: (context) => const TeacherWalletPage(),
                 ),
               );
             },
@@ -299,7 +300,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                       .trim()
                                                   : payment.transactionId
                                                       .trim();
-
                                           return Padding(
                                             padding: const EdgeInsets.only(
                                                 left: 5, right: 5, bottom: 15),
@@ -458,7 +458,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                       isWideScreen),
                                   feepayment.isEmpty
                                       ? const Padding(
-                                          padding: EdgeInsets.only(top: 15),
+                                          padding: EdgeInsets.only(top: 15.0),
                                           child: Center(
                                               child: Text(
                                                   'No Transaction history available')),

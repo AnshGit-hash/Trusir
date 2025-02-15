@@ -5,7 +5,8 @@ import 'package:trusir/teacher/teacher_facilities.dart';
 import 'package:trusir/teacher/teacherssettings.dart';
 
 class TeacherMainScreen extends StatefulWidget {
-  const TeacherMainScreen({super.key});
+  final int index;
+  const TeacherMainScreen({super.key, required this.index});
 
   @override
   TeacherMainScreenState createState() => TeacherMainScreenState();
@@ -13,6 +14,14 @@ class TeacherMainScreen extends StatefulWidget {
 
 class TeacherMainScreenState extends State<TeacherMainScreen> {
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      currentIndex = widget.index;
+    });
+  }
 
   // List of pages for each bottom navigation item
   final List<Widget> pages = [
