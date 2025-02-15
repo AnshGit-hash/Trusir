@@ -326,7 +326,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                               padding: const EdgeInsets.all(5.0),
                               child: GridView.count(
                                 shrinkWrap: true,
-                                physics: const AlwaysScrollableScrollPhysics(),
+                                physics: const NeverScrollableScrollPhysics(),
                                 crossAxisCount: 4,
                                 crossAxisSpacing: 30,
                                 mainAxisSpacing: 30,
@@ -360,7 +360,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color.fromARGB(255, 222, 151, 255),
+                                      const Color.fromARGB(255, 109, 216, 249),
                                       'assets/money.png',
                                       'Fee Payment', () {
                                     Navigator.push(
@@ -372,7 +372,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color.fromARGB(255, 109, 216, 249),
+                                      const Color.fromARGB(255, 222, 151, 255),
                                       'assets/setting.png',
                                       'Setting', () {
                                     Navigator.push(
@@ -385,7 +385,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color.fromARGB(255, 222, 151, 255),
+                                      const Color.fromARGB(255, 188, 180, 255),
                                       'assets/list@3x.png',
                                       'Attendance', () {
                                     Navigator.push(
@@ -399,7 +399,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color.fromARGB(255, 188, 180, 255),
+                                      const Color.fromARGB(255, 235, 177, 236),
                                       'assets/knowledge.png',
                                       'General Knowledge', () {
                                     Navigator.push(
@@ -413,7 +413,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                   }),
                                   buildTile(
                                       context,
-                                      const Color.fromARGB(255, 235, 177, 236),
+                                      const Color.fromARGB(255, 151, 177, 255),
                                       'assets/pensp@3x.png',
                                       'Student Notice', () {
                                     Navigator.push(
@@ -459,6 +459,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                           child: Text(
                                               'No Students Enrolled for Any course yet'))
                                       : GridView.builder(
+                                          shrinkWrap: true,
                                           physics:
                                               const BouncingScrollPhysics(),
                                           gridDelegate:
@@ -607,423 +608,452 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                       ),
                     ],
                   )
-                : Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Teacherpfpage()),
-                          );
-                        },
-                        child: Container(
-                          height: isWeb ? 150 : 116,
-                          width: isWeb
-                              ? double.infinity
-                              : constraints.maxWidth > 388
-                                  ? 388
-                                  : constraints.maxWidth - 40,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFF48116A), // Darker color for the top
-                                Color(
-                                    0xFFC22054), // Lighter color for the bottom
-                              ],
-                              begin: Alignment
-                                  .topCenter, // Start the gradient at the top
-                              end: Alignment
-                                  .bottomCenter, // End the gradient at the bottom
+                : SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.9,
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const Teacherpfpage()),
+                              );
+                            },
+                            child: Container(
+                              height: isWeb ? 150 : 116,
+                              width: isWeb
+                                  ? double.infinity
+                                  : constraints.maxWidth > 388
+                                      ? 388
+                                      : constraints.maxWidth - 40,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(
+                                        0xFF48116A), // Darker color for the top
+                                    Color(
+                                        0xFFC22054), // Lighter color for the bottom
+                                  ],
+                                  begin: Alignment
+                                      .topCenter, // Start the gradient at the top
+                                  end: Alignment
+                                      .bottomCenter, // End the gradient at the bottom
+                                ),
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFC22054)
+                                        .withValues(alpha: 0.2),
+                                    spreadRadius: 3,
+                                    blurRadius: 15,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment: isWeb
+                                    ? MainAxisAlignment.center
+                                    : MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          left: isWeb ? 60 : 20.0,
+                                          top: 12,
+                                          bottom: 12),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: isWeb
+                                            ? MainAxisAlignment.center
+                                            : MainAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: isWeb ? 25 : 22,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 5.0),
+                                            child: Text(
+                                              address,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                color: Colors.white,
+                                                fontSize: isWeb ? 19 : 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 2.0),
+                                            child: Text(
+                                              phone,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: isWeb ? 16 : 11,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        right: isWeb ? 50 : 12.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white10,
+                                        borderRadius: BorderRadius.circular(22),
+                                        border: Border.all(
+                                          color: Colors.white12,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(22),
+                                        child: Image.network(
+                                          profile,
+                                          width: isWeb ? 120 : 75,
+                                          height: isWeb ? 120 : 75,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return const Center(
+                                              child: Icon(
+                                                Icons.broken_image,
+                                                color: Colors.grey,
+                                                size: 50,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFC22054)
-                                    .withValues(alpha: 0.2),
-                                spreadRadius: 3,
-                                blurRadius: 15,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
                           ),
-                          child: Row(
-                            mainAxisAlignment: isWeb
-                                ? MainAxisAlignment.center
-                                : MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                      left: isWeb ? 60 : 20.0,
-                                      top: 12,
-                                      bottom: 12),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: isWeb
-                                        ? MainAxisAlignment.center
-                                        : MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: isWeb ? 25 : 22,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w700,
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return GridView.count(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  crossAxisCount:
+                                      constraints.maxWidth > 600 ? 4 : 3,
+                                  crossAxisSpacing: isWeb ? 30 : 15,
+                                  mainAxisSpacing: isWeb ? 30 : 15,
+                                  childAspectRatio: isWeb
+                                      ? tileWidth / tileHeight * 1.5
+                                      : tileWidth / tileHeight,
+                                  children: [
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 170, 224, 249),
+                                        'assets/myprofile.png',
+                                        'My Profile', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const Teacherpfpage(),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 5.0),
-                                        child: Text(
-                                          address,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            color: Colors.white,
-                                            fontSize: isWeb ? 19 : 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                      );
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 248, 169, 227),
+                                        'assets/noticesp@3x.png',
+                                        'Notice', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TeacherNoticeScreen(),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 2.0),
-                                        child: Text(
-                                          phone,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: isWeb ? 16 : 11,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    EdgeInsets.only(right: isWeb ? 50 : 12.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white10,
-                                    borderRadius: BorderRadius.circular(22),
-                                    border: Border.all(
-                                      color: Colors.white12,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(22),
-                                    child: Image.network(
-                                      profile,
-                                      width: isWeb ? 120 : 75,
-                                      height: isWeb ? 120 : 75,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Center(
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                            size: 50,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            return GridView.count(
-                              shrinkWrap: true,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              crossAxisCount:
-                                  constraints.maxWidth > 600 ? 4 : 3,
-                              crossAxisSpacing: isWeb ? 30 : 15,
-                              mainAxisSpacing: isWeb ? 30 : 15,
-                              childAspectRatio: isWeb
-                                  ? tileWidth / tileHeight * 1.5
-                                  : tileWidth / tileHeight,
-                              children: [
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 170, 224, 249),
-                                    'assets/myprofile.png',
-                                    'My Profile', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const Teacherpfpage(),
-                                    ),
-                                  );
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 248, 169, 227),
-                                    'assets/noticesp@3x.png',
-                                    'Notice', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const TeacherNoticeScreen(),
-                                    ),
-                                  );
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 109, 216, 249),
-                                    'assets/list@3x.png',
-                                    'Attendance', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => Teacherattendance(
-                                        studentprofile: studentprofile,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 222, 151, 255),
-                                    'assets/money.png',
-                                    'Fee Payment', () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const TeacherFeePaymentScreen(),
-                                      ));
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 222, 151, 255),
-                                    'assets/knowledge.png',
-                                    'General Knowledge', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddGkTeacher(
-                                        studentprofile: studentprofile,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 188, 180, 255),
-                                    'assets/pensp@3x.png',
-                                    'Student Notice', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddNoticeTeacher(
-                                        studentprofile: studentprofile,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                                buildTile(
-                                    context,
-                                    const Color.fromARGB(255, 235, 177, 236),
-                                    'assets/setting.png',
-                                    'Setting', () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const Teacherssettings(),
-                                    ),
-                                  );
-                                }),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding:
-                              EdgeInsets.only(top: 20, left: 10, bottom: 10),
-                          child: Text(
-                            'Student Profiles',
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins'),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5),
-                          child: SizedBox(
-                            height: 340,
-                            child: studentprofile.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                        'No Students Enrolled for Any course yet'))
-                                : GridView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
-                                      crossAxisSpacing: 15,
-                                      mainAxisSpacing: 15,
-                                      childAspectRatio: 94 / 120,
-                                    ),
-                                    itemCount: studentprofile.length,
-                                    itemBuilder: (context, index) {
-                                      StudentProfile studentProfile =
-                                          studentprofile[index];
-
-                                      Color cardColor =
-                                          cardColors[index % cardColors.length];
-
-                                      final borderColor =
-                                          HSLColor.fromColor(cardColor)
-                                              .withLightness(0.95)
-                                              .toColor();
-
-                                      return GestureDetector(
-                                        onTap: studentProfile.active == 1
-                                            ? () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        StudentProfileScreen(
-                                                      name: studentProfile.name,
-                                                      phone:
-                                                          studentProfile.phone,
-                                                      subject: studentProfile
-                                                          .subject,
-                                                      image:
-                                                          studentProfile.image,
-                                                      userID:
-                                                          studentProfile.userID,
-                                                      address: studentProfile
-                                                          .address,
-                                                      fatherName:
-                                                          studentProfile.dob,
-                                                      school:
-                                                          studentProfile.school,
-                                                      studentClass:
-                                                          studentProfile
-                                                              .studentClass,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            : () {
-                                                Fluttertoast.showToast(
-                                                    msg: 'Account Inactive');
-                                              },
-                                        child: Container(
-                                          width: 94,
-                                          height: 120,
-                                          decoration: BoxDecoration(
-                                              color: cardColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(22),
-                                              gradient: SweepGradient(
-                                                colors: [
-                                                  cardColor,
-                                                  cardColor.withValues(
-                                                      alpha: 0.9),
-                                                  cardColor.withValues(
-                                                      alpha: 0.8),
-                                                  Colors.white54
-                                                      .withValues(alpha: 0.1),
-                                                  cardColor,
-                                                  cardColor
-                                                ],
-                                                center: Alignment.topRight,
-                                                startAngle: 0,
-                                                endAngle: 6,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey
-                                                      .withValues(alpha: 0.2),
-                                                  spreadRadius: 3,
-                                                  blurRadius: 15,
-                                                  offset: const Offset(0, 10),
-                                                ),
-                                              ]),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(15),
-                                                  border: Border.all(
-                                                    color: borderColor,
-                                                    width: 1.5,
-                                                  ),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                  child: Image.network(
-                                                    studentProfile.image,
-                                                    width: 65,
-                                                    height: 65,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 12),
-                                                child: Text(
-                                                  studentProfile.name,
-                                                  textAlign: TextAlign.center,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Poppins',
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                      );
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 109, 216, 249),
+                                        'assets/list@3x.png',
+                                        'Attendance', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              Teacherattendance(
+                                            studentprofile: studentprofile,
                                           ),
                                         ),
                                       );
-                                    },
-                                  ),
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 222, 151, 255),
+                                        'assets/money.png',
+                                        'Fee Payment', () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const TeacherFeePaymentScreen(),
+                                          ));
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 188, 180, 255),
+                                        'assets/knowledge.png',
+                                        'General Knowledge', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AddGkTeacher(
+                                            studentprofile: studentprofile,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 235, 177, 236),
+                                        'assets/pensp@3x.png',
+                                        'Student Notice', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              AddNoticeTeacher(
+                                            studentprofile: studentprofile,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    buildTile(
+                                        context,
+                                        const Color.fromARGB(
+                                            255, 151, 177, 255),
+                                        'assets/setting.png',
+                                        'Setting', () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const Teacherssettings(),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
-                        ),
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  top: 20, left: 10, bottom: 10),
+                              child: Text(
+                                'Student Profiles',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Poppins'),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 5),
+                              child: SizedBox(
+                                height: 340,
+                                child: studentprofile.isEmpty
+                                    ? const Center(
+                                        child: Text(
+                                            'No Students Enrolled for Any course yet'))
+                                    : GridView.builder(
+                                        physics: const BouncingScrollPhysics(),
+                                        shrinkWrap: true,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 3,
+                                          crossAxisSpacing: 15,
+                                          mainAxisSpacing: 15,
+                                          childAspectRatio: 94 / 120,
+                                        ),
+                                        itemCount: studentprofile.length,
+                                        itemBuilder: (context, index) {
+                                          StudentProfile studentProfile =
+                                              studentprofile[index];
+
+                                          Color cardColor = cardColors[
+                                              index % cardColors.length];
+
+                                          final borderColor =
+                                              HSLColor.fromColor(cardColor)
+                                                  .withLightness(0.95)
+                                                  .toColor();
+
+                                          return GestureDetector(
+                                            onTap: studentProfile.active == 1
+                                                ? () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            StudentProfileScreen(
+                                                          name: studentProfile
+                                                              .name,
+                                                          phone: studentProfile
+                                                              .phone,
+                                                          subject:
+                                                              studentProfile
+                                                                  .subject,
+                                                          image: studentProfile
+                                                              .image,
+                                                          userID: studentProfile
+                                                              .userID,
+                                                          address:
+                                                              studentProfile
+                                                                  .address,
+                                                          fatherName:
+                                                              studentProfile
+                                                                  .dob,
+                                                          school: studentProfile
+                                                              .school,
+                                                          studentClass:
+                                                              studentProfile
+                                                                  .studentClass,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                : () {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            'Account Inactive');
+                                                  },
+                                            child: Container(
+                                              width: 94,
+                                              height: 120,
+                                              decoration: BoxDecoration(
+                                                  color: cardColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(22),
+                                                  gradient: SweepGradient(
+                                                    colors: [
+                                                      cardColor,
+                                                      cardColor.withValues(
+                                                          alpha: 0.9),
+                                                      cardColor.withValues(
+                                                          alpha: 0.8),
+                                                      Colors.white54.withValues(
+                                                          alpha: 0.1),
+                                                      cardColor,
+                                                      cardColor
+                                                    ],
+                                                    center: Alignment.topRight,
+                                                    startAngle: 0,
+                                                    endAngle: 6,
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.grey
+                                                          .withValues(
+                                                              alpha: 0.2),
+                                                      spreadRadius: 3,
+                                                      blurRadius: 15,
+                                                      offset:
+                                                          const Offset(0, 10),
+                                                    ),
+                                                  ]),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                      color: cardColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15),
+                                                      border: Border.all(
+                                                        color: borderColor,
+                                                        width: 1.5,
+                                                      ),
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
+                                                      child: Image.network(
+                                                        studentProfile.image,
+                                                        width: 65,
+                                                        height: 65,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 12),
+                                                    child: Text(
+                                                      studentProfile.name,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontFamily: 'Poppins',
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
           );
         },

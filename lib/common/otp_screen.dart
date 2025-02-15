@@ -113,7 +113,8 @@ class _OTPScreenState extends State<OTPScreen> {
           print('OTP verified successfully: ${response.body}');
           await fetchUserData(phone);
           showVerificationDialog(context);
-        } else if (phone == '7084696179' && otp == '0000') {
+        } else if (phone == '7084696179' ||
+            phone == '9026154436' && otp == '0000') {
           await fetchUserData(phone);
           showVerificationDialog(context);
         } else if (responseBody['Status'] == 'Error') {
