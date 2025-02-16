@@ -28,12 +28,54 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
   List<Map<String, dynamic>> walletTransactions = [];
   PaymentService paymentService = PaymentService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  List<Map<String, String>> savedAccounts = [];
+  bool saveDetails = false;
   @override
   void initState() {
     super.initState();
     fetchBalance();
     fetchWalletTransactions();
     paymentService.initPhonePeSdk();
+    _loadSavedAccounts();
+  }
+
+  Future<void> _loadSavedAccounts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? accountsJson = prefs.getString('savedAccounts');
+
+    if (accountsJson != null) {
+      setState(() {
+        savedAccounts = List<Map<String, String>>.from(
+          json
+              .decode(accountsJson)
+              .map((item) => Map<String, String>.from(item)),
+        );
+      });
+    }
+  }
+
+  Future<void> _saveAccountDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final Map<String, String> accountDetails = {
+      "accountNumber": accountController.text,
+      "name": nameController.text,
+      "ifsc": ifscController.text,
+      "upi": upiController.text,
+    };
+
+    savedAccounts.add(accountDetails);
+    await prefs.setString('savedAccounts', json.encode(savedAccounts));
+  }
+
+  String? _validatePaymentMethod() {
+    if ((accountController.text.isEmpty ||
+            nameController.text.isEmpty ||
+            ifscController.text.isEmpty) &&
+        upiController.text.isEmpty) {
+      return "Either UPI ID or complete bank details are required";
+    }
+    return null;
   }
 
   Future<double> fetchBalance() async {
@@ -107,11 +149,9 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
 
   String? phone;
   TextEditingController amountController = TextEditingController();
-  TextEditingController bankNameController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController accountController = TextEditingController();
   TextEditingController ifscController = TextEditingController();
-  TextEditingController branchController = TextEditingController();
   TextEditingController upiController = TextEditingController();
   TextEditingController promoController = TextEditingController();
   String transactionType = '';
@@ -337,15 +377,16 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                     children: [
                       GestureDetector(
                           onTap: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => Dialog(
+                            savedAccounts.isEmpty
+                                ? showDialog(
+                                    context: context,
+                                    builder: (context) => Dialog(
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(16)),
-                                      child: Form(
-                                        key: _formKey,
-                                        child: Padding(
+                                      child: StatefulBuilder(
+                                          builder: (context, setState) {
+                                        return Padding(
                                           padding: const EdgeInsets.all(16),
                                           child: SingleChildScrollView(
                                             child: Column(
@@ -353,194 +394,487 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  "Withdrawal",
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontFamily: "Poppins"),
-                                                ),
+                                                const Text("Withdrawal",
+                                                    style: TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w600)),
                                                 const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: amountController,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  decoration: InputDecoration(
-                                                    hintText: "Amount",
-                                                    prefixIcon: const Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 25.0, top: 11),
-                                                      child: Text(
-                                                        "₹",
-                                                        style: TextStyle(
-                                                            fontSize: 18),
-                                                      ),
-                                                    ),
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: accountController,
-                                                  keyboardType:
-                                                      TextInputType.number,
-                                                  decoration: InputDecoration(
-                                                    hintText: "Account Number",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: nameController,
-                                                  decoration: InputDecoration(
-                                                    hintText: "Name",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: branchController,
-                                                  decoration: InputDecoration(
-                                                    hintText: "Branch",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller:
-                                                      bankNameController,
-                                                  decoration: InputDecoration(
-                                                    hintText: "Bank Name",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: ifscController,
-                                                  decoration: InputDecoration(
-                                                    hintText: "IFSC Code",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                TextFormField(
-                                                  autovalidateMode:
-                                                      AutovalidateMode
-                                                          .onUserInteraction,
-                                                  validator: _validateRequired,
-                                                  controller: upiController,
-                                                  decoration: InputDecoration(
-                                                    hintText: "UPI Id",
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10)),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 16),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 40.0,
-                                                          right: 40),
-                                                  child: SizedBox(
-                                                    width: double.infinity,
-                                                    child: ElevatedButton(
-                                                      onPressed: () {
-                                                        // Pass the entered amount to the parent
-                                                        if (_formKey
-                                                            .currentState!
-                                                            .validate()) {
-                                                          Navigator.pop(
-                                                              context);
-                                                        }
-                                                        // Close dialog after confirming
-                                                      },
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        backgroundColor:
-                                                            Colors.deepPurple,
-                                                        foregroundColor:
-                                                            Colors.white,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 10,
-                                                                vertical: 8),
-                                                        textStyle:
-                                                            const TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(12),
+                                                // If saved accounts exist, show them first
+                                                Form(
+                                                  key: _formKey,
+                                                  child: Column(
+                                                    children: [
+                                                      TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        validator: (value) =>
+                                                            value!.isEmpty
+                                                                ? "Required"
+                                                                : null,
+                                                        controller:
+                                                            amountController,
+                                                        keyboardType:
+                                                            TextInputType
+                                                                .number,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText: "Amount",
+                                                          prefixIcon:
+                                                              const Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 25.0,
+                                                                    top: 11),
+                                                            child: Text("₹",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18)),
+                                                          ),
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
                                                         ),
-                                                        elevation: 6,
-                                                        shadowColor: Colors
-                                                            .deepPurpleAccent,
                                                       ),
-                                                      child: const Text(
-                                                        "Confirm",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins"),
+                                                      const SizedBox(
+                                                          height: 16),
+                                                      // Bank Details Section
+                                                      TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        controller:
+                                                            accountController,
+                                                        keyboardType:
+                                                            TextInputType
+                                                                .number,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText:
+                                                              "Account Number",
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                        ),
                                                       ),
-                                                    ),
+                                                      const SizedBox(
+                                                          height: 16),
+                                                      TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        controller:
+                                                            nameController,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText: "Name",
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+                                                      TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        controller:
+                                                            ifscController,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText:
+                                                              "IFSC Code",
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+
+                                                      // OR Section
+                                                      const Row(
+                                                        children: [
+                                                          Expanded(
+                                                              child: Divider()),
+                                                          SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          Text("OR",
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .grey)),
+                                                          SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          Expanded(
+                                                              child: Divider()),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+
+                                                      // UPI Section
+                                                      TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        controller:
+                                                            upiController,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText: "UPI ID",
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+
+                                                      // Checkbox to Save Details
+                                                      Row(
+                                                        children: [
+                                                          Checkbox(
+                                                            value: saveDetails,
+                                                            onChanged:
+                                                                (bool? value) {
+                                                              setState(() {
+                                                                saveDetails =
+                                                                    value ??
+                                                                        false;
+                                                              });
+                                                            },
+                                                          ),
+                                                          const Text(
+                                                              "Save these details for future use"),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 16),
+
+                                                      // Confirm Button
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        child: ElevatedButton(
+                                                          onPressed: () {
+                                                            if (_formKey
+                                                                    .currentState!
+                                                                    .validate() &&
+                                                                _validatePaymentMethod() ==
+                                                                    null) {
+                                                              if (saveDetails) {
+                                                                _saveAccountDetails();
+                                                              }
+                                                              Navigator.pop(
+                                                                  context);
+                                                              Navigator
+                                                                  .pushReplacement(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                    builder:
+                                                                        (context) =>
+                                                                            const TeacherWalletPage()),
+                                                              );
+                                                            } else {
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                    content: Text(
+                                                                        _validatePaymentMethod() ??
+                                                                            "Please fill in the required fields")),
+                                                              );
+                                                            }
+                                                          },
+                                                          style: ElevatedButton
+                                                              .styleFrom(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .deepPurple,
+                                                            foregroundColor:
+                                                                Colors.white,
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        10,
+                                                                    vertical:
+                                                                        8),
+                                                            textStyle:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                            shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            12)),
+                                                            elevation: 6,
+                                                          ),
+                                                          child: const Text(
+                                                              "Confirm"),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ));
+                                        );
+                                      }),
+                                    ),
+                                  )
+                                : showDialog(
+                                    context: context,
+                                    builder: (context) => Dialog(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16)),
+                                      child: StatefulBuilder(
+                                          builder: (context, setState) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text("Withdrawal",
+                                                    style: TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w600)),
+                                                const SizedBox(height: 16),
+                                                // If saved accounts exist, show them first
+                                                const Text("Saved Accounts:",
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount:
+                                                      savedAccounts.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    final account =
+                                                        savedAccounts[index];
+                                                    return ListTile(
+                                                      title: account[
+                                                                  "accountNumber"]!
+                                                              .isNotEmpty
+                                                          ? Text(
+                                                              "Acc. No.: ${account["accountNumber"]}")
+                                                          : Text(
+                                                              "UPI: ${account["upi"]}"),
+                                                      subtitle: Text(
+                                                          account["name"] ??
+                                                              ""),
+                                                      onTap: () {
+                                                        setState(() {
+                                                          accountController
+                                                              .text = account[
+                                                                  "accountNumber"] ??
+                                                              "";
+                                                          nameController.text =
+                                                              account["name"] ??
+                                                                  "";
+                                                          ifscController.text =
+                                                              account["ifsc"] ??
+                                                                  "";
+                                                          upiController.text =
+                                                              account["upi"] ??
+                                                                  "";
+                                                          showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (context) =>
+                                                                    Dialog(
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              16)),
+                                                              child: StatefulBuilder(
+                                                                  builder: (context,
+                                                                      setState) {
+                                                                return Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          16),
+                                                                  child:
+                                                                      SingleChildScrollView(
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        const Text(
+                                                                            "Withdrawal",
+                                                                            style:
+                                                                                TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                16),
+                                                                        // If saved accounts exist, show them first
+                                                                        Form(
+                                                                          key:
+                                                                              _formKey,
+                                                                          child:
+                                                                              Column(
+                                                                            children: [
+                                                                              TextFormField(
+                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                                validator: (value) => value!.isEmpty ? "Required" : null,
+                                                                                controller: amountController,
+                                                                                keyboardType: TextInputType.number,
+                                                                                decoration: InputDecoration(
+                                                                                  labelText: "Amount",
+                                                                                  prefixIcon: const Padding(
+                                                                                    padding: EdgeInsets.only(left: 25.0, top: 11),
+                                                                                    child: Text("₹", style: TextStyle(fontSize: 18)),
+                                                                                  ),
+                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+                                                                              // Bank Details Section
+                                                                              TextFormField(
+                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                                controller: accountController,
+                                                                                keyboardType: TextInputType.number,
+                                                                                decoration: InputDecoration(
+                                                                                  labelText: "Account Number",
+                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+                                                                              TextFormField(
+                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                                controller: nameController,
+                                                                                decoration: InputDecoration(
+                                                                                  labelText: "Name",
+                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+                                                                              TextFormField(
+                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                                controller: ifscController,
+                                                                                decoration: InputDecoration(
+                                                                                  labelText: "IFSC Code",
+                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+
+                                                                              // OR Section
+                                                                              const Row(
+                                                                                children: [
+                                                                                  Expanded(child: Divider()),
+                                                                                  SizedBox(
+                                                                                    width: 10,
+                                                                                  ),
+                                                                                  Text("OR", textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                                                                  SizedBox(
+                                                                                    width: 10,
+                                                                                  ),
+                                                                                  Expanded(child: Divider()),
+                                                                                ],
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+
+                                                                              // UPI Section
+                                                                              TextFormField(
+                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                                controller: upiController,
+                                                                                decoration: InputDecoration(
+                                                                                  labelText: "UPI ID",
+                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                                                ),
+                                                                              ),
+                                                                              const SizedBox(height: 16),
+                                                                              // Confirm Button
+                                                                              SizedBox(
+                                                                                width: double.infinity,
+                                                                                child: ElevatedButton(
+                                                                                  onPressed: () {
+                                                                                    if (_formKey.currentState!.validate() && _validatePaymentMethod() == null) {
+                                                                                      Navigator.pop(context);
+                                                                                      Navigator.pushReplacement(
+                                                                                        context,
+                                                                                        MaterialPageRoute(builder: (context) => const TeacherWalletPage()),
+                                                                                      );
+                                                                                    } else {
+                                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                                        SnackBar(content: Text(_validatePaymentMethod() ?? "Please fill in the required fields")),
+                                                                                      );
+                                                                                    }
+                                                                                  },
+                                                                                  style: ElevatedButton.styleFrom(
+                                                                                    backgroundColor: Colors.deepPurple,
+                                                                                    foregroundColor: Colors.white,
+                                                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                                                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                                    elevation: 6,
+                                                                                  ),
+                                                                                  child: const Text("Confirm"),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }),
+                                                            ),
+                                                          );
+                                                        });
+                                                        // Close dialog and reopen with form filled
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                  );
                           },
                           child: _buildActionButton(Icons.add, "Withdraw")),
                       GestureDetector(
@@ -656,6 +990,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                                 onPressed: () {
                                                   // Pass the entered amount to the parent
                                                   Navigator.pop(context);
+
                                                   // Close dialog after confirming
                                                 },
                                                 style: ElevatedButton.styleFrom(
@@ -741,13 +1076,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
         ),
       ),
     );
-  }
-
-  String? _validateRequired(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Required';
-    }
-    return null;
   }
 
   Widget _buildActionButton(IconData icon, String label) {
