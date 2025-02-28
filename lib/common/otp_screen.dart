@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/enquiry.dart';
 import 'package:trusir/common/api.dart';
@@ -20,6 +21,36 @@ class _OTPScreenState extends State<OTPScreen> {
   final TextEditingController otpController = TextEditingController();
   bool newuser = false;
   bool isVerifying = false;
+  bool _isButtonEnabled = false; // Initially disabled
+  int _secondsRemaining = 30;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  void startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        setState(() {
+          _isButtonEnabled = true;
+        });
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel timer to avoid memory leaks
+    super.dispose();
+  }
 
   Future<Map<String, dynamic>?> fetchUserData(String phoneNumber) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -100,6 +131,31 @@ class _OTPScreenState extends State<OTPScreen> {
     }
   }
 
+  Future<void> sendOTP(String phoneNumber) async {
+    final url = Uri.parse(
+      '$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP',
+    );
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        print('OTP sent successfully: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OTP Sent Successfully'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        setState(() {
+          startTimer();
+        });
+      } else {
+        print('Failed to send OTP: ${response.body}');
+      }
+    } catch (e) {
+      print('Error sending OTP: $e');
+    }
+  }
+
   Future<void> verifyOTP(String phone, String otp) async {
     final url = Uri.parse(
       '$otpapi/SMS/VERIFY3/91$phone/$otp',
@@ -114,6 +170,7 @@ class _OTPScreenState extends State<OTPScreen> {
           await fetchUserData(phone);
           showVerificationDialog(context);
         } else if (phone == '7084696179' ||
+            phone == '7493026708' ||
             phone == '9026154436' && otp == '0000') {
           await fetchUserData(phone);
           showVerificationDialog(context);
@@ -314,6 +371,25 @@ class _OTPScreenState extends State<OTPScreen> {
                     );
                   }),
                 ),
+                TextButton(
+                    onPressed: _isButtonEnabled
+                        ? () {
+                            sendOTP(widget.phonenum);
+                          }
+                        : () {
+                            Fluttertoast.showToast(
+                                msg: 'Please Wait for the cooldown');
+                          },
+                    child: Text(
+                      _isButtonEnabled ? 'Resend OTP' : '$_secondsRemaining',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: isWeb ? 18 : 16, // Adjust font size for web
+                        color: _isButtonEnabled
+                            ? const Color(0xFF48116A)
+                            : Colors.grey,
+                      ),
+                    )),
                 const SizedBox(height: 70),
                 _buildVerifyButton(isWeb),
               ],

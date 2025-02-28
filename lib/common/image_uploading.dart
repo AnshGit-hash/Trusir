@@ -98,38 +98,39 @@ class ImageUploadUtils {
 
   static Future<String> uploadMultipleImagesFromGallery() async {
     await requestPermissions();
-
     final ImagePicker picker = ImagePicker();
-    final List<XFile> images = await picker.pickMultiImage();
+    List<XFile> selectedImages = [];
 
-    if (images.isEmpty) {
+    bool continueSelecting = true;
+
+    while (continueSelecting) {
+      final List<XFile> images = await picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImages.addAll(images);
+      }
+
+      continueSelecting = await _showImageDialog(selectedImages);
+    }
+
+    if (selectedImages.isEmpty) {
       Fluttertoast.showToast(msg: 'No images selected.');
       return 'null';
     }
 
     List<String> downloadUrls = [];
-
-    for (var image in images) {
+    for (var image in selectedImages) {
       final compressedImage = await compressImage(File(image.path));
-
       if (compressedImage == null) {
         Fluttertoast.showToast(msg: 'Failed to compress an image. Skipping.');
         continue;
       }
-
       final String downloadUrl = await _uploadImage(compressedImage);
-
       if (downloadUrl != 'null') {
         downloadUrls.add(downloadUrl);
       }
     }
 
-    if (downloadUrls.isEmpty) {
-      Fluttertoast.showToast(msg: 'No images were successfully uploaded.');
-      return 'null';
-    }
-
-    return downloadUrls.join(',');
+    return downloadUrls.isEmpty ? 'null' : downloadUrls.join(',');
   }
 
   // Function to upload multiple images from the camera
@@ -176,7 +177,7 @@ class ImageUploadUtils {
           context: navigatorKey.currentContext!,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Captured Images'),
+              title: const Text('Selected Images'),
               content: SizedBox(
                 width: double.maxFinite,
                 child: Column(
@@ -188,19 +189,35 @@ class ImageUploadUtils {
                         scrollDirection: Axis.horizontal,
                         itemCount: images.length,
                         itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.file(
-                              File(images[index].path),
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
+                          return Stack(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.file(
+                                  File(images[index].path),
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: IconButton(
+                                  icon: const Icon(Icons.cancel,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    images.removeAt(index);
+                                    Navigator.pop(context);
+                                    _showImageDialog(images);
+                                  },
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),
                     ),
-                    const SizedBox(height: 10),
                   ],
                 ),
               ),

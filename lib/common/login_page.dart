@@ -117,7 +117,9 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                 duration: Duration(seconds: 2),
               ),
             );
-          } else if (phonenum == '7084696179' || phonenum == '9026154436') {
+          } else if (phonenum == '7084696179' ||
+              phonenum == '9026154436' ||
+              phonenum == '7493026708') {
             storePhoneNo();
             Navigator.push(
                 context,

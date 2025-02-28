@@ -8,6 +8,7 @@ import 'package:trusir/student/all_courses.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/demo_courses.dart';
 import 'package:trusir/student/my_courses.dart';
+import 'package:trusir/student/special_courses.dart';
 
 class Course {
   final int id;
@@ -21,6 +22,7 @@ class Course {
   final String image;
   final String medium;
   final String board;
+  final String student;
 
   Course(
       {required this.id,
@@ -33,6 +35,7 @@ class Course {
       required this.newAmount,
       required this.image,
       required this.medium,
+      required this.student,
       required this.board});
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -47,6 +50,7 @@ class Course {
         newAmount: json['new_amount'],
         image: json['image'],
         medium: json['medium'] ?? 'N/A',
+        student: json['student'] ?? 'all',
         board: json['board'] ?? 'N/A');
   }
 }
@@ -170,6 +174,7 @@ class _CoursePageState extends State<CoursePage> {
   List<Course> _courses = [];
   List<MyCourseModel> _courseDetails = [];
   List<Course> allCourses = [];
+  List<Course> specialCourse = [];
   List<MyCourseModel> myCourses = [];
   List<MyCourseModel> demoCourses = [];
   int _selectedIndex = 0;
@@ -221,6 +226,7 @@ class _CoursePageState extends State<CoursePage> {
 
   Future<void> _filterCourses(int index) async {
     final prefs = await SharedPreferences.getInstance();
+    final String? userID = prefs.getString('userID');
     final String? userPincode = prefs.getString('pincode');
     final String? userClass = prefs.getString('class');
     final String? medium = prefs.getString('medium');
@@ -233,6 +239,9 @@ class _CoursePageState extends State<CoursePage> {
       await fetchAllCourses();
 
       setState(() {
+        final specialCourses = _courses.where((course) {
+          return course.student == userID;
+        }).toList();
         final filteredAllCourses = _courses.where((course) {
           final noMatchingDetail = !_courseDetails.any((detail) =>
               int.parse(detail.courseID) == course.id); // No match for courseID
@@ -240,12 +249,14 @@ class _CoursePageState extends State<CoursePage> {
               ? noMatchingDetail &&
                   course.pincode == userPincode &&
                   course.active == 1 && // Match pincode
-                  course.courseClass == userClass
+                  course.courseClass == userClass &&
+                  course.student == 'all'
               : noMatchingDetail &&
                   course.pincode == userPincode &&
                   course.active == 1 && // Match pincode
                   course.courseClass == userClass &&
                   course.board == board &&
+                  course.student == 'all' &&
                   course.medium == medium; // Match class
         }).toList();
         if (index == 0) {
@@ -258,6 +269,8 @@ class _CoursePageState extends State<CoursePage> {
               _courseDetails.where((course) => course.type == 'demo').toList();
         } else if (index == 2) {
           allCourses = filteredAllCourses;
+        } else if (index == 3) {
+          specialCourse = specialCourses;
         }
       });
     } catch (e) {
@@ -294,6 +307,7 @@ class _CoursePageState extends State<CoursePage> {
     await _filterCourses(0);
     await _filterCourses(1);
     await _filterCourses(2);
+    await _filterCourses(3);
     await fetchCoursesByIds(myCourses, 0);
     await fetchCoursesByIds(demoCourses, 1);
   }
@@ -349,6 +363,7 @@ class _CoursePageState extends State<CoursePage> {
                   option1: 'My Courses',
                   option2: 'Demo Courses',
                   option3: 'All Courses',
+                  option4: 'Special Courses',
                   initialSelectedIndex: _selectedIndex,
                   onChanged: (index) {
                     _pageController.jumpToPage(
@@ -367,6 +382,9 @@ class _CoursePageState extends State<CoursePage> {
                       Democourses(courses: democourses),
                       AllCourses(
                         courses: allCourses,
+                      ),
+                      SpecialCourses(
+                        courses: specialCourse,
                       ),
                     ],
                   ),
