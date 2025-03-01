@@ -37,6 +37,7 @@ class PopupScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => const StudentHomepage(
                         enablephone: true,
+                        enableReg: true,
                       ),
                     ),
                   );
@@ -63,7 +64,9 @@ class PopupScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Teacherhomepage(),
+                      builder: (context) => const Teacherhomepage(
+                        enableReg: true,
+                      ),
                     ),
                   );
                 },

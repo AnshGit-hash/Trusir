@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -45,6 +46,18 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
   int currentPage = 1;
   bool hasMore = true;
   final apiBase = '$baseUrl/api/my-notice';
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   String formatDate(String dateString) {
     if (dateString == 'currentDate') {

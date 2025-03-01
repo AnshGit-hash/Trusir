@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -111,6 +112,19 @@ class _GKPageState extends State<GKPage> {
     fetchGks();
   }
 
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
+
   Future<void> fetchGks() async {
     if (!hasMoreData || isLoading) return; // Prevent unnecessary calls
 
@@ -152,38 +166,38 @@ class _GKPageState extends State<GKPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.grey[50],
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Image.asset('assets/back_button.png', height: 50)),
-                const SizedBox(width: 20),
-                const Text(
-                  'GK',
-                  style: TextStyle(
-                    color: Color(0xFF48116A),
-                    fontSize: 25,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          toolbarHeight: 70,
-        ),
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Colors.grey[50],
-        body: SizedBox(
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 10.0),
+          child: Row(
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Image.asset('assets/back_button.png', height: 50)),
+              const SizedBox(width: 20),
+              const Text(
+                'GK',
+                style: TextStyle(
+                  color: Color(0xFF48116A),
+                  fontSize: 25,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        toolbarHeight: 70,
+      ),
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: Stack(
             children: [

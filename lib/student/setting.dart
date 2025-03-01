@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/contactus.dart';
 import 'package:trusir/student/editprofilescreen.dart';
@@ -8,10 +9,29 @@ import 'package:trusir/common/about_us.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/your_doubt.dart';
 
-class SettingsScreen extends StatelessWidget {
-  SettingsScreen({super.key});
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   String userID = '';
+
   bool isWeb = false;
 
   Future<void> fetchuserID() async {

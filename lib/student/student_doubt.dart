@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -72,6 +73,19 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
     super.initState();
     fetchAllCourses();
     fetchTeachers();
+  }
+
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
   }
 
   Future<void> fetchTeachers() async {
@@ -459,367 +473,362 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
                                                 ),
                                               ],
                                             ),
-                                            child: formData.photo != null
-                                                ? GestureDetector(
-                                                    onTap: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        barrierColor: Colors
-                                                            .black
-                                                            .withOpacity(0.3),
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          List<String> images =
-                                                              formData.photo!
-                                                                  .split(',');
+                                            child:
+                                                formData.photo != null &&
+                                                        formData
+                                                            .photo!.isNotEmpty
+                                                    ? GestureDetector(
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            barrierColor: Colors
+                                                                .black
+                                                                .withOpacity(
+                                                                    0.3),
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              List<String>
+                                                                  images =
+                                                                  formData
+                                                                      .photo!
+                                                                      .split(
+                                                                          ',');
 
-                                                          return Dialog(
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            insetPadding:
-                                                                const EdgeInsets
-                                                                    .all(16),
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20),
-                                                            ),
-                                                            child: Container(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      16.0),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                              ),
-                                                              child: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                children: [
-                                                                  const Text(
-                                                                    "Uploaded Images",
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          18,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                                  ),
-                                                                  const SizedBox(
-                                                                      height:
-                                                                          10),
-                                                                  GridView
-                                                                      .builder(
-                                                                    shrinkWrap:
-                                                                        true,
-                                                                    physics:
-                                                                        const NeverScrollableScrollPhysics(),
-                                                                    gridDelegate:
-                                                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                                                      crossAxisCount:
-                                                                          3,
-                                                                      crossAxisSpacing:
-                                                                          10,
-                                                                      mainAxisSpacing:
-                                                                          10,
-                                                                    ),
-                                                                    itemCount:
-                                                                        images
-                                                                            .length,
-                                                                    itemBuilder:
-                                                                        (context,
-                                                                            index) {
-                                                                      return Stack(
-                                                                        children: [
-                                                                          Column(
-                                                                            children: [
-                                                                              Expanded(
-                                                                                child: Image.network(
-                                                                                  images[index],
-                                                                                  fit: BoxFit.cover,
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 5),
-                                                                              Text(
-                                                                                '${_titleController.text}_$index',
-                                                                                style: const TextStyle(
-                                                                                  fontSize: 8,
-                                                                                  color: Colors.blue,
-                                                                                ),
-                                                                                overflow: TextOverflow.ellipsis,
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Positioned(
-                                                                            top:
-                                                                                0,
-                                                                            right:
-                                                                                0,
-                                                                            child:
-                                                                                GestureDetector(
-                                                                              onTap: () {
-                                                                                setState(() {
-                                                                                  images.removeAt(index);
-                                                                                  formData.photo = images.join(','); // Update URL string
-                                                                                });
-                                                                                Fluttertoast.showToast(
-                                                                                  msg: 'Image removed!',
-                                                                                );
-                                                                              },
-                                                                              child: const CircleAvatar(
-                                                                                radius: 12,
-                                                                                backgroundColor: Colors.red,
-                                                                                child: Icon(
-                                                                                  Icons.close,
-                                                                                  color: Colors.white,
-                                                                                  size: 16,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      );
-                                                                    },
-                                                                  ),
-                                                                  const SizedBox(
-                                                                      height:
+                                                              return StatefulBuilder(
+                                                                  builder: (context,
+                                                                      setStateDialog) {
+                                                                return Dialog(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  insetPadding:
+                                                                      const EdgeInsets
+                                                                          .all(
                                                                           16),
-                                                                  Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceEvenly,
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20),
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            16.0),
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20),
+                                                                    ),
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      children: [
+                                                                        const Text(
+                                                                          "Uploaded Images",
+                                                                          style:
+                                                                              TextStyle(
+                                                                            fontSize:
+                                                                                18,
+                                                                            fontWeight:
+                                                                                FontWeight.bold,
+                                                                          ),
+                                                                        ),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                10),
+                                                                        GridView
+                                                                            .builder(
+                                                                          shrinkWrap:
+                                                                              true,
+                                                                          physics:
+                                                                              const NeverScrollableScrollPhysics(),
+                                                                          gridDelegate:
+                                                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                            crossAxisCount:
+                                                                                3,
+                                                                            crossAxisSpacing:
+                                                                                10,
+                                                                            mainAxisSpacing:
+                                                                                10,
+                                                                          ),
+                                                                          itemCount:
+                                                                              images.length,
+                                                                          itemBuilder:
+                                                                              (context, index) {
+                                                                            return Stack(
+                                                                              children: [
+                                                                                Column(
+                                                                                  children: [
+                                                                                    Expanded(
+                                                                                      child: Image.network(
+                                                                                        images[index],
+                                                                                        fit: BoxFit.cover,
+                                                                                      ),
+                                                                                    ),
+                                                                                    const SizedBox(height: 5),
+                                                                                    Text(
+                                                                                      '${_titleController.text}_$index',
+                                                                                      style: const TextStyle(
+                                                                                        fontSize: 8,
+                                                                                        color: Colors.blue,
+                                                                                      ),
+                                                                                      overflow: TextOverflow.ellipsis,
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                                Positioned(
+                                                                                  top: 0,
+                                                                                  right: 0,
+                                                                                  child: GestureDetector(
+                                                                                    onTap: () {
+                                                                                      setState(() {
+                                                                                        images.removeAt(index);
+                                                                                        formData.photo = images.join(','); // Update URL string
+                                                                                      });
+                                                                                      setStateDialog(() {});
+                                                                                      Fluttertoast.showToast(
+                                                                                        msg: 'Image removed!',
+                                                                                      );
+                                                                                      print(formData.photo);
+                                                                                    },
+                                                                                    child: const CircleAvatar(
+                                                                                      radius: 12,
+                                                                                      backgroundColor: Colors.red,
+                                                                                      child: Icon(
+                                                                                        Icons.close,
+                                                                                        color: Colors.white,
+                                                                                        size: 16,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            );
+                                                                          },
+                                                                        ),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                16),
+                                                                        Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            ElevatedButton(
+                                                                              onPressed: () {
+                                                                                Navigator.pop(context);
+                                                                                setState(() {
+                                                                                  isimageUploading = true;
+                                                                                });
+                                                                                handleUploadFromCamera();
+                                                                              },
+                                                                              child: const Text("Camera"),
+                                                                            ),
+                                                                            ElevatedButton(
+                                                                              onPressed: () {
+                                                                                Navigator.pop(context);
+                                                                                setState(() {
+                                                                                  isimageUploading = true;
+                                                                                });
+                                                                                handleUploadFromGallery();
+                                                                              },
+                                                                              child: const Text("Gallery"),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              });
+                                                            },
+                                                          );
+                                                        },
+                                                        child: Image.network(
+                                                          formData.photo!
+                                                              .split(',')
+                                                              .first,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : GestureDetector(
+                                                        onTap: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            barrierColor: Colors
+                                                                .black
+                                                                .withValues(
+                                                                    alpha: 0.3),
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return Dialog(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .transparent,
+                                                                insetPadding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        16),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20),
+                                                                ),
+                                                                child:
+                                                                    Container(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          16.0),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20),
+                                                                  ),
+                                                                  child: Column(
+                                                                    mainAxisSize:
+                                                                        MainAxisSize
+                                                                            .min,
                                                                     children: [
-                                                                      ElevatedButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          setState(
+                                                                      Container(
+                                                                        width:
+                                                                            200,
+                                                                        height:
+                                                                            50,
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color: Colors
+                                                                              .lightBlue
+                                                                              .shade100,
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(22),
+                                                                        ),
+                                                                        child:
+                                                                            TextButton(
+                                                                          onPressed:
                                                                               () {
-                                                                            isimageUploading =
-                                                                                true;
-                                                                          });
-                                                                          handleUploadFromCamera();
-                                                                        },
-                                                                        child: const Text(
-                                                                            "Camera"),
+                                                                            Navigator.pop(context);
+                                                                            setState(() {
+                                                                              isimageUploading = true;
+                                                                            });
+                                                                            handleUploadFromCamera();
+                                                                          },
+                                                                          child:
+                                                                              const Text(
+                                                                            "Camera",
+                                                                            style: TextStyle(
+                                                                                fontSize: 18,
+                                                                                color: Colors.black,
+                                                                                fontFamily: 'Poppins'),
+                                                                          ),
+                                                                        ),
                                                                       ),
-                                                                      ElevatedButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                          setState(
+                                                                      const SizedBox(
+                                                                          height:
+                                                                              16),
+                                                                      // Button for "I'm a Teacher"
+                                                                      Container(
+                                                                        width:
+                                                                            200,
+                                                                        height:
+                                                                            50,
+                                                                        decoration:
+                                                                            BoxDecoration(
+                                                                          color: Colors
+                                                                              .orange
+                                                                              .shade100,
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(22),
+                                                                        ),
+                                                                        child:
+                                                                            TextButton(
+                                                                          onPressed:
                                                                               () {
-                                                                            isimageUploading =
-                                                                                true;
-                                                                          });
-                                                                          handleUploadFromGallery();
-                                                                        },
-                                                                        child: const Text(
-                                                                            "Gallery"),
+                                                                            Navigator.pop(context);
+                                                                            setState(() {
+                                                                              isimageUploading = true;
+                                                                            });
+                                                                            handleUploadFromGallery();
+                                                                          },
+                                                                          child:
+                                                                              const Text(
+                                                                            "Upload File",
+                                                                            style: TextStyle(
+                                                                                fontSize: 18,
+                                                                                color: Colors.black,
+                                                                                fontFamily: 'Poppins'),
+                                                                          ),
+                                                                        ),
                                                                       ),
                                                                     ],
                                                                   ),
-                                                                ],
-                                                              ),
-                                                            ),
+                                                                ),
+                                                              );
+                                                            },
                                                           );
                                                         },
-                                                      );
-                                                    },
-                                                    child: Image.network(
-                                                      formData.photo!
-                                                          .split(',')
-                                                          .first,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )
-                                                : GestureDetector(
-                                                    onTap: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        barrierColor: Colors
-                                                            .black
-                                                            .withValues(
-                                                                alpha: 0.3),
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return Dialog(
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .transparent,
-                                                            insetPadding:
-                                                                const EdgeInsets
-                                                                    .all(16),
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20),
-                                                            ),
-                                                            child: Container(
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                      .all(
-                                                                      16.0),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                              ),
-                                                              child: Column(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
-                                                                children: [
-                                                                  Container(
-                                                                    width: 200,
-                                                                    height: 50,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Colors
-                                                                          .lightBlue
-                                                                          .shade100,
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              22),
-                                                                    ),
-                                                                    child:
-                                                                        TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.pop(
-                                                                            context);
-                                                                        setState(
-                                                                            () {
-                                                                          isimageUploading =
-                                                                              true;
-                                                                        });
-                                                                        handleUploadFromCamera();
-                                                                      },
-                                                                      child:
-                                                                          const Text(
-                                                                        "Camera",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                18,
-                                                                            color:
-                                                                                Colors.black,
-                                                                            fontFamily: 'Poppins'),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  const SizedBox(
-                                                                      height:
-                                                                          16),
-                                                                  // Button for "I'm a Teacher"
-                                                                  Container(
-                                                                    width: 200,
-                                                                    height: 50,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Colors
-                                                                          .orange
-                                                                          .shade100,
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              22),
-                                                                    ),
-                                                                    child:
-                                                                        TextButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        Navigator.pop(
-                                                                            context);
-                                                                        setState(
-                                                                            () {
-                                                                          isimageUploading =
-                                                                              true;
-                                                                        });
-                                                                        handleUploadFromGallery();
-                                                                      },
-                                                                      child:
-                                                                          const Text(
-                                                                        "Upload File",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                18,
-                                                                            color:
-                                                                                Colors.black,
-                                                                            fontFamily: 'Poppins'),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
+                                                                      .only(
+                                                                      top: 15),
+                                                              child:
+                                                                  Image.asset(
+                                                                'assets/camera@3x.png',
+                                                                width: 46,
+                                                                height: 37,
                                                               ),
                                                             ),
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  top: 15),
-                                                          child: Image.asset(
-                                                            'assets/camera@3x.png',
-                                                            width: 46,
-                                                            height: 37,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        const Center(
-                                                          child: Text(
-                                                            'Upload Image',
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontSize: 14,
+                                                            const SizedBox(
+                                                              height: 10,
                                                             ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        const Center(
-                                                          child: Text(
-                                                            'Click here',
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontSize: 10,
+                                                            const Center(
+                                                              child: Text(
+                                                                'Upload Image',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
                                                             ),
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
+                                                            const SizedBox(
+                                                              height: 5,
+                                                            ),
+                                                            const Center(
+                                                              child: Text(
+                                                                'Click here',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize: 10,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
                                           ),
                                   ),
                                   const SizedBox(

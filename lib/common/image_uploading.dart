@@ -109,7 +109,11 @@ class ImageUploadUtils {
         selectedImages.addAll(images);
       }
 
-      continueSelecting = await _showImageDialog(selectedImages);
+      if (selectedImages.isNotEmpty) {
+        continueSelecting = await _showImageDialog(selectedImages);
+      } else {
+        break; // Prevents the dialog from appearing if no images were selected
+      }
     }
 
     if (selectedImages.isEmpty) {
@@ -147,11 +151,15 @@ class ImageUploadUtils {
         capturedImages.add(image);
       }
 
-      continueCapturing = await _showImageDialog(capturedImages);
+      if (capturedImages.isNotEmpty) {
+        continueCapturing = await _showImageDialog(capturedImages);
+      } else {
+        break; // Prevents the dialog from appearing if no images were captured
+      }
     }
 
     if (capturedImages.isEmpty) {
-      Fluttertoast.showToast(msg: 'No images selected.');
+      Fluttertoast.showToast(msg: 'No images captured.');
       return 'null';
     }
 

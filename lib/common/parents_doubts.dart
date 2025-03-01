@@ -370,6 +370,7 @@ class ParentsDoubtDetailPage extends StatelessWidget {
             children: [
               Center(
                 child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(8),
                   shrinkWrap: true,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -4,7 +4,6 @@ class FilterSwitch extends StatefulWidget {
   final String option1;
   final String option2;
   final String option3;
-  final String option4;
   final ValueChanged<int> onChanged;
   final int initialSelectedIndex;
 
@@ -12,7 +11,6 @@ class FilterSwitch extends StatefulWidget {
     required this.option1,
     required this.option2,
     required this.option3,
-    required this.option4,
     required this.onChanged,
     this.initialSelectedIndex = 0,
     super.key,
@@ -52,7 +50,7 @@ class FilterSwitchState extends State<FilterSwitch> {
     return Center(
       child: Container(
         height: 50,
-        width: isWeb ? 600 : 380,
+        width: isWeb ? 450 : 350,
         decoration: BoxDecoration(
           border: Border.all(color: Colors.transparent, width: 1),
           borderRadius: BorderRadius.circular(10),
@@ -63,11 +61,19 @@ class FilterSwitchState extends State<FilterSwitch> {
               duration: const Duration(milliseconds: 400),
               curve: Curves.easeOutCubic,
               left: isWeb
-                  ? (_selectedIndex * (600 / 4)) + 4
-                  : (_selectedIndex * (380 / 4)) + 4,
+                  ? _selectedIndex == 0
+                      ? 4
+                      : _selectedIndex == 1
+                          ? (450 / 3) + 4
+                          : (2 * (450 / 3)) + 4
+                  : _selectedIndex == 0
+                      ? 4
+                      : _selectedIndex == 1
+                          ? (350 / 3) + 4
+                          : (2 * (350 / 3)) + 4,
               top: 4,
               child: Container(
-                width: (isWeb ? 600 / 4 : 380 / 4) - 8,
+                width: (isWeb ? 450 / 3 : 350 / 3) - 8,
                 height: 40,
                 decoration: BoxDecoration(
                   color: Colors.black87,
@@ -90,7 +96,7 @@ class FilterSwitchState extends State<FilterSwitch> {
                           fontWeight: _selectedIndex == 0
                               ? FontWeight.bold
                               : FontWeight.w500,
-                          fontSize: isWeb ? 15 : 10,
+                          fontSize: isWeb ? 17 : 13,
                         ),
                       ),
                     ),
@@ -109,7 +115,7 @@ class FilterSwitchState extends State<FilterSwitch> {
                           fontWeight: _selectedIndex == 1
                               ? FontWeight.bold
                               : FontWeight.w500,
-                          fontSize: isWeb ? 15 : 10,
+                          fontSize: isWeb ? 17 : 13,
                         ),
                       ),
                     ),
@@ -128,26 +134,7 @@ class FilterSwitchState extends State<FilterSwitch> {
                           fontWeight: _selectedIndex == 2
                               ? FontWeight.bold
                               : FontWeight.w500,
-                          fontSize: isWeb ? 15 : 10,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _onOptionTap(3),
-                    child: Center(
-                      child: Text(
-                        widget.option4,
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          color:
-                              _selectedIndex == 3 ? Colors.white : Colors.black,
-                          fontWeight: _selectedIndex == 3
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          fontSize: isWeb ? 15 : 10,
+                          fontSize: isWeb ? 17 : 13,
                         ),
                       ),
                     ),

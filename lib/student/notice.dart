@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,6 +89,19 @@ class _NoticeScreenState extends State<NoticeScreen> {
   void initState() {
     super.initState();
     fetchNotices();
+  }
+
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
   }
 
   final List<Color> cardColors = [

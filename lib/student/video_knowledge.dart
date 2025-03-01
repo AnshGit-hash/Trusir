@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -31,6 +32,20 @@ class _VideoKnowledgeState extends State<VideoKnowledge> {
     _searchController.addListener(_filterVideos);
     fetchVideoCategory();
     fetchData(category: 'All');
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
   }
 
   Future<void> fetchVideoCategory() async {
@@ -131,12 +146,6 @@ class _VideoKnowledgeState extends State<VideoKnowledge> {
           .where((video) => video['title']!.toLowerCase().contains(query))
           .toList();
     });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   void _onCategorySelected(int index) {

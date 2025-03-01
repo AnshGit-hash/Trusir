@@ -27,6 +27,7 @@ class _SpecialCoursesState extends State<SpecialCourses> {
         ? const Center(child: Text('No Courses'))
         : isWeb
             ? GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2, mainAxisExtent: 560),
                 shrinkWrap: true,
@@ -40,6 +41,7 @@ class _SpecialCoursesState extends State<SpecialCourses> {
                 },
               )
             : ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 itemCount: widget.courses.length,

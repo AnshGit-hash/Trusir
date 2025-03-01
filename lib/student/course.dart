@@ -8,7 +8,6 @@ import 'package:trusir/student/all_courses.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/demo_courses.dart';
 import 'package:trusir/student/my_courses.dart';
-import 'package:trusir/student/special_courses.dart';
 
 class Course {
   final int id;
@@ -363,7 +362,6 @@ class _CoursePageState extends State<CoursePage> {
                   option1: 'My Courses',
                   option2: 'Demo Courses',
                   option3: 'All Courses',
-                  option4: 'Special Courses',
                   initialSelectedIndex: _selectedIndex,
                   onChanged: (index) {
                     _pageController.jumpToPage(
@@ -378,13 +376,11 @@ class _CoursePageState extends State<CoursePage> {
                     children: [
                       Mycourses(
                         courses: mycourses,
+                        specialCourses: specialCourse,
                       ),
                       Democourses(courses: democourses),
                       AllCourses(
                         courses: allCourses,
-                      ),
-                      SpecialCourses(
-                        courses: specialCourse,
                       ),
                     ],
                   ),

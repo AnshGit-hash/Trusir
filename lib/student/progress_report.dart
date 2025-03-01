@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -12,15 +13,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/notificationhelper.dart';
 
-class ProgressReportScreen extends StatelessWidget {
+class ProgressReportScreen extends StatefulWidget {
   const ProgressReportScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade300,
-      body: const ProgressReportPage(),
+  State<ProgressReportScreen> createState() => _ProgressReportScreenState();
+}
+
+class _ProgressReportScreenState extends State<ProgressReportScreen> {
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
     );
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const ProgressReportPage();
   }
 }
 

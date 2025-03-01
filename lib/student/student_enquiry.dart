@@ -188,6 +188,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
                       MaterialPageRoute(
                         builder: (context) => const StudentHomepage(
                           enablephone: true,
+                          enableReg: true,
                         ),
                       ),
                     );
@@ -218,6 +219,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
         MaterialPageRoute(
           builder: (context) => const StudentHomepage(
             enablephone: true,
+            enableReg: true,
           ),
         ),
       );

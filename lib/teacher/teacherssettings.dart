@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:trusir/common/contactus.dart';
 import 'package:trusir/teacher/teacher_edit_profile.dart';
 import 'package:trusir/common/terms_and_conditions.dart';
 import 'package:trusir/common/about_us.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 
-class Teacherssettings extends StatelessWidget {
+class Teacherssettings extends StatefulWidget {
   const Teacherssettings({super.key});
+
+  @override
+  State<Teacherssettings> createState() => _TeacherssettingsState();
+}
+
+class _TeacherssettingsState extends State<Teacherssettings> {
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

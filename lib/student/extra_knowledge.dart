@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'specificextraknowledge.dart';
 import 'dart:convert';
@@ -42,7 +43,15 @@ class _SearchDialogState extends State<SearchDialog> {
 
   @override
   void dispose() {
+    // Reset status bar to default when leaving the page
     _searchDialogController.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
     super.dispose();
   }
 
@@ -264,6 +273,19 @@ class _ExtraKnowledgeState extends State<ExtraKnowledge> {
   String selectedSubcategory = '';
   List<String> subcategory = [];
   List<KnowledgeItem> gks = [];
+  @override
+  void dispose() {
+    _searchController.dispose();
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   Future<void> fetchSubCategories(String category) async {
     try {
@@ -425,12 +447,6 @@ class _ExtraKnowledgeState extends State<ExtraKnowledge> {
     super.initState();
     initialize();
     loadRecentlyViewed();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override

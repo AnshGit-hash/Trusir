@@ -1,43 +1,126 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:trusir/common/delete.dart';
+import 'package:trusir/student/course.dart';
 import 'package:trusir/student/main_screen.dart';
+import 'package:trusir/student/special_courses.dart';
 import 'package:trusir/student/teacher_profile_page.dart';
 
 class Mycourses extends StatelessWidget {
   final List<Map<String, dynamic>> courses;
-  const Mycourses({super.key, required this.courses});
+  final List<Course> specialCourses;
+  const Mycourses(
+      {super.key, required this.courses, required this.specialCourses});
 
   @override
   Widget build(BuildContext context) {
     bool isWeb = MediaQuery.of(context).size.width > 600;
-    return courses.isEmpty
-        ? const Center(child: Text('No Courses'))
-        : isWeb
-            ? GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, mainAxisExtent: 560),
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course = courses[index];
-                  return MyCourseCard(
-                    course: course,
-                  );
-                },
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                itemCount: courses.length,
-                itemBuilder: (context, index) {
-                  final course = courses[index];
-                  return MyCourseCard(
-                    course: course,
-                  );
-                },
-              );
+    return SingleChildScrollView(
+      child: specialCourses.isEmpty
+          ? Column(
+              children: [
+                courses.isEmpty
+                    ? const Center(
+                        child: Text(
+                        'No Courses',
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                        ),
+                      ))
+                    : isWeb
+                        ? GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, mainAxisExtent: 560),
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course = courses[index];
+                              return MyCourseCard(
+                                course: course,
+                              );
+                            },
+                          )
+                        : ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course = courses[index];
+                              return MyCourseCard(
+                                course: course,
+                              );
+                            },
+                          ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const Center(
+                    child: Text(
+                  'No Special Courses',
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                  ),
+                ))
+              ],
+            )
+          : Column(
+              children: [
+                courses.isEmpty
+                    ? const Center(
+                        child: Text(
+                        'No Courses',
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                        ),
+                      ))
+                    : isWeb
+                        ? GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, mainAxisExtent: 560),
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course = courses[index];
+                              return MyCourseCard(
+                                course: course,
+                              );
+                            },
+                          )
+                        : ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            itemCount: courses.length,
+                            itemBuilder: (context, index) {
+                              final course = courses[index];
+                              return MyCourseCard(
+                                course: course,
+                              );
+                            },
+                          ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const Center(
+                    child: Text(
+                  'Special Courses',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17),
+                )),
+                SpecialCourses(courses: specialCourses)
+              ],
+            ),
+    );
   }
 }
 

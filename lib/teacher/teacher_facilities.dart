@@ -120,6 +120,8 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
     super.initState();
     fetchProfileData();
     fetchStudentProfiles();
+
+    // Ensure status bar is reset when the page is opened
   }
 
   Future<void> fetchProfileData() async {

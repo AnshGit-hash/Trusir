@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:trusir/teacher/teacher_bottomnavbar.dart';
 import 'package:trusir/teacher/teacher_course.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
-import 'package:trusir/teacher/teacherssettings.dart';
+import 'package:trusir/teacher/teacher_homepage.dart';
 
 class TeacherMainScreen extends StatefulWidget {
   final int index;
@@ -20,14 +21,23 @@ class TeacherMainScreenState extends State<TeacherMainScreen> {
     super.initState();
     setState(() {
       currentIndex = widget.index;
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Colors.grey[50], // Transparent for the homepage
+          statusBarIconBrightness:
+              Brightness.dark, // White icons for a dark background
+        ),
+      );
     });
   }
 
   // List of pages for each bottom navigation item
   final List<Widget> pages = [
-    const TeacherFacilities(),
+    const Teacherhomepage(enableReg: false),
     const TeacherCoursePage(), // Home page (Student Facilities) // Placeholder for Courses
-    const Teacherssettings(), // Placeholder for Menu
+    const TeacherFacilities(),
+    // Placeholder for Menu
   ];
 
   // Function to handle bottom navigation item taps

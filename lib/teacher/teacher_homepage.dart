@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/teacher/teachers_registeration.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Teacherhomepage extends StatelessWidget {
-  const Teacherhomepage({super.key});
+class Teacherhomepage extends StatefulWidget {
+  final bool enableReg;
+  const Teacherhomepage({super.key, required this.enableReg});
+
+  @override
+  State<Teacherhomepage> createState() => _TeacherhomepageState();
+}
+
+class _TeacherhomepageState extends State<Teacherhomepage> {
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+  }
+
+  String name = '';
+
+  Future<void> fetchProfileData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString('name')!;
+    });
+  }
 
   Future<void> openDialer(String phoneNumber) async {
     final Uri launchUri = Uri(
@@ -41,18 +63,19 @@ class Teacherhomepage extends StatelessWidget {
           // Main Scrollable Content
           SingleChildScrollView(
             padding: isWeb
-                ? const EdgeInsets.only(left: 50, right: 30.0, bottom: 100)
-                : const EdgeInsets.only(
+                ? EdgeInsets.only(
+                    left: 50, right: 30.0, bottom: widget.enableReg ? 100 : 0)
+                : EdgeInsets.only(
                     left: 16.0,
                     right: 16.0,
                     top: 16.0,
                     // Add bottom padding to prevent content from being hidden behind the fixed button
-                    bottom: 100.0,
+                    bottom: widget.enableReg ? 100 : 0,
                   ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: widget.enableReg ? 40 : 0),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -68,15 +91,25 @@ class Teacherhomepage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 25),
-                const Text(
-                  'Welcome To Trusir',
-                  style: TextStyle(
-                    fontSize: 35,
-                    height: 1.0,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+                widget.enableReg
+                    ? const Text(
+                        'Welcome To Trusir',
+                        style: TextStyle(
+                          fontSize: 35,
+                          height: 1.0,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                        ),
+                      )
+                    : Text(
+                        'Hello, $name',
+                        style: const TextStyle(
+                          fontSize: 30,
+                          height: 1.0,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
                 const Divider(
                     color: Colors.black, thickness: 3, endIndent: 230),
                 const SizedBox(height: 10),
@@ -153,10 +186,25 @@ class Teacherhomepage extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                const SizedBox(
-                  height: 30,
-                ),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const Text(
+                        'We are Available in Bihar',
+                        style: TextStyle(
+                          fontSize: 20,
+                          height: 1.6,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFBCBCBC),
+                        ),
+                      ),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 10),
+                widget.enableReg
+                    ? const SizedBox()
+                    : Image.asset('assets/homepage_image.jpg'),
+                const SizedBox(height: 30),
 
                 // Explore our offerings text
                 const Align(
@@ -199,6 +247,12 @@ class Teacherhomepage extends StatelessWidget {
                   }).toList(),
                 ),
                 const SizedBox(height: 30),
+                widget.enableReg
+                    ? const SizedBox()
+                    : Image.asset('assets/bihar_map_chart.png'),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 30),
 
                 // Explore our offerings text
                 const Align(
@@ -344,12 +398,14 @@ class Teacherhomepage extends StatelessWidget {
           ),
 
           // Fixed Registration Button
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 5,
-            child: _buildRegistrationButton(context),
-          ),
+          widget.enableReg
+              ? Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 5,
+                  child: _buildRegistrationButton(context),
+                )
+              : const SizedBox(),
           Positioned(
             right: 13,
             top: MediaQuery.of(context).size.height * 0.4 - 0,

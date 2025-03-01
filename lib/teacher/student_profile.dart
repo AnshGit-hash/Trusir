@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:trusir/teacher/gk_page.dart';
 import 'package:trusir/teacher/student_attendance_page.dart';
 import 'package:trusir/teacher/student_doubts.dart';
@@ -8,7 +9,7 @@ import 'package:trusir/teacher/student_profile_page.dart';
 import 'package:trusir/teacher/students_progress.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class StudentProfileScreen extends StatelessWidget {
+class StudentProfileScreen extends StatefulWidget {
   final String name;
   final String phone;
   final String subject;
@@ -30,6 +31,24 @@ class StudentProfileScreen extends StatelessWidget {
       required this.address,
       required this.school,
       required this.studentClass});
+
+  @override
+  State<StudentProfileScreen> createState() => _StudentProfileScreenState();
+}
+
+class _StudentProfileScreenState extends State<StudentProfileScreen> {
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   Future<void> openDialer(String phoneNumber) async {
     final Uri launchUri = Uri(
@@ -122,7 +141,7 @@ class StudentProfileScreen extends StatelessWidget {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(22),
                                 child: Image.network(
-                                  image,
+                                  widget.image,
                                   width: 80,
                                   height: 80,
                                   fit: BoxFit.cover,
@@ -148,7 +167,7 @@ class StudentProfileScreen extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      name,
+                                      widget.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -161,7 +180,7 @@ class StudentProfileScreen extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 5.0),
                                       child: Text(
-                                        '+91-$phone',
+                                        '+91-${widget.phone}',
                                         style: const TextStyle(
                                           fontFamily: 'Poppins',
                                           color: Colors.white,
@@ -173,7 +192,7 @@ class StudentProfileScreen extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 2.0),
                                       child: Text(
-                                        subject,
+                                        widget.subject,
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 11,
@@ -193,7 +212,7 @@ class StudentProfileScreen extends StatelessWidget {
                                   padding: const EdgeInsets.only(top: 13.0),
                                   child: IconButton(
                                       onPressed: () {
-                                        openDialer(phone);
+                                        openDialer(widget.phone);
                                       },
                                       icon: const Icon(
                                         Icons.phone,
@@ -208,14 +227,14 @@ class StudentProfileScreen extends StatelessWidget {
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             StudentProfilePage(
-                                          name: name,
-                                          phone: phone,
-                                          profile: image,
-                                          subject: subject,
-                                          fatherName: fatherName,
-                                          address: address,
-                                          school: school,
-                                          studentClass: studentClass,
+                                          name: widget.name,
+                                          phone: widget.phone,
+                                          profile: widget.image,
+                                          subject: widget.subject,
+                                          fatherName: widget.fatherName,
+                                          address: widget.address,
+                                          school: widget.school,
+                                          studentClass: widget.studentClass,
                                         ),
                                       ),
                                     );
@@ -288,7 +307,7 @@ class StudentProfileScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => StudentAttendancePage(
-                                    userID: userID,
+                                    userID: widget.userID,
                                   ),
                                 ),
                               );
@@ -378,7 +397,7 @@ class StudentProfileScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      TestSeriesScreen(userID: userID),
+                                      TestSeriesScreen(userID: widget.userID),
                                 ),
                               );
                             },
@@ -466,8 +485,8 @@ class StudentProfileScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      StudentProgressPage(userID: userID),
+                                  builder: (context) => StudentProgressPage(
+                                      userID: widget.userID),
                                 ),
                               );
                             },
@@ -556,7 +575,7 @@ class StudentProfileScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => StudentDoubtsPage(
-                                    userID: userID,
+                                    userID: widget.userID,
                                   ),
                                 ),
                               );
@@ -645,8 +664,8 @@ class StudentProfileScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      StudentGKPage(studentuserID: userID),
+                                  builder: (context) => StudentGKPage(
+                                      studentuserID: widget.userID),
                                 ),
                               );
                             },
@@ -735,7 +754,7 @@ class StudentProfileScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => StudentNoticeScreen(
-                                          userID: userID,
+                                          userID: widget.userID,
                                         )),
                               );
                             },

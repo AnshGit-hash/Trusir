@@ -185,7 +185,9 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const Teacherhomepage(),
+                        builder: (context) => const Teacherhomepage(
+                          enableReg: true,
+                        ),
                       ),
                     );
                   },
@@ -213,7 +215,9 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const Teacherhomepage(),
+          builder: (context) => const Teacherhomepage(
+            enableReg: true,
+          ),
         ),
       );
     });

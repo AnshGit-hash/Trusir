@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/student/student_registration.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class StudentHomepage extends StatelessWidget {
+class StudentHomepage extends StatefulWidget {
+  final bool enableReg;
   final bool enablephone;
-  const StudentHomepage({super.key, required this.enablephone});
+  const StudentHomepage(
+      {super.key, required this.enablephone, required this.enableReg});
+
+  @override
+  State<StudentHomepage> createState() => _StudentHomepageState();
+}
+
+class _StudentHomepageState extends State<StudentHomepage> {
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+  }
 
   Future<void> openDialer(String phoneNumber) async {
     final Uri launchUri = Uri(
@@ -12,6 +26,15 @@ class StudentHomepage extends StatelessWidget {
       path: phoneNumber,
     );
     await launchUrl(launchUri);
+  }
+
+  String name = '';
+
+  Future<void> fetchProfileData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString('name')!;
+    });
   }
 
   Future<void> _launchWhatsApp(String phoneNumber, String message) async {
@@ -42,17 +65,18 @@ class StudentHomepage extends StatelessWidget {
           // Main Content
           SingleChildScrollView(
             padding: isWeb
-                ? const EdgeInsets.only(left: 50, right: 30.0, bottom: 100)
-                : const EdgeInsets.only(
+                ? EdgeInsets.only(
+                    left: 50, right: 30.0, bottom: widget.enableReg ? 100 : 0)
+                : EdgeInsets.only(
                     left: 16.0,
                     right: 16.0,
                     top: 20.0,
-                    bottom: 100,
+                    bottom: widget.enableReg ? 100 : 0,
                   ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: widget.enableReg ? 40 : 0),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -70,15 +94,25 @@ class StudentHomepage extends StatelessWidget {
                 const SizedBox(height: 25),
 
                 // Welcome text
-                const Text(
-                  'Welcome To Trusir',
-                  style: TextStyle(
-                    fontSize: 35,
-                    height: 1.0,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
+                widget.enableReg
+                    ? const Text(
+                        'Welcome To Trusir',
+                        style: TextStyle(
+                          fontSize: 35,
+                          height: 1.0,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                        ),
+                      )
+                    : Text(
+                        'Hello, $name',
+                        style: const TextStyle(
+                          fontSize: 30,
+                          height: 1.0,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
                 const Divider(
                     color: Colors.black, thickness: 3, endIndent: 230),
                 const SizedBox(height: 10),
@@ -257,6 +291,27 @@ class StudentHomepage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const Text(
+                        'We are Available in Bihar',
+                        style: TextStyle(
+                          fontSize: 20,
+                          height: 1.6,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFFBCBCBC),
+                        ),
+                      ),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 10),
+                widget.enableReg
+                    ? const SizedBox()
+                    : Image.asset('assets/homepage_image.jpg'),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 30),
 
                 // Row of two images
                 Column(
@@ -321,6 +376,10 @@ class StudentHomepage extends StatelessWidget {
                   }).toList(),
                 ),
                 const SizedBox(height: 30),
+                widget.enableReg
+                    ? const SizedBox()
+                    : Image.asset('assets/bihar_map_chart.png'),
+                SizedBox(height: widget.enableReg ? 0 : 30),
 
                 // Explore our offerings text
                 const Align(
@@ -465,12 +524,14 @@ class StudentHomepage extends StatelessWidget {
           ),
 
           // Fixed Registration Button at bottom
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 5,
-            child: _buildRegistrationButton(context),
-          ),
+          widget.enableReg
+              ? Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 5,
+                  child: _buildRegistrationButton(context),
+                )
+              : const SizedBox(),
           Positioned(
             right: 13,
             top: MediaQuery.of(context).size.height * 0.4 - 0,

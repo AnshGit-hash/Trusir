@@ -1,10 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/login_page.dart';
 
-class WanaLogout extends StatelessWidget {
+class WanaLogout extends StatefulWidget {
   final String profile;
   const WanaLogout({super.key, required this.profile});
+
+  @override
+  State<WanaLogout> createState() => _WanaLogoutState();
+}
+
+class _WanaLogoutState extends State<WanaLogout> {
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
 
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -63,7 +82,7 @@ class WanaLogout extends StatelessWidget {
                         radius: imageSize / 2,
                         child: ClipOval(
                           child: Image.network(
-                            profile,
+                            widget.profile,
                             width: imageSize,
                             height: imageSize,
                             fit: BoxFit.cover,

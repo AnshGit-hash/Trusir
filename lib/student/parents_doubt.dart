@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -64,6 +65,19 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
         isimageUploading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
   }
 
   Future<void> handleUploadFromGallery() async {
@@ -340,7 +354,8 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
                                           ),
                                         ],
                                       ),
-                                      child: formData.photo != null
+                                      child: formData.photo != null &&
+                                              formData.photo!.isNotEmpty
                                           ? GestureDetector(
                                               onTap: () {
                                                 showDialog(
@@ -353,174 +368,175 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
                                                         formData.photo!
                                                             .split(',');
 
-                                                    return Dialog(
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      insetPadding:
-                                                          const EdgeInsets.all(
-                                                              16),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                      ),
-                                                      child: Container(
-                                                        padding:
+                                                    return StatefulBuilder(
+                                                        builder: (context,
+                                                            setDialogState) {
+                                                      return Dialog(
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        insetPadding:
                                                             const EdgeInsets
-                                                                .all(16.0),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors.white,
+                                                                .all(16),
+                                                        shape:
+                                                            RoundedRectangleBorder(
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(20),
                                                         ),
-                                                        child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: [
-                                                            const Text(
-                                                              "Uploaded Images",
-                                                              style: TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
+                                                        child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(16.0),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                          ),
+                                                          child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              const Text(
+                                                                "Uploaded Images",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
                                                               ),
-                                                            ),
-                                                            const SizedBox(
-                                                                height: 10),
-                                                            GridView.builder(
-                                                              shrinkWrap: true,
-                                                              physics:
-                                                                  const NeverScrollableScrollPhysics(),
-                                                              gridDelegate:
-                                                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                                                crossAxisCount:
-                                                                    3,
-                                                                crossAxisSpacing:
-                                                                    10,
-                                                                mainAxisSpacing:
-                                                                    10,
-                                                              ),
-                                                              itemCount:
-                                                                  images.length,
-                                                              itemBuilder:
-                                                                  (context,
-                                                                      index) {
-                                                                return Stack(
-                                                                  children: [
-                                                                    Column(
-                                                                      children: [
-                                                                        Expanded(
-                                                                          child:
-                                                                              Image.network(
-                                                                            images[index],
-                                                                            fit:
-                                                                                BoxFit.cover,
+                                                              const SizedBox(
+                                                                  height: 10),
+                                                              GridView.builder(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                physics:
+                                                                    const NeverScrollableScrollPhysics(),
+                                                                gridDelegate:
+                                                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                  crossAxisCount:
+                                                                      3,
+                                                                  crossAxisSpacing:
+                                                                      10,
+                                                                  mainAxisSpacing:
+                                                                      10,
+                                                                ),
+                                                                itemCount:
+                                                                    images
+                                                                        .length,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return Stack(
+                                                                    children: [
+                                                                      Column(
+                                                                        children: [
+                                                                          Expanded(
+                                                                            child:
+                                                                                Image.network(
+                                                                              images[index],
+                                                                              fit: BoxFit.cover,
+                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                        const SizedBox(
-                                                                            height:
-                                                                                5),
-                                                                        Text(
-                                                                          '${titleController.text}_index',
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                8,
-                                                                            color:
-                                                                                Colors.blue,
+                                                                          const SizedBox(
+                                                                              height: 5),
+                                                                          Text(
+                                                                            '${titleController.text}_index',
+                                                                            style:
+                                                                                const TextStyle(
+                                                                              fontSize: 8,
+                                                                              color: Colors.blue,
+                                                                            ),
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
                                                                           ),
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    Positioned(
-                                                                      top: 0,
-                                                                      right: 0,
-                                                                      child:
-                                                                          GestureDetector(
-                                                                        onTap:
-                                                                            () {
-                                                                          setState(
-                                                                              () {
-                                                                            images.removeAt(index);
-                                                                            formData.photo =
-                                                                                images.join(','); // Update URL string
-                                                                          });
-                                                                          Fluttertoast
-                                                                              .showToast(
-                                                                            msg:
-                                                                                'Image removed!',
-                                                                          );
-                                                                        },
+                                                                        ],
+                                                                      ),
+                                                                      Positioned(
+                                                                        top: 0,
+                                                                        right:
+                                                                            0,
                                                                         child:
-                                                                            const CircleAvatar(
-                                                                          radius:
-                                                                              12,
-                                                                          backgroundColor:
-                                                                              Colors.red,
+                                                                            GestureDetector(
+                                                                          onTap:
+                                                                              () {
+                                                                            setState(() {
+                                                                              images.removeAt(index);
+                                                                              formData.photo = images.join(','); // Update URL string
+                                                                            });
+                                                                            setDialogState(() {});
+                                                                            Fluttertoast.showToast(
+                                                                              msg: 'Image removed!',
+                                                                            );
+                                                                          },
                                                                           child:
-                                                                              Icon(
-                                                                            Icons.close,
-                                                                            color:
-                                                                                Colors.white,
-                                                                            size:
-                                                                                16,
+                                                                              const CircleAvatar(
+                                                                            radius:
+                                                                                12,
+                                                                            backgroundColor:
+                                                                                Colors.red,
+                                                                            child:
+                                                                                Icon(
+                                                                              Icons.close,
+                                                                              color: Colors.white,
+                                                                              size: 16,
+                                                                            ),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                            const SizedBox(
-                                                                height: 16),
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceEvenly,
-                                                              children: [
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.pop(
-                                                                        context);
-                                                                    setState(
+                                                                    ],
+                                                                  );
+                                                                },
+                                                              ),
+                                                              const SizedBox(
+                                                                  height: 16),
+                                                              Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceEvenly,
+                                                                children: [
+                                                                  ElevatedButton(
+                                                                    onPressed:
                                                                         () {
-                                                                      isimageUploading =
-                                                                          true;
-                                                                    });
-                                                                    handleUploadFromCamera();
-                                                                  },
-                                                                  child: const Text(
-                                                                      "Camera"),
-                                                                ),
-                                                                ElevatedButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.pop(
-                                                                        context);
-                                                                    setState(
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      setState(
+                                                                          () {
+                                                                        isimageUploading =
+                                                                            true;
+                                                                      });
+                                                                      handleUploadFromCamera();
+                                                                    },
+                                                                    child: const Text(
+                                                                        "Camera"),
+                                                                  ),
+                                                                  ElevatedButton(
+                                                                    onPressed:
                                                                         () {
-                                                                      isimageUploading =
-                                                                          true;
-                                                                    });
-                                                                    handleUploadFromGallery();
-                                                                  },
-                                                                  child: const Text(
-                                                                      "Gallery"),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ],
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                      setState(
+                                                                          () {
+                                                                        isimageUploading =
+                                                                            true;
+                                                                      });
+                                                                      handleUploadFromGallery();
+                                                                    },
+                                                                    child: const Text(
+                                                                        "Gallery"),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ),
-                                                    );
+                                                      );
+                                                    });
                                                   },
                                                 );
                                               },

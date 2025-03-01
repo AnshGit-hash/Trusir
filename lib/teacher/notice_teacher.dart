@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
@@ -18,6 +19,21 @@ class AddNoticeTeacher extends StatefulWidget {
 }
 
 class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    // Reset status bar to default when leaving the page
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    super.dispose();
+  }
+
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -82,13 +98,6 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
       students = widget.studentprofile;
       extractStudentData(students, names, nameUserMap);
     });
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
   }
 
   @override
