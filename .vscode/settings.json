@@ -1,5 +1,6 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "automatic",
-    "cmake.sourceDirectory": "C:/Users/anshc/Downloads/Amacle work/TrusirApp-main/linux"
+    "cmake.sourceDirectory": "C:/Users/anshc/Downloads/Amacle work/TrusirApp-main/linux",
+    "cmake.ignoreCMakeListsMissing": true
 }

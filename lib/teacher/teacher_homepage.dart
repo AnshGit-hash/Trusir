@@ -195,7 +195,7 @@ class _TeacherhomepageState extends State<Teacherhomepage> {
                           height: 1.6,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFFBCBCBC),
+                          color: Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                 widget.enableReg
@@ -415,7 +415,7 @@ class _TeacherhomepageState extends State<Teacherhomepage> {
               child: FloatingActionButton(
                 heroTag: 'whatsappButton',
                 onPressed: () {
-                  _launchWhatsApp('919234945401', 'Hello');
+                  _launchWhatsApp('918582040204', 'Hello');
                 },
                 child: Image.asset(
                   'assets/whatsapp@3x.png',
@@ -434,7 +434,7 @@ class _TeacherhomepageState extends State<Teacherhomepage> {
               child: FloatingActionButton(
                 heroTag: 'callButton',
                 onPressed: () {
-                  openDialer('9234945401');
+                  openDialer('8582040204');
                 },
                 child: Image.asset(
                   'assets/call.png',

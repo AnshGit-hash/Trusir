@@ -291,27 +291,6 @@ class _StudentHomepageState extends State<StudentHomepage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                widget.enableReg
-                    ? const SizedBox()
-                    : const Text(
-                        'We are Available in Bihar',
-                        style: TextStyle(
-                          fontSize: 20,
-                          height: 1.6,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFFBCBCBC),
-                        ),
-                      ),
-                widget.enableReg
-                    ? const SizedBox()
-                    : const SizedBox(height: 10),
-                widget.enableReg
-                    ? const SizedBox()
-                    : Image.asset('assets/homepage_image.jpg'),
-                widget.enableReg
-                    ? const SizedBox()
-                    : const SizedBox(height: 30),
 
                 // Row of two images
                 Column(
@@ -336,6 +315,27 @@ class _StudentHomepageState extends State<StudentHomepage> {
                   ],
                 ),
                 const SizedBox(height: 30),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const Text(
+                        'We are Available in Bihar',
+                        style: TextStyle(
+                          fontSize: 20,
+                          height: 1.6,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 10),
+                widget.enableReg
+                    ? const SizedBox()
+                    : Image.asset('assets/homepage_image.jpg'),
+                widget.enableReg
+                    ? const SizedBox()
+                    : const SizedBox(height: 30),
                 const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -541,7 +541,7 @@ class _StudentHomepageState extends State<StudentHomepage> {
               child: FloatingActionButton(
                 heroTag: 'whatsappButton',
                 onPressed: () {
-                  _launchWhatsApp('919234945401', 'Hello');
+                  _launchWhatsApp('918582040204', 'Hello');
                 },
                 child: Image.asset(
                   'assets/whatsapp@3x.png',
@@ -560,7 +560,7 @@ class _StudentHomepageState extends State<StudentHomepage> {
               child: FloatingActionButton(
                 heroTag: 'callButton',
                 onPressed: () {
-                  openDialer('9234945401');
+                  openDialer('8582040204');
                 },
                 child: Image.asset(
                   'assets/call.png',
