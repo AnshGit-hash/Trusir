@@ -364,14 +364,21 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       context,
                                       const Color.fromARGB(255, 109, 216, 249),
                                       'assets/money.png',
-                                      'Fee Payment', () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TeacherFeePaymentScreen(),
-                                        ));
-                                  }),
+                                      'Fee Payment',
+                                      studentprofile.isEmpty
+                                          ? () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'We will assign you a student shortly.');
+                                            }
+                                          : () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const TeacherFeePaymentScreen(),
+                                                  ));
+                                            }),
                                   buildTile(
                                       context,
                                       const Color.fromARGB(255, 222, 151, 255),
@@ -389,44 +396,71 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                       context,
                                       const Color.fromARGB(255, 188, 180, 255),
                                       'assets/list@3x.png',
-                                      'Attendance', () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Teacherattendance(
-                                          studentprofile: studentprofile,
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                      'Attendance',
+                                      studentprofile.isEmpty
+                                          ? () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'We will assign you a student shortly.');
+                                            }
+                                          : () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Teacherattendance(
+                                                    studentprofile:
+                                                        studentprofile,
+                                                  ),
+                                                ),
+                                              );
+                                            }),
                                   buildTile(
                                       context,
                                       const Color.fromARGB(255, 235, 177, 236),
                                       'assets/knowledge.png',
-                                      'General Knowledge', () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddGkTeacher(
-                                          studentprofile: studentprofile,
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                      'General Knowledge',
+                                      studentprofile.isEmpty
+                                          ? () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'We will assign you a student shortly.');
+                                            }
+                                          : () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AddGkTeacher(
+                                                    studentprofile:
+                                                        studentprofile,
+                                                  ),
+                                                ),
+                                              );
+                                            }),
                                   buildTile(
                                       context,
                                       const Color.fromARGB(255, 151, 177, 255),
                                       'assets/pensp@3x.png',
-                                      'Student Notice', () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AddNoticeTeacher(
-                                          studentprofile: studentprofile,
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                      'Student Notice',
+                                      studentprofile.isEmpty
+                                          ? () {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'We will assign you a student shortly.');
+                                            }
+                                          : () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AddNoticeTeacher(
+                                                    studentprofile:
+                                                        studentprofile,
+                                                  ),
+                                                ),
+                                              );
+                                            }),
                                 ],
                               ),
                             ),
@@ -803,61 +837,93 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                                         const Color.fromARGB(
                                             255, 109, 216, 249),
                                         'assets/list@3x.png',
-                                        'Attendance', () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              Teacherattendance(
-                                            studentprofile: studentprofile,
-                                          ),
-                                        ),
-                                      );
-                                    }),
+                                        'Attendance',
+                                        studentprofile.isEmpty
+                                            ? () {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'We will assign you a student shortly.');
+                                              }
+                                            : () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        Teacherattendance(
+                                                      studentprofile:
+                                                          studentprofile,
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
                                     buildTile(
                                         context,
                                         const Color.fromARGB(
                                             255, 222, 151, 255),
                                         'assets/money.png',
-                                        'Fee Payment', () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const TeacherFeePaymentScreen(),
-                                          ));
-                                    }),
+                                        'Fee Payment',
+                                        studentprofile.isEmpty
+                                            ? () {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'We will assign you a student shortly.');
+                                              }
+                                            : () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          const TeacherFeePaymentScreen(),
+                                                    ));
+                                              }),
                                     buildTile(
                                         context,
                                         const Color.fromARGB(
                                             255, 188, 180, 255),
                                         'assets/knowledge.png',
-                                        'General Knowledge', () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => AddGkTeacher(
-                                            studentprofile: studentprofile,
-                                          ),
-                                        ),
-                                      );
-                                    }),
+                                        'General Knowledge',
+                                        studentprofile.isEmpty
+                                            ? () {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'We will assign you a student shortly.');
+                                              }
+                                            : () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddGkTeacher(
+                                                      studentprofile:
+                                                          studentprofile,
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
                                     buildTile(
                                         context,
                                         const Color.fromARGB(
                                             255, 235, 177, 236),
                                         'assets/pensp@3x.png',
-                                        'Student Notice', () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              AddNoticeTeacher(
-                                            studentprofile: studentprofile,
-                                          ),
-                                        ),
-                                      );
-                                    }),
+                                        'Student Notice',
+                                        studentprofile.isEmpty
+                                            ? () {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'We will assign you a student shortly.');
+                                              }
+                                            : () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddNoticeTeacher(
+                                                      studentprofile:
+                                                          studentprofile,
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
                                     buildTile(
                                         context,
                                         const Color.fromARGB(

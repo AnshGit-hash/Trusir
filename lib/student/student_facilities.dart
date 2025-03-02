@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/api.dart';
 import 'package:trusir/student/attendance.dart';
+import 'package:trusir/student/course.dart';
 import 'package:trusir/student/extra_knowledge.dart';
 import 'package:trusir/student/gk_page.dart';
 import 'package:trusir/student/profilepopup.dart';
@@ -31,6 +36,10 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
   String phone = '';
   String userID = '';
   bool isWeb = false;
+  bool checking = false;
+  String checkTitle = '';
+  List<MyCourseModel> _courseDetails = [];
+  List<Teacher> teachers = [];
 
   final Map<String, Map<String, double>> imageSizes = {
     'assets/myprofile.png': {'width': 50, 'height': 50},
@@ -51,6 +60,53 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
   void initState() {
     super.initState();
     fetchProfileData();
+    check();
+  }
+
+  void check() async {
+    await fetchCourses();
+    await fetchTeachers();
+    setState(() {
+      checking = _courseDetails.isEmpty || teachers.isEmpty;
+      if (_courseDetails.isEmpty) {
+        checkTitle = 'Please enroll in a course First';
+      } else if (teachers.isEmpty) {
+        checkTitle = 'We will assign you a teacher shortly';
+      }
+    });
+  }
+
+  Future<List<MyCourseModel>> fetchCourses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userID = prefs.getString('userID');
+    final url = Uri.parse('$baseUrl/get-courses/$userID');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final responseData =
+          data.map((json) => MyCourseModel.fromJson(json)).toList();
+      _courseDetails = responseData;
+      return _courseDetails;
+    } else {
+      throw Exception('Failed to fetch courses');
+    }
+  }
+
+  Future<void> fetchTeachers() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userID = prefs.getString('userID');
+
+    final response = await http.get(Uri.parse('$baseUrl/teacher/$userID'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        teachers = data.map((json) => Teacher.fromJson(json)).toList();
+      });
+    } else {
+      throw Exception('Failed to load teachers');
+    }
   }
 
   Future<void> fetchProfileData() async {
@@ -304,145 +360,210 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             'assets/teacherprofile.png',
                             'Teacher Profile',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const TeacherProfileScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const TeacherProfileScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 109, 216, 249),
                             'assets/attendance.png',
                             'Attendance',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AttendancePage(
-                                userID: userID,
-                              ),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AttendancePage(
+                                          userID: userID,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 222, 151, 255),
                             'assets/money.png',
                             'Fee Payment',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const FeePaymentScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const FeePaymentScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 188, 180, 255),
                             'assets/pencil and ruller.png',
                             'Test Series',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  TestSeriesScreen(userID: userID),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TestSeriesScreen(userID: userID),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 235, 177, 236),
                             'assets/medal.png',
                             'Progress Report',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const ProgressReportScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ProgressReportScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 151, 177, 255),
                             'assets/qna.png',
                             'Student Doubt',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StudentDoubtScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const StudentDoubtScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color(0xFFB3E5FC),
                             'assets/sir.png',
                             'Parents Doubt',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ParentsDoubtScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ParentsDoubtScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 177, 135, 220),
                             'assets/knowledge.png',
                             'Extra Knowledge',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ExtraKnowledge(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ExtraKnowledge(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 255, 170, 157),
                             'assets/knowledge.png',
                             'General Knowledge',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const GKPage(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const GKPage(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 182, 202, 255),
                             'assets/notice.png',
                             'Notice',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const NoticeScreen(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const NoticeScreen(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(189, 244, 133, 232),
@@ -463,14 +584,21 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             'assets/video knowledge.png',
                             'Video Knowledge',
                             tileWidth,
-                            tileHeight, () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const VideoKnowledge(),
-                            ),
-                          );
-                        }, isWeb),
+                            tileHeight,
+                            checking
+                                ? () {
+                                    Fluttertoast.showToast(msg: checkTitle);
+                                  }
+                                : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const VideoKnowledge(),
+                                      ),
+                                    );
+                                  },
+                            isWeb),
                       ],
                     );
                   }),
