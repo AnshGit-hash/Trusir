@@ -626,6 +626,7 @@ class _WalletPageState extends State<WalletPage> {
                         return _buildTransactionItem(
                           transaction["transactionType"] ??
                               "Unknown Transaction",
+                          transaction["des"] ?? "No Description",
                           double.tryParse(transaction["amount"] ?? "0.0") ??
                               0.0,
                           formatDate(transaction["created_at"]),
@@ -694,7 +695,8 @@ class _WalletPageState extends State<WalletPage> {
     );
   }
 
-  Widget _buildTransactionItem(String description, double amount, String date) {
+  Widget _buildTransactionItem(
+      String title, String description, double amount, String date) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -719,11 +721,26 @@ class _WalletPageState extends State<WalletPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  description,
+                  title,
                   style: const TextStyle(
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
                   ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w300,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
                 ),
                 Text(
                   date,
