@@ -239,7 +239,10 @@ class _CoursePageState extends State<CoursePage> {
 
       setState(() {
         final specialCourses = _courses.where((course) {
-          return course.student == userID;
+          final isPurchased = myCourses
+              .any((myCourse) => int.parse(myCourse.courseID) == course.id);
+          return course.student == userID &&
+              !isPurchased; // Exclude purchased courses
         }).toList();
         final filteredAllCourses = _courses.where((course) {
           final noMatchingDetail = !_courseDetails.any((detail) =>
