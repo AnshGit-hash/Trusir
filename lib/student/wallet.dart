@@ -728,9 +728,7 @@ class _WalletPageState extends State<WalletPage> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 5),
                 Text(
                   description,
                   style: const TextStyle(
@@ -739,9 +737,7 @@ class _WalletPageState extends State<WalletPage> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 5),
                 Text(
                   date,
                   style: TextStyle(
