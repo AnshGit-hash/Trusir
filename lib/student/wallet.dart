@@ -41,7 +41,7 @@ class _WalletPageState extends State<WalletPage> {
     // Replace with your API URL
     try {
       final response =
-          await http.get(Uri.parse('$baseUrl/user/balance/$userID'));
+          await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -151,8 +151,8 @@ class _WalletPageState extends State<WalletPage> {
             paymentstatus = true;
           });
           if (paymentstatus) {
-            paymentService.updateWalletBalance(
-                context, addMoneyamount ?? '0', userID, '0');
+            paymentService.addWalletBalance(
+                context, addMoneyamount ?? '0', userID);
             Navigator.pop(context);
             Navigator.push(
               context,

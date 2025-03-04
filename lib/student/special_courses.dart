@@ -24,7 +24,7 @@ class _SpecialCoursesState extends State<SpecialCourses> {
   Widget build(BuildContext context) {
     isWeb = MediaQuery.of(context).size.width > 600;
     return widget.courses.isEmpty
-        ? const Center(child: Text('No Courses'))
+        ? const SizedBox()
         : isWeb
             ? GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
@@ -287,8 +287,8 @@ class _CourseCardState extends State<CourseCard> {
 
   void walletPayment(String amount, int courseID) async {
     if (double.parse(amount) > double.parse(balance!)) {
-      bool success = await paymentService.updateWalletBalance(
-          context, '0', userID, balance!);
+      bool success =
+          await paymentService.subWalletBalance(context, balance!, userID);
       if (success) {
         merchantTransactionID =
             paymentService.generateUniqueTransactionId(userID!);
@@ -310,8 +310,8 @@ class _CourseCardState extends State<CourseCard> {
         );
       }
     } else {
-      bool success = await paymentService.updateWalletBalance(
-          context, '0', userID, amount);
+      bool success =
+          await paymentService.subWalletBalance(context, amount, userID);
 
       if (success) {
         postTransaction('WALLET', int.parse(amount), transactionType,
@@ -508,11 +508,11 @@ class _CourseCardState extends State<CourseCard> {
 
     // Create a Transaction instance
     final Transaction transaction = Transaction(
-      transactionName: transactionName,
-      amount: amount,
-      transactionType: transactionType,
-      transactionID: transactionID,
-    );
+        transactionName: transactionName,
+        amount: amount,
+        transactionType: transactionType,
+        transactionID: transactionID,
+        description: "Course Purchase");
 
     try {
       // Make the POST request

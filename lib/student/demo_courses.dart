@@ -364,8 +364,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
 
   void walletPayment(String amount, int courseID) async {
     if (double.parse(amount) > double.parse(balance!)) {
-      bool success = await paymentService.updateWalletBalance(
-          context, '0', userID, balance!);
+      bool success =
+          await paymentService.subWalletBalance(context, balance!, userID);
       if (success) {
         merchantTransactionID =
             paymentService.generateUniqueTransactionId(userID!);
@@ -387,8 +387,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
         );
       }
     } else {
-      bool success = await paymentService.updateWalletBalance(
-          context, '0', userID, amount);
+      bool success =
+          await paymentService.subWalletBalance(context, amount, userID);
 
       if (success) {
         postTransaction('WALLET', int.parse(amount), transactionType,
@@ -585,11 +585,11 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
 
     // Create a Transaction instance
     final Transaction transaction = Transaction(
-      transactionName: transactionName,
-      amount: amount,
-      transactionType: transactionType,
-      transactionID: transactionID,
-    );
+        transactionName: transactionName,
+        amount: amount,
+        transactionType: transactionType,
+        transactionID: transactionID,
+        description: "Course Purchase");
 
     try {
       // Make the POST request

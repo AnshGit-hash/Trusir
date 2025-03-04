@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'package:trusir/common/api.dart';
 
 class PaymentService {
   final String environmentValue =
@@ -69,27 +70,30 @@ class PaymentService {
     });
   }
 
-  Future<bool> updateWalletBalance(BuildContext context, String balance,
-      String? userID, String negativebalance) async {
-    final String url =
-        "https://admin.trusir.com/api/user/$userID/update-balance";
-
-    // Define the query parameters
-    final Map<String, String> queryParams = {
-      "balanceplus": balance,
-      "balancenegative": negativebalance
-    };
-
-    // Append query parameters to URL
-    final Uri uri = Uri.parse(url).replace(queryParameters: queryParams);
+  Future<bool> subWalletBalance(
+      BuildContext context, String balance, String? userID) async {
+    final String url = "$baseUrl/sub-balance/$userID/$balance";
 
     // Make PUT request
-    final response = await http.put(
-      uri,
-      headers: {
-        "Content-Type": "application/json" // Add authentication if required
-      },
-    );
+    final response = await http.get(Uri.parse(url));
+
+    // Handle response
+    if (response.statusCode == 200) {
+      print("Wallet balance updated successfully: ${response.body}");
+      return true;
+    } else {
+      print(
+          "Failed to update balance: ${response.statusCode} - ${response.body}");
+      return false;
+    }
+  }
+
+  Future<bool> addWalletBalance(
+      BuildContext context, String balance, String? userID) async {
+    final String url = "$baseUrl/add-balance/$userID/$balance";
+
+    // Make PUT request
+    final response = await http.get(Uri.parse(url));
 
     // Handle response
     if (response.statusCode == 200) {

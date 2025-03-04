@@ -59,13 +59,14 @@ class Transaction {
   final int amount;
   final String transactionType;
   final String transactionID;
+  final String description;
 
-  Transaction({
-    required this.transactionName,
-    required this.amount,
-    required this.transactionType,
-    required this.transactionID,
-  });
+  Transaction(
+      {required this.transactionName,
+      required this.amount,
+      required this.transactionType,
+      required this.transactionID,
+      required this.description});
 
   // Convert the Transaction object to JSON
   Map<String, dynamic> toJson() {
@@ -74,6 +75,7 @@ class Transaction {
       "amount": amount,
       "transactionType": transactionType,
       "transactionID": transactionID,
+      "des": description
     };
   }
 }

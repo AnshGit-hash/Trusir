@@ -87,7 +87,7 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
     // Replace with your API URL
     try {
       final response =
-          await http.get(Uri.parse('$baseUrl/user/balance/$userID'));
+          await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
