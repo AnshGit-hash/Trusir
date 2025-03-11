@@ -267,7 +267,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                   return PaymentMethod.buildDialog(
                                       amount: widget.course['new_amount'],
                                       name: widget.course['name'],
-                                      balance: balance,
+                                      balance: balance ?? '0',
                                       onPhonePayment: () {
                                         merchantTransactionID = paymentService
                                             .generateUniqueTransactionId(

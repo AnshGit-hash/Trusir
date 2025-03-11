@@ -1568,10 +1568,14 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                 Checkbox(
                                   value: agreeToTerms,
                                   onChanged: (bool? value) {
-                                    setState(() {
-                                      agreeToTerms = value!;
-                                      formData.agreetoterms = agreeToTerms;
-                                    });
+                                    if (!agreeToTerms) {
+                                      _showTermsPopup(); // Show popup first before allowing agreement
+                                    } else {
+                                      setState(() {
+                                        agreeToTerms =
+                                            false; // Allow unchecking directly
+                                      });
+                                    }
                                   },
                                 ),
                                 const Text('I agree with the ',
@@ -2539,6 +2543,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                   onPressed: () {
                     setState(() {
                       agreeToTerms = true;
+                      formData.agreetoterms = agreeToTerms;
                     });
                     Navigator.pop(context);
                   },

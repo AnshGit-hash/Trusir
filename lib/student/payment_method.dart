@@ -4,7 +4,7 @@ class PaymentMethod {
   static Widget buildDialog({
     required String amount,
     required String name,
-    required String? balance,
+    required String balance,
     required VoidCallback onPhonePayment,
     required VoidCallback onWalletPayment,
   }) {

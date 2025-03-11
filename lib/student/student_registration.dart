@@ -906,18 +906,16 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                         ),
                         const SizedBox(width: 20),
                         Expanded(
-                          child: _buildMultiSelectDropdownField('Subject',
-                              selectedValues: selectedSubjectsPerForm[index],
-                              onChanged: (List<String> values) {
-                            setState(() {
-                              selectedSubjects = values;
-                              studentForms[index].subject =
-                                  selectedSubjects.join(',');
-                            });
-                          },
-                              items: _courses,
-                              selectedText:
-                                  studentForms[index].subject ?? 'Select'),
+                          child: _buildDropdownField(
+                            'Subject',
+                            selectedValue: studentForms[index].subject,
+                            onChanged: (value) {
+                              setState(() {
+                                studentForms[index].subject = value;
+                              });
+                            },
+                            items: _courses,
+                          ),
                         ),
                       ],
                     ),
@@ -1514,16 +1512,16 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                     items: additionals['board'] ?? [],
                   ),
                   const SizedBox(height: 14),
-                  _buildMultiSelectDropdownField('Subject',
-                      selectedValues: selectedSubjectsPerForm[index],
-                      onChanged: (List<String> values) {
-                    setState(() {
-                      selectedSubjects = values;
-                      studentForms[index].subject = selectedSubjects.join(',');
-                    });
-                  },
-                      items: _courses,
-                      selectedText: studentForms[index].subject ?? 'Select'),
+                  _buildDropdownField(
+                    'Subject',
+                    selectedValue: studentForms[index].subject,
+                    onChanged: (value) {
+                      setState(() {
+                        studentForms[index].subject = value;
+                      });
+                    },
+                    items: _courses,
+                  ),
                   const SizedBox(height: 14),
 
                   _buildDropdownField(
@@ -2142,108 +2140,6 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
             .map((item) => DropdownMenuItem(value: item, child: Text(item)))
             .toList(),
       ),
-    );
-  }
-
-  Widget _buildMultiSelectDropdownField(
-    String hintText, {
-    required List<String> selectedValues,
-    required ValueChanged<List<String>> onChanged,
-    required List<String> items,
-    required String selectedText,
-  }) {
-    bool isWeb = MediaQuery.of(context).size.width > 600;
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Container(
-          height: 48,
-          width: isWeb ? 700 : double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade200,
-                blurRadius: 4,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: DropdownButtonFormField<String>(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (value) {
-              if (selectedValues.isEmpty) {
-                return 'Please select at least one option';
-              }
-              return null;
-            },
-            decoration: InputDecoration(
-              labelText: hintText,
-              floatingLabelBehavior: FloatingLabelBehavior.auto,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              isDense: true,
-            ),
-            items: items
-                .map(
-                  (item) => DropdownMenuItem(
-                    value: item,
-                    child: StatefulBuilder(
-                      builder: (context, setStateInner) {
-                        return CheckboxListTile(
-                          title: Text(
-                            item,
-                            style: const TextStyle(fontWeight: FontWeight.w400),
-                          ),
-                          value: selectedValues.contains(item),
-                          onChanged: (bool? isChecked) {
-                            if (isChecked == true) {
-                              if (!selectedValues.contains(item)) {
-                                selectedValues.add(item);
-                              }
-                            } else {
-                              selectedValues.remove(item);
-                            }
-                            // Update the concatenated text
-                            selectedText = selectedValues.join(', ');
-
-                            // Pass the updated list to the parent
-                            onChanged(selectedValues);
-                            setStateInner(() {}); // Update the UI for this item
-                            setState(() {}); // Update the display string
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                        );
-                      },
-                    ),
-                  ),
-                )
-                .toList(),
-            onChanged: (_) {
-              // No need for action here since selection happens in the checkbox
-            },
-            isExpanded: true,
-            value: null,
-            hint: selectedText.isNotEmpty
-                ? Text(
-                    selectedText,
-                    style: const TextStyle(fontWeight: FontWeight.w400),
-                  )
-                : null,
-          ),
-        );
-      },
     );
   }
 
