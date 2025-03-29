@@ -66,6 +66,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
     super.initState();
     paymentService.initPhonePeSdk();
     fetchProfileData();
+    fetchBalance();
   }
 
   @override
@@ -267,7 +268,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                   return PaymentMethod.buildDialog(
                                       amount: widget.course['new_amount'],
                                       name: widget.course['name'],
-                                      balance: balance ?? '0',
+                                      balance: '$balance',
                                       onPhonePayment: () {
                                         merchantTransactionID = paymentService
                                             .generateUniqueTransactionId(
@@ -363,14 +364,17 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
   }
 
   void walletPayment(String amount, int courseID) async {
-    if (double.parse(amount) > double.parse(balance!)) {
+    setState(() {
+      payviawallet = true;
+    });
+    if (double.parse(amount) > balance) {
       bool success =
-          await paymentService.subWalletBalance(context, balance!, userID);
+          await paymentService.subWalletBalance(context, '$balance', userID);
       if (success) {
         merchantTransactionID =
             paymentService.generateUniqueTransactionId(userID!);
         body = getChecksum(
-          int.parse('${double.parse(amount) - double.parse(balance!)}00'),
+          int.parse('${double.parse(amount) - balance}00'),
         ).toString();
         paymentService.startTransaction(body, checksum, checkStatus,
             showLoadingDialog, paymentstatusnavigation);
@@ -423,21 +427,46 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
   String checksum = "";
   // Obtain this from your backend
   String? userID;
-  String? balance;
+  double balance = 0;
 
   String? phone;
   String transactionType = '';
 
   String merchantTransactionID = '';
   bool paymentstatus = false;
+  bool payviawallet = false;
 
   Future<void> fetchProfileData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userID = prefs.getString('userID');
       phone = prefs.getString('phone_number');
-      balance = prefs.getString('wallet_balance');
     });
+  }
+
+  Future<double> fetchBalance() async {
+    final prefs = await SharedPreferences.getInstance();
+    userID = prefs.getString('userID');
+    // Replace with your API URL
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(double.parse(data['balance']));
+        setState(() {
+          balance = double.parse(data['balance']);
+          prefs.setString('wallet_balance', '$balance');
+        });
+        return balance; // Convert balance to an integer
+      } else {
+        throw Exception('Failed to load balance');
+      }
+    } catch (e) {
+      print('Error: $e');
+      return 0; // Return 0 in case of an error
+    }
   }
 
   void paymentstatusnavigation() {
@@ -525,7 +554,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
             );
           }
           postTransaction(
-            double.parse(widget.course['new_amount']) > double.parse(balance!)
+            double.parse(widget.course['new_amount']) > balance && payviawallet
                 ? 'Wallet & $transactionType'
                 : transactionType,
             adjustedAmount,

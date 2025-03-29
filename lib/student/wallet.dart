@@ -71,9 +71,10 @@ class _WalletPageState extends State<WalletPage> {
 
       // Filter transactions where transactionName is 'WALLET' or 'ByAdmin'
       List<Map<String, dynamic>> walletTransactions = data
-          .where((transaction) =>
-              transaction['transactionName'] == 'WALLET' ||
-              transaction['transactionName'] == 'ByAdmin')
+          .where((transaction) => transaction['transactionName']
+              .toString()
+              .toLowerCase()
+              .contains('wallet'))
           .map((transaction) => transaction as Map<String, dynamic>)
           .toList();
 
@@ -623,6 +624,7 @@ class _WalletPageState extends State<WalletPage> {
                   ? const Center(child: Text("No Wallet Transactions Found"))
                   : Column(
                       children: walletTransactions.map((transaction) {
+                        print(transaction['des']);
                         return _buildTransactionItem(
                           transaction["transactionType"] ??
                               "Unknown Transaction",
@@ -704,14 +706,20 @@ class _WalletPageState extends State<WalletPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: amount > 0
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.red.withOpacity(0.1),
+              color:
+                  amount > 0 && !description.toLowerCase().contains('purchase')
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              amount > 0 ? Icons.add : Icons.remove,
-              color: amount > 0 ? Colors.green : Colors.red,
+              amount > 0 && !description.toLowerCase().contains('purchase')
+                  ? Icons.add
+                  : Icons.remove,
+              color:
+                  amount > 0 && !description.toLowerCase().contains('purchase')
+                      ? Colors.green
+                      : Colors.red,
               size: 16,
             ),
           ),
@@ -750,9 +758,12 @@ class _WalletPageState extends State<WalletPage> {
             ),
           ),
           Text(
-            "${amount > 0 ? '+' : ''}₹${amount.abs().toStringAsFixed(2)}",
+            "${amount > 0 && !description.toLowerCase().contains('purchase') ? '+' : ''}₹${amount.abs().toStringAsFixed(2)}",
             style: TextStyle(
-              color: amount > 0 ? Colors.green : Colors.red,
+              color:
+                  amount > 0 && !description.toLowerCase().contains('purchase')
+                      ? Colors.green
+                      : Colors.red,
               fontWeight: FontWeight.w600,
               fontFamily: 'Poppins',
             ),
