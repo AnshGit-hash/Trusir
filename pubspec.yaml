@@ -41,6 +41,7 @@ dependencies:
   hexcolor:
   connectivity_plus:
   image:
+  photo_view:
 dev_dependencies:
   flutter_test:
     sdk: flutter

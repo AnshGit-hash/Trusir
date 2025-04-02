@@ -664,6 +664,9 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
                                                                                     ),
                                                                                   ),
                                                                                 ),
+                                                                                const SizedBox(
+                                                                                  height: 16,
+                                                                                ),
                                                                                 Container(
                                                                                   width: 200,
                                                                                   height: 50,
@@ -945,7 +948,7 @@ class StudentDoubtsDetailPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: GridView.builder(
@@ -959,11 +962,17 @@ class StudentDoubtsDetailPage extends StatelessWidget {
                   ),
                   itemCount: imageUrls.length,
                   itemBuilder: (context, index) {
-                    return Image.network(
-                      imageUrls[index],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
+                    return GestureDetector(
+                      onTap: () {
+                        FileDownloader.openFile(
+                            context, 'Doubt_${gk.title}', imageUrls[index]);
+                      },
+                      child: Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image),
+                      ),
                     );
                   },
                 ),
@@ -998,26 +1007,24 @@ class StudentDoubtsDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Solution:',
-                style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 10),
-              gk.solution != "null"
-                  ? Image.network(
-                      gk.solution,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
-                    )
-                  : const Text(
-                      'No Solutions Uploaded',
-                      style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: 16,
+              gk.status == 'Solved'
+                  ? const Text('Uploaded Solution')
+                  : const Text('Upload Solution'),
+              gk.status == 'Solved'
+                  ? GestureDetector(
+                      onTap: () {
+                        FileDownloader.openFile(
+                            context, 'Solution_${gk.title}', gk.solution);
+                      },
+                      child: Image.network(gk.solution))
+                  : ElevatedButton.icon(
+                      onPressed: onUpload,
+                      icon: const Icon(Icons.upload, size: 17),
+                      label:
+                          const Text("Upload", style: TextStyle(fontSize: 10)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(0),
+                        foregroundColor: Colors.blue,
                       ),
                     ),
             ],

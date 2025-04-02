@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 // import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/image_viewer.dart';
 import 'package:trusir/common/notificationhelper.dart';
 
 class FileDownloader {
@@ -20,6 +20,7 @@ class FileDownloader {
     BuildContext context,
     String url,
     String filename,
+    Function(String) onDownloadComplete, // Callback to refresh UI
   ) async {
     try {
       String fileExtension = _getFileExtensionFromUrl(url);
@@ -35,6 +36,8 @@ class FileDownloader {
 
       await _saveDownloadedFiles();
       showDownloadNotification(finalFilename, filePath);
+
+      onDownloadComplete(filePath); // Refresh UI after download
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -108,44 +111,5 @@ class FileDownloader {
     if (await Permission.notification.isDenied) {
       await Permission.notification.request();
     }
-  }
-}
-
-class ImageViewerScreen extends StatelessWidget {
-  final String imagePath;
-  final bool downloaded;
-  final String title;
-
-  const ImageViewerScreen(
-      {super.key,
-      required this.imagePath,
-      required this.title,
-      required this.downloaded});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Row(
-        children: [
-          Text(title),
-          const Spacer(),
-          !downloaded
-              ? IconButton(
-                  onPressed: () {
-                    FileDownloader.downloadFile(context, imagePath, title);
-                  },
-                  icon: const Icon(Icons.download))
-              : const SizedBox()
-        ],
-      )),
-      body: !downloaded
-          ? Center(
-              child: Image.network(imagePath, fit: BoxFit.contain),
-            )
-          : Center(
-              child: Image.file(File(imagePath), fit: BoxFit.contain),
-            ),
-    );
   }
 }

@@ -1,16 +1,9 @@
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
-import 'package:trusir/common/notificationhelper.dart';
+import 'package:trusir/common/file_downloader.dart';
 
 class StudentProgressPage extends StatefulWidget {
   final String userID;
@@ -23,8 +16,6 @@ class StudentProgressPage extends StatefulWidget {
 class _StudentProgressPageState extends State<StudentProgressPage> {
   List<dynamic> _loadedReports = [];
   bool reportempty = true;
-  bool _isDownloading = false;
-  String _downloadProgress = '';
   Map<String, String> downloadedFiles = {};
   int page = 1;
 
@@ -81,7 +72,6 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
   @override
   void initState() {
     super.initState();
-    _loadDownloadedFiles();
     _loadedReports = [];
     reportempty = false;
     _loadInitialReports();
@@ -99,52 +89,10 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
     return formattedTime; // Example: 11:40 PM
   }
 
-  Future<void> _loadDownloadedFiles() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedFiles = prefs.getString('downloadedReports') ?? '{}';
+  void onDownloadComplete(String reporturl, String newPath) {
     setState(() {
-      downloadedFiles = Map<String, String>.from(jsonDecode(savedFiles));
+      reporturl = newPath;
     });
-  }
-
-  Future<void> _saveDownloadedFiles() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('downloadedReports', jsonEncode(downloadedFiles));
-  }
-
-  Future<void> _requestNotificationPermission() async {
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
-    }
-  }
-
-  Future<void> _requestPermissions() async {
-    if (await Permission.storage.isGranted) {
-      return;
-    }
-
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-
-      // Skip permissions for Android versions below API 30
-      if (androidInfo.version.sdkInt < 30) {
-        return;
-      }
-
-      if (await Permission.photos.isGranted ||
-          await Permission.videos.isGranted) {
-        return;
-      }
-
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.photos,
-        Permission.videos,
-      ].request();
-
-      if (statuses.values.any((status) => !status.isGranted)) {
-        openAppSettings();
-      }
-    }
   }
 
   Future<List<dynamic>> fetchProgressReports({int page = 1}) async {
@@ -189,63 +137,6 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
     }
   }
 
-  Future<String> _getAppSpecificDownloadPath(String filename) async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/$filename';
-  }
-
-  Future<void> _downloadFile(String url, String filename) async {
-    setState(() {
-      _isDownloading = true;
-      _downloadProgress = '0%';
-    });
-
-    try {
-      final filePath = await _getAppSpecificDownloadPath(filename);
-      await _requestPermissions();
-      await _requestNotificationPermission();
-      final dio = Dio();
-      await dio.download(
-        url,
-        filePath,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            setState(() {
-              _downloadProgress =
-                  '${(received / total * 100).toStringAsFixed(0)}%';
-            });
-          }
-        },
-      );
-
-      setState(() {
-        downloadedFiles[filename] = filePath;
-        _isDownloading = false;
-        _downloadProgress = '';
-      });
-      await _saveDownloadedFiles();
-
-      showDownloadNotification(filename, filePath);
-    } catch (e) {
-      setState(() {
-        _isDownloading = false;
-        _downloadProgress = '';
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Download failed: $e'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
-  Future<void> _openFile(String filename) async {
-    final filePath = downloadedFiles[filename];
-    OpenFile.open(filePath);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -279,20 +170,6 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            if (_isDownloading)
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Downloading: $_downloadProgress',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
             _buildBackButton(context),
             _buildCurrentMonthCard(),
             const SizedBox(height: 20),
@@ -308,6 +185,7 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
                         subject: report['subject'],
                         date: formatDate(report['created_at']),
                         time: formatTime(report['created_at']),
+                        total: report['total_marks'],
                         marks: report['marks'],
                         reportUrl: report['report'],
                         cardColors: 'color',
@@ -456,12 +334,12 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
     required String date,
     required String time,
     required String marks,
+    required String total,
     required String reportUrl,
     required String cardColors,
     required int index,
   }) {
     String filename = '${subject}_report_$date.jpg';
-    bool isDownloaded = downloadedFiles.containsKey(filename);
     List<Color> currentCircleColors = getCircleColors(index);
 
     return Padding(
@@ -511,7 +389,7 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
                         ),
                       ),
                       Text(
-                        'Marks Obtained: $marks',
+                        'Marks Obtained: $marks/$total',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
@@ -558,24 +436,20 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      if (isDownloaded) {
-                        _openFile(filename);
-                      } else {
-                        _downloadFile(reportUrl, filename);
-                      }
+                      FileDownloader.openFile(context, filename, reportUrl);
                     },
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isDownloaded ? 'Open Report' : 'Download Report',
-                          style: const TextStyle(
+                          'Open Report',
+                          style: TextStyle(
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Icon(
-                          isDownloaded ? Icons.open_in_new : Icons.download,
+                          Icons.open_in_new,
                           color: Colors.black,
                           size: 19,
                         ),

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/delete.dart';
+import 'package:trusir/common/file_downloader.dart';
 import 'package:trusir/student/student_doubt.dart';
 
 class YourDoubtPage extends StatefulWidget {
@@ -422,11 +423,17 @@ class YourDoubtDetailPage extends StatelessWidget {
                   ),
                   itemCount: imageUrls.length,
                   itemBuilder: (context, index) {
-                    return Image.network(
-                      imageUrls[index],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
+                    return GestureDetector(
+                      onTap: () {
+                        FileDownloader.openFile(
+                            context, 'Doubt_${gk.title}', imageUrls[index]);
+                      },
+                      child: Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image),
+                      ),
                     );
                   },
                 ),
@@ -470,11 +477,17 @@ class YourDoubtDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               gk.solution != "null"
-                  ? Image.network(
-                      gk.solution,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
+                  ? GestureDetector(
+                      onTap: () {
+                        FileDownloader.openFile(
+                            context, 'Solution_${gk.title}', gk.solution);
+                      },
+                      child: Image.network(
+                        gk.solution,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image),
+                      ),
                     )
                   : const Text(
                       'No Solutions Uploaded',

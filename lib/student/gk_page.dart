@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/file_downloader.dart';
 
 // New DetailPage to show GK details
 class GKDetailPage extends StatelessWidget {
@@ -45,14 +46,20 @@ class GKDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Image.network(
-                  gk.image,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.broken_image,
-                        size: 200, color: Colors.grey);
+                child: GestureDetector(
+                  onTap: () {
+                    FileDownloader.openFile(
+                        context, 'GK_${gk.title}', gk.image);
                   },
+                  child: Image.network(
+                    gk.image,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.broken_image,
+                          size: 200, color: Colors.grey);
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

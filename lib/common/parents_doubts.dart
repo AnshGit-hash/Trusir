@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/delete.dart';
+import 'package:trusir/common/file_downloader.dart';
 
 class ParentsDoubtsPage extends StatefulWidget {
   const ParentsDoubtsPage({super.key});
@@ -380,11 +381,17 @@ class ParentsDoubtDetailPage extends StatelessWidget {
                   ),
                   itemCount: imageUrls.length,
                   itemBuilder: (context, index) {
-                    return Image.network(
-                      imageUrls[index],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.broken_image),
+                    return GestureDetector(
+                      onTap: () {
+                        FileDownloader.openFile(
+                            context, 'Solution_${gk.title}', imageUrls[index]);
+                      },
+                      child: Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image),
+                      ),
                     );
                   },
                 ),
