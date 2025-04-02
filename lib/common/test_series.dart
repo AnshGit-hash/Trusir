@@ -287,13 +287,17 @@ class _TestSeriesScreenState extends State<TestSeriesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildDownloadButton(
-                  isactive: isactive,
-                  testName: test['test_name'],
-                  label: 'Question',
-                  isQuestion: true,
-                  fileName: 'question_${test['test_name']}',
-                  downloadFile: test['question']),
+              test['question'] == 'No Question'
+                  ? SizedBox(
+                      child: Text(test['question']),
+                    )
+                  : _buildDownloadButton(
+                      isactive: isactive,
+                      testName: test['test_name'],
+                      label: 'Question',
+                      isQuestion: true,
+                      fileName: 'question_${test['test_name']}',
+                      downloadFile: test['question']),
               const SizedBox(width: 27),
               _buildDownloadButton(
                   isactive: isactive,
@@ -369,12 +373,8 @@ class _TestSeriesScreenState extends State<TestSeriesScreen> {
                                       answerFileName = '${fileName}_$index';
                                     }
                                   });
-                                  FileDownloader.downloadedFiles
-                                          .containsKey('${fileName}_$index')
-                                      ? FileDownloader.openFile(
-                                          '${fileName}_$index')
-                                      : FileDownloader.downloadFile(
-                                          context, image, '${fileName}_$index');
+                                  FileDownloader.openFile(
+                                      context, '${fileName}_$index', image);
                                 },
                                 child: Column(
                                   children: [

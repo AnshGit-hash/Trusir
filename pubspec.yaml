@@ -40,6 +40,7 @@ dependencies:
   multi_select_flutter:
   hexcolor:
   connectivity_plus:
+  image:
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -945,7 +945,7 @@ class StudentDoubtsDetailPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: GridView.builder(
@@ -998,19 +998,26 @@ class StudentDoubtsDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              gk.status == 'Solved'
-                  ? const Text('Uploaded Solution')
-                  : const Text('Upload Solution'),
-              gk.status == 'Solved'
-                  ? Image.network(gk.solution)
-                  : ElevatedButton.icon(
-                      onPressed: onUpload,
-                      icon: const Icon(Icons.upload, size: 17),
-                      label:
-                          const Text("Upload", style: TextStyle(fontSize: 10)),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(0),
-                        foregroundColor: Colors.blue,
+              const Text(
+                'Solution:',
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              gk.solution != "null"
+                  ? Image.network(
+                      gk.solution,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    )
+                  : const Text(
+                      'No Solutions Uploaded',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
                       ),
                     ),
             ],

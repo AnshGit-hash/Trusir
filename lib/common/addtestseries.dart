@@ -140,9 +140,7 @@ class _AddtestseriesState extends State<Addtestseries> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Test uploaded successfully!')),
-        );
+        Fluttertoast.showToast(msg: 'Test Uploaded Successfully');
         Navigator.pop(context);
         Navigator.push(
             context,
@@ -152,14 +150,10 @@ class _AddtestseriesState extends State<Addtestseries> {
                     )));
         print(postData);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to upload test.')),
-        );
+        Fluttertoast.showToast(msg: 'Failed to upload test');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      Fluttertoast.showToast(msg: 'Internal Server Error');
     }
   }
 
@@ -246,12 +240,6 @@ class _AddtestseriesState extends State<Addtestseries> {
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 13),
                         isDense: true),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the test name';
-                      }
-                      return null;
-                    },
                   ),
                 ),
               ),
@@ -1003,11 +991,15 @@ class _AddtestseriesState extends State<Addtestseries> {
       child: GestureDetector(
         onTap: () {
           if (_formKey.currentState!.validate()) {
+            if (_testNameController.text.isEmpty) {
+              setState(() {
+                _testNameController.text = 'No Title';
+              });
+            }
             if (question == '') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Upload Question')),
-              );
-              return;
+              setState(() {
+                question = 'No Question';
+              });
             } else if (answer == '') {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Upload Answer')),

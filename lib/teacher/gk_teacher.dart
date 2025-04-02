@@ -131,20 +131,18 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
 
         if (response.statusCode == 200) {
           print("GK posted for $student");
+          Fluttertoast.showToast(
+              msg: 'GK Posted Successfully for all selected students!');
+          Navigator.pop(context);
         } else {
           print("Failed for $student: ${response.body}");
+          Fluttertoast.showToast(msg: 'Failed to post GK for $student!');
         }
       } catch (e) {
         print("Error occurred for $student: $e");
+        Fluttertoast.showToast(msg: 'Error occurred for $student');
       }
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text('GK Posted Successfully for all selected students!')),
-    );
-
-    Navigator.pop(context);
   }
 
   @override

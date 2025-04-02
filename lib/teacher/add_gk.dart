@@ -112,22 +112,17 @@ class _AddGKState extends State<AddGK> {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        // Successfully submitted
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('GK Posted Successfully!'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        print("GK posted");
+        Fluttertoast.showToast(
+            msg: 'GK Posted Successfully for all selected students!');
         Navigator.pop(context);
-
-        print(body);
       } else {
-        // Handle error
-        print('Failed to submit form: ${response.body}');
+        print("Failed ${response.body}");
+        Fluttertoast.showToast(msg: 'Failed to post GK!');
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print("Error occurred : $e");
+      Fluttertoast.showToast(msg: 'Error occurred');
     }
   }
 

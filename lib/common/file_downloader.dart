@@ -1,7 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
+// import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,10 +58,38 @@ class FileDownloader {
     }
   }
 
-  static Future<void> openFile(String filename) async {
+  // static Future<void> openFile(String filename) async {
+  //   final filePath = downloadedFiles[filename];
+  //   if (filePath != null) {
+  //     await OpenFile.open(filePath);
+  //   }
+  // }
+
+  static Future<void> openFile(
+      BuildContext context, String filename, String url) async {
     final filePath = downloadedFiles[filename];
     if (filePath != null) {
-      await OpenFile.open(filePath);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageViewerScreen(
+            imagePath: filePath,
+            downloaded: true,
+            title: filename,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageViewerScreen(
+            imagePath: url,
+            downloaded: false,
+            title: filename,
+          ),
+        ),
+      );
     }
   }
 
@@ -79,5 +108,44 @@ class FileDownloader {
     if (await Permission.notification.isDenied) {
       await Permission.notification.request();
     }
+  }
+}
+
+class ImageViewerScreen extends StatelessWidget {
+  final String imagePath;
+  final bool downloaded;
+  final String title;
+
+  const ImageViewerScreen(
+      {super.key,
+      required this.imagePath,
+      required this.title,
+      required this.downloaded});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: Row(
+        children: [
+          Text(title),
+          const Spacer(),
+          !downloaded
+              ? IconButton(
+                  onPressed: () {
+                    FileDownloader.downloadFile(context, imagePath, title);
+                  },
+                  icon: const Icon(Icons.download))
+              : const SizedBox()
+        ],
+      )),
+      body: !downloaded
+          ? Center(
+              child: Image.network(imagePath, fit: BoxFit.contain),
+            )
+          : Center(
+              child: Image.file(File(imagePath), fit: BoxFit.contain),
+            ),
+    );
   }
 }

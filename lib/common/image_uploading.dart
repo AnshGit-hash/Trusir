@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
 import 'package:trusir/main.dart';
+import 'package:image/image.dart' as img;
 
 class ImageUploadUtils {
   static Future<void> requestPermissions() async {
@@ -36,18 +36,23 @@ class ImageUploadUtils {
     }
   }
 
-  static Future<XFile?> compressImage(File file) async {
-    final String targetPath =
-        '${file.parent.path}/compressed_${file.uri.pathSegments.last}';
-
+  static Future<File?> compressImage(File file) async {
     try {
-      final compressedFile = await FlutterImageCompress.compressAndGetFile(
-        file.absolute.path,
-        targetPath,
-        quality: 85,
-        minWidth: 1920,
-        minHeight: 1080,
-      );
+      final bytes = await file.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
+
+      if (image == null) {
+        Fluttertoast.showToast(msg: 'Error decoding image.');
+        return null;
+      }
+
+      img.Image resized = img.copyResize(image, width: 1080, height: 720);
+
+      final compressedBytes = img.encodeJpg(resized, quality: 75);
+
+      final compressedFile =
+          File('${file.parent.path}/compressed_${file.uri.pathSegments.last}')
+            ..writeAsBytesSync(compressedBytes);
 
       return compressedFile;
     } catch (e) {
@@ -245,7 +250,7 @@ class ImageUploadUtils {
         false;
   }
 
-  static Future<String> _uploadImage(XFile image) async {
+  static Future<String> _uploadImage(File image) async {
     final uri = Uri.parse('$baseUrl/api/upload-profile');
     final request = http.MultipartRequest('POST', uri);
 

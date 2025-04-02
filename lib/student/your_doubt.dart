@@ -348,25 +348,26 @@ class Doubt {
   final String image;
   final String createdAt;
   final String status;
+  final String solution;
 
-  Doubt({
-    required this.id,
-    required this.title,
-    required this.course,
-    required this.image,
-    required this.createdAt,
-    required this.status,
-  });
+  Doubt(
+      {required this.id,
+      required this.title,
+      required this.course,
+      required this.image,
+      required this.createdAt,
+      required this.status,
+      required this.solution});
 
   factory Doubt.fromJson(Map<String, dynamic> json) {
     return Doubt(
-      id: json['id'],
-      title: json['title'] ?? 'No data',
-      course: json['course'] ?? 'No data',
-      image: json['image'],
-      createdAt: json['created_at'],
-      status: json['status'] ?? 'N/A',
-    );
+        id: json['id'],
+        title: json['title'] ?? 'No data',
+        course: json['course'] ?? 'No data',
+        image: json['image'],
+        createdAt: json['created_at'],
+        status: json['status'] ?? 'N/A',
+        solution: json['solution']);
   }
 }
 
@@ -459,6 +460,29 @@ class YourDoubtDetailPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 10),
+              const Text(
+                'Solution:',
+                style: TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              gk.solution != "null"
+                  ? Image.network(
+                      gk.solution,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
+                    )
+                  : const Text(
+                      'No Solutions Uploaded',
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                      ),
+                    ),
             ],
           ),
         ),
