@@ -487,197 +487,186 @@ class _TeacherattendanceState extends State<Teacherattendance> {
           // Calendar Section
           Padding(
             padding:
-                const EdgeInsets.only(top: 10, left: 15, bottom: 15, right: 20),
+                const EdgeInsets.only(top: 10, left: 15, bottom: 8, right: 20),
             child: Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.only(left: 10, right: 10),
               width: 380,
-              height: 360,
               decoration: BoxDecoration(
                 color: Colors.white70,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.5), // Shadow color
-                    spreadRadius: 1, // Spread radius
-                    blurRadius: 8, // Blur radius
-                    offset:
-                        const Offset(0, 3), // Only apply shadow on the bottom
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, // Allow dynamic height
                 children: [
                   // Calendar Header
-                  Padding(
-                    padding: const EdgeInsets.all(0),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_outlined,
-                            size: 15,
-                          ),
-                          onPressed: _prevMonth,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon:
+                            const Icon(Icons.arrow_back_ios_outlined, size: 15),
+                        onPressed: _prevMonth,
+                      ),
+                      TextButton(
+                        onPressed: () => _navigateToYearMonthPicker(context),
+                        child: Text(_monthYearString,
+                            style: const TextStyle(fontSize: 17)),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward_ios_outlined,
+                            size: 15),
+                        onPressed: _nextMonth,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedDate = DateTime.now();
+                            _fetchAttendanceData(selectedslotID!);
+                          });
+                        },
+                        child: const Text(
+                          'Today',
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 18,
+                              color: Color(0xFF48116A)),
                         ),
-                        TextButton(
-                            onPressed: () {
-                              _navigateToYearMonthPicker(context);
-                            },
-                            child: Text(
-                              _monthYearString,
-                              style: const TextStyle(fontSize: 17),
-                            )),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_forward_ios_outlined,
-                            size: 15,
-                          ),
-                          onPressed: _nextMonth,
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedDate = DateTime.now();
-                                _fetchAttendanceData(selectedslotID!);
-                              });
-                            },
-                            child: const Text(
-                              'Today',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 18,
-                                color: Color(0xFF48116A),
-                              ),
-                            )),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+
                   // Day Headers
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: weekdays
-                          .map((day) => Center(
-                                child: Text(
-                                  day,
-                                  style: const TextStyle(
-                                      color: Color(0xFF48116A),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ))
+                          .map((day) => Text(day,
+                              style: const TextStyle(
+                                  color: Color(0xFF48116A),
+                                  fontWeight: FontWeight.bold)))
                           .toList(),
                     ),
                   ),
-                  // Calendar Dates
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 7,
-                          childAspectRatio: 0.5,
-                          mainAxisExtent: 45,
-                        ),
-                        itemCount: _startingWeekday + _daysInMonth,
-                        itemBuilder: (context, index) {
-                          if (index < _startingWeekday) {
-                            return const SizedBox.shrink();
-                          }
 
-                          int day = index - _startingWeekday + 1;
-                          bool isToday = day == DateTime.now().day &&
-                              _selectedDate.month == DateTime.now().month &&
-                              _selectedDate.year == DateTime.now().year;
+                  // Calendar Dates (Using SizedBox for dynamic height)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      int totalRows =
+                          ((_startingWeekday + _daysInMonth) / 7).ceil();
+                      double rowHeight = 50; // Adjust row height as needed
+                      double totalHeight = totalRows * rowHeight;
 
-                          // Check if the day exists in _attendanceData and extract status
-                          Map<String, String>? attendanceInfo =
-                              _attendanceData[day];
-                          String status =
-                              attendanceInfo?['status'] ?? "no_data";
-                          String? id = attendanceInfo?['id'];
-                          return GestureDetector(
-                            onTap: () {
-                              if (id != null) {
-                                // Show a dialog to update the status
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text("Update Attendance for $day"),
-                                    content: DropdownButton<String>(
-                                      value: status,
-                                      items: const [
-                                        DropdownMenuItem(
-                                            value: 'present',
-                                            child: Text('Present')),
-                                        DropdownMenuItem(
-                                            value: 'absent',
-                                            child: Text('Absent')),
-                                        DropdownMenuItem(
-                                            value: 'No class',
-                                            child: Text('No class')),
-                                      ],
-                                      onChanged: (newStatus) {
-                                        if (newStatus != null) {
-                                          _submitAttendance(
-                                                  id: id, status: newStatus)
-                                              .then((_) {
-                                            Navigator.pop(
-                                                context); // Close the dialog after updating
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("No ID found for this date!")),
-                                );
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: status == "no_data"
-                                    ? Colors.transparent
-                                    : Colors.yellow,
-                              ),
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: status == "present"
-                                      ? Colors.green
-                                      : status == "absent"
-                                          ? Colors.red
-                                          : Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isToday
-                                        ? const Color(0xFF48116A)
-                                        : Colors.white,
-                                    width: isToday ? 3 : 0,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '$day',
-                                    style: TextStyle(
-                                      color: status == "no_data"
-                                          ? Colors.black
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: SizedBox(
+                          height: totalHeight, // Dynamically calculated height
+                          child: GridView.builder(
+                            physics:
+                                const NeverScrollableScrollPhysics(), // Prevent inner scrolling
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 7,
+                              childAspectRatio: 1.2,
+                              mainAxisExtent: 50, // Height of each date box
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                            itemCount: _startingWeekday + _daysInMonth,
+                            itemBuilder: (context, index) {
+                              if (index < _startingWeekday) {
+                                return const SizedBox.shrink();
+                              }
+
+                              int day = index - _startingWeekday + 1;
+                              bool isToday = day == DateTime.now().day &&
+                                  _selectedDate.month == DateTime.now().month &&
+                                  _selectedDate.year == DateTime.now().year;
+
+                              String status =
+                                  _attendanceData[day]?['status'] ?? "no_data";
+                              String? id = _attendanceData[day]?['id'];
+
+                              return GestureDetector(
+                                onTap: () {
+                                  if (id != null) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title:
+                                            Text("Update Attendance for $day"),
+                                        content: DropdownButton<String>(
+                                          value: status,
+                                          items: const [
+                                            DropdownMenuItem(
+                                                value: 'present',
+                                                child: Text('Present')),
+                                            DropdownMenuItem(
+                                                value: 'absent',
+                                                child: Text('Absent')),
+                                            DropdownMenuItem(
+                                                value: 'No class',
+                                                child: Text('No class')),
+                                          ],
+                                          onChanged: (newStatus) {
+                                            if (newStatus != null) {
+                                              _submitAttendance(
+                                                      id: id, status: newStatus)
+                                                  .then((_) {
+                                                Navigator.pop(context);
+                                              });
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "No ID found for this date!")),
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: status == "present"
+                                        ? Colors.green
+                                        : status == "absent"
+                                            ? Colors.red
+                                            : Colors.grey[400],
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isToday
+                                          ? const Color(0xFF48116A)
+                                          : Colors.white,
+                                      width: isToday ? 3 : 0,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '$day',
+                                      style: TextStyle(
+                                          color: status == "no_data"
+                                              ? Colors.black
+                                              : Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

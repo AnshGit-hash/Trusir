@@ -382,21 +382,21 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             'Attendance',
                             tileWidth,
                             tileHeight,
-                            checking
-                                ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
-                                  }
-                                : () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => AttendancePage(
-                                          userID: userID,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                            isWeb),
+                            // checking
+                            //     ? () {
+                            //         Fluttertoast.showToast(msg: checkTitle);
+                            //       }
+                            //     :
+                            () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AttendancePage(
+                                userID: userID,
+                              ),
+                            ),
+                          );
+                        }, isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 222, 151, 255),
