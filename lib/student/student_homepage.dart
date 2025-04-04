@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/student/student_registration.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,6 +19,13 @@ class _StudentHomepageState extends State<StudentHomepage> {
   void initState() {
     super.initState();
     fetchProfileData();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   Future<void> openDialer(String phoneNumber) async {

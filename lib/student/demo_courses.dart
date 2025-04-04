@@ -5,10 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
-import 'package:trusir/common/delete.dart';
+// import 'package:trusir/common/delete.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/course.dart';
-import 'package:trusir/student/main_screen.dart';
+// import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/payment__status_popup.dart';
 import 'package:trusir/student/payment_method.dart';
 import 'package:trusir/student/teacher_profile_page.dart';
@@ -141,54 +141,54 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                     ),
                   ),
                 ),
-                Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                        onPressed: widget.course['active'] == 1
-                            ? () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Confirm Deletion"),
-                                      content: const Text(
-                                          "Are you sure you want to delete?"),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(
-                                              context), // Dismiss dialog
-                                          child: const Text("Cancel"),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            DeleteUtility.deleteItem(
-                                                'individualSlot',
-                                                widget.course['slotID']);
-                                            Navigator.pop(context);
-                                            Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const MainScreen(
-                                                            index: 1)));
-                                          }, // Confirm deletion
-                                          child: const Text("OK"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            : () {
-                                Fluttertoast.showToast(
-                                    msg:
-                                        'Course Inactive, Please Contact Admin');
-                              },
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.redAccent,
-                        )))
+                // Positioned(
+                //     top: 0,
+                //     right: 0,
+                //     child: IconButton(
+                //         onPressed: widget.course['active'] == 1
+                //             ? () {
+                //                 showDialog(
+                //                   context: context,
+                //                   builder: (BuildContext context) {
+                //                     return AlertDialog(
+                //                       title: const Text("Confirm Deletion"),
+                //                       content: const Text(
+                //                           "Are you sure you want to delete?"),
+                //                       actions: [
+                //                         TextButton(
+                //                           onPressed: () => Navigator.pop(
+                //                               context), // Dismiss dialog
+                //                           child: const Text("Cancel"),
+                //                         ),
+                //                         TextButton(
+                //                           onPressed: () {
+                //                             DeleteUtility.deleteItem(
+                //                                 'individualSlot',
+                //                                 widget.course['slotID']);
+                //                             Navigator.pop(context);
+                //                             Navigator.pushReplacement(
+                //                                 context,
+                //                                 MaterialPageRoute(
+                //                                     builder: (context) =>
+                //                                         const MainScreen(
+                //                                             index: 1)));
+                //                           }, // Confirm deletion
+                //                           child: const Text("OK"),
+                //                         ),
+                //                       ],
+                //                     );
+                //                   },
+                //                 );
+                //               }
+                //             : () {
+                //                 Fluttertoast.showToast(
+                //                     msg:
+                //                         'Course Inactive, Please Contact Admin');
+                //               },
+                //         icon: const Icon(
+                //           Icons.close,
+                //           color: Colors.redAccent,
+                //         )))
               ],
             ),
             const SizedBox(height: 12),

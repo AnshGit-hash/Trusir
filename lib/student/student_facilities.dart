@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/student/attendance.dart';
 import 'package:trusir/student/course.dart';
-import 'package:trusir/student/extra_knowledge.dart';
+// import 'package:trusir/student/extra_knowledge.dart';
 import 'package:trusir/student/gk_page.dart';
 import 'package:trusir/student/profilepopup.dart';
 import 'package:trusir/common/test_series.dart';
@@ -502,27 +502,27 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                                     );
                                   },
                             isWeb),
-                        buildTile(
-                            context,
-                            const Color.fromARGB(255, 177, 135, 220),
-                            'assets/knowledge.png',
-                            'Extra Knowledge',
-                            tileWidth,
-                            tileHeight,
-                            checking
-                                ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
-                                  }
-                                : () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ExtraKnowledge(),
-                                      ),
-                                    );
-                                  },
-                            isWeb),
+                        // buildTile(
+                        //     context,
+                        //     const Color.fromARGB(255, 177, 135, 220),
+                        //     'assets/knowledge.png',
+                        //     'Extra Knowledge',
+                        //     tileWidth,
+                        //     tileHeight,
+                        //     checking
+                        //         ? () {
+                        //             Fluttertoast.showToast(msg: checkTitle);
+                        //           }
+                        //         : () {
+                        //             Navigator.push(
+                        //               context,
+                        //               MaterialPageRoute(
+                        //                 builder: (context) =>
+                        //                     const ExtraKnowledge(),
+                        //               ),
+                        //             );
+                        //           },
+                        //     isWeb),
                         buildTile(
                             context,
                             const Color.fromARGB(255, 255, 170, 157),

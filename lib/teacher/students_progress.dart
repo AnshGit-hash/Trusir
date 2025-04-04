@@ -341,7 +341,6 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
   }) {
     String filename = '${subject}_report_$date.jpg';
     List<Color> currentCircleColors = getCircleColors(index);
-
     return Padding(
       padding: const EdgeInsets.only(left: 18.0, right: 18, top: 0, bottom: 10),
       child: Container(

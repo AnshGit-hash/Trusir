@@ -92,11 +92,16 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text(widget.title),
-            const Spacer(),
-            if (_isDeleting) // Show loading indicator while deleting
+            Expanded(
+              child: Text(
+                widget.title,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 18), // optional style
+              ),
+            ),
+            if (_isDeleting)
               const Padding(
-                padding: EdgeInsets.only(right: 16.0),
+                padding: EdgeInsets.only(left: 8.0),
                 child: SizedBox(
                   width: 24,
                   height: 24,
@@ -106,8 +111,12 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
             else if (!_isDownloaded)
               IconButton(
                 onPressed: () {
-                  FileDownloader.downloadFile(context, widget.imagePath,
-                      widget.title, _onDownloadComplete);
+                  FileDownloader.downloadFile(
+                    context,
+                    widget.imagePath,
+                    widget.title,
+                    _onDownloadComplete,
+                  );
                 },
                 icon: const Icon(Icons.download),
               )

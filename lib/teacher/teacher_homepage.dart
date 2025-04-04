@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/teacher/teachers_registeration.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,6 +17,13 @@ class _TeacherhomepageState extends State<Teacherhomepage> {
   void initState() {
     super.initState();
     fetchProfileData();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   String name = '';

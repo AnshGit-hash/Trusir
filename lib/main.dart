@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/login_page.dart';
+import 'package:trusir/connectivity_service.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -35,7 +36,7 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
       statusBarColor: Colors.transparent,
       statusBarBrightness: Brightness.light));
-
+  ConnectivityService().initialize();
   runApp(const MyApp());
 }
 
@@ -48,31 +49,49 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
+  void dispose() {
+    super.dispose();
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.grey[200], // Set navigation bar color
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.grey[50],
+        statusBarBrightness: Brightness.light));
+  }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return StreamBuilder<ConnectivityResult>(
+  //     stream: Connectivity().onConnectivityChanged.map((event) => event.first),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.active) {
+  //         final result = snapshot.data;
+  //         if (result == ConnectivityResult.none) {
+  //           return const MaterialApp(
+  //             debugShowCheckedModeBanner: false,
+  //             home: NoConnectionScreen(), // Show no connection screen
+  //           );
+  //         } else {
+  //           return MaterialApp(
+  //             navigatorKey: navigatorKey,
+  //             debugShowCheckedModeBanner: false,
+  //             home: const SplashScreen(), // Show SplashScreen if online
+  //           );
+  //         }
+  //       } else {
+  //         return const MaterialApp(
+  //           debugShowCheckedModeBanner: false,
+  //           home: SplashScreen(), // Default screen while checking
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<ConnectivityResult>(
-      stream: Connectivity().onConnectivityChanged.map((event) => event.first),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          final result = snapshot.data;
-          if (result == ConnectivityResult.none) {
-            return const MaterialApp(
-              debugShowCheckedModeBanner: false,
-              home: NoConnectionScreen(), // Show no connection screen
-            );
-          } else {
-            return MaterialApp(
-              navigatorKey: navigatorKey,
-              debugShowCheckedModeBanner: false,
-              home: const SplashScreen(), // Show SplashScreen if online
-            );
-          }
-        } else {
-          return const MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: SplashScreen(), // Default screen while checking
-          );
-        }
-      },
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      home: const SplashScreen(),
     );
   }
 }
@@ -92,6 +111,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        systemNavigationBarColor:
+            Colors.transparent, // Set navigation bar color
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light));
 
     // Set up fade animation
     _animationController = AnimationController(
@@ -188,17 +214,31 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
           Positioned(
-              left: 120,
-              right: 0,
-              bottom: 110,
-              child: Text(
+            left: 120,
+            right: 0,
+            bottom: 110,
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [
+                  Color(0xFFF5AE08),
+                  Colors.white,
+                  Color(0xFFF5AE08), // Yellow
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+              blendMode: BlendMode.srcIn,
+              child: const Text(
                 'trusir.com',
                 style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.grey[100],
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700),
-              ))
+                  fontSize: 25,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white, // This gets overridden by the gradient
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

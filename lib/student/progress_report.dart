@@ -1,17 +1,11 @@
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
-import 'package:trusir/common/notificationhelper.dart';
+import 'package:trusir/common/file_downloader.dart';
 
 class ProgressReportScreen extends StatefulWidget {
   const ProgressReportScreen({super.key});
@@ -50,8 +44,7 @@ class ProgressReportPage extends StatefulWidget {
 class _ProgressReportPageState extends State<ProgressReportPage> {
   List<dynamic> _loadedReports = [];
   bool reportempty = true;
-  bool _isDownloading = false;
-  String _downloadProgress = '';
+
   Map<String, String> downloadedFiles = {};
   int page = 1;
 
@@ -108,58 +101,9 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
   @override
   void initState() {
     super.initState();
-    _loadDownloadedFiles();
     _loadedReports = [];
     reportempty = false;
     _loadInitialReports();
-  }
-
-  Future<void> _loadDownloadedFiles() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedFiles = prefs.getString('downloadedReports') ?? '{}';
-    setState(() {
-      downloadedFiles = Map<String, String>.from(jsonDecode(savedFiles));
-    });
-  }
-
-  Future<void> _saveDownloadedFiles() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('downloadedReports', jsonEncode(downloadedFiles));
-  }
-
-  Future<void> _requestNotificationPermission() async {
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
-    }
-  }
-
-  Future<void> _requestPermissions() async {
-    if (await Permission.storage.isGranted) {
-      return;
-    }
-
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-
-      // Skip permissions for Android versions below API 30
-      if (androidInfo.version.sdkInt < 30) {
-        return;
-      }
-
-      if (await Permission.photos.isGranted ||
-          await Permission.videos.isGranted) {
-        return;
-      }
-
-      Map<Permission, PermissionStatus> statuses = await [
-        Permission.photos,
-        Permission.videos,
-      ].request();
-
-      if (statuses.values.any((status) => !status.isGranted)) {
-        openAppSettings();
-      }
-    }
   }
 
   Future<List<dynamic>> fetchProgressReports({int page = 1}) async {
@@ -210,58 +154,6 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
     }
   }
 
-  Future<String> _getAppSpecificDownloadPath(String filename) async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/$filename';
-  }
-
-  Future<void> _downloadFile(String url, String filename) async {
-    setState(() {
-      _isDownloading = true;
-      _downloadProgress = '0%';
-    });
-
-    try {
-      final filePath = await _getAppSpecificDownloadPath(filename);
-      await _requestPermissions();
-      await _requestNotificationPermission();
-      final dio = Dio();
-      await dio.download(
-        url,
-        filePath,
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            setState(() {
-              _downloadProgress =
-                  '${(received / total * 100).toStringAsFixed(0)}%';
-            });
-          }
-        },
-      );
-
-      setState(() {
-        downloadedFiles[filename] = filePath;
-        _isDownloading = false;
-        _downloadProgress = '';
-      });
-      await _saveDownloadedFiles();
-
-      showDownloadNotification(filename, filePath);
-    } catch (e) {
-      setState(() {
-        _isDownloading = false;
-        _downloadProgress = '';
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Download failed: $e'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
   String formatDate(String dateString) {
     DateTime dateTime = DateTime.parse(dateString);
     String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
@@ -272,11 +164,6 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
     DateTime dateTime = DateTime.parse(dateString);
     String formattedTime = DateFormat('hh:mm a').format(dateTime);
     return formattedTime; // Example: 11:40 PM
-  }
-
-  Future<void> _openFile(String filename) async {
-    final filePath = downloadedFiles[filename];
-    OpenFile.open(filePath);
   }
 
   @override
@@ -312,22 +199,8 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            if (_isDownloading)
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Downloading: $_downloadProgress',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
             _buildBackButton(context),
-            _buildCurrentMonthCard(),
+            _buildCurrentMonthCard(_loadedReports),
             const SizedBox(height: 20),
             _buildPreviousMonthsReports(),
             const SizedBox(height: 20),
@@ -338,11 +211,13 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                     ]
                   : _loadedReports.map((report) {
                       return _buildPreviousMonthCard(
+                        isDialog: false,
                         subject: report['subject'],
                         date: formatDate(report['created_at']),
                         time: formatTime(report['created_at']),
                         marks: report['marks'],
                         reportUrl: report['report'],
+                        total: report['total_marks'],
                         cardColors: 'color',
                         index: _loadedReports.indexOf(report),
                       );
@@ -380,86 +255,157 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
     );
   }
 
-  Widget _buildCurrentMonthCard() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 5.0,
-        right: 18,
-        left: 18,
-      ),
-      child: Container(
-        width: 386,
-        height: 120,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF48116A),
-              Color(0xFFC22054),
+  Widget _buildCurrentMonthCard(List<dynamic> allReports) {
+    DateTime now = DateTime.now();
+    DateTime firstOfMonth = DateTime(now.year, now.month, 1);
+    String formattedStart = DateFormat('d MMM yyyy').format(firstOfMonth);
+
+    // Filter reports from current month
+    List<dynamic> currentMonthReports = allReports.where((report) {
+      DateTime reportDate = DateTime.parse(report['created_at']);
+      return reportDate.month == now.month && reportDate.year == now.year;
+    }).toList();
+
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              backgroundColor: Colors.grey[50],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text('Current Month Report',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
+                      )),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    width: double.maxFinite,
+                    child: currentMonthReports.isEmpty
+                        ? const Text('No reports available for this month.')
+                        : SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: currentMonthReports.map((report) {
+                                return _buildPreviousMonthCard(
+                                  isDialog: true,
+                                  subject: report['subject'],
+                                  date: formatDate(report['created_at']),
+                                  time: formatTime(report['created_at']),
+                                  marks: report['marks'],
+                                  reportUrl: report['report'],
+                                  total: report['total_marks'],
+                                  cardColors: 'color',
+                                  index: currentMonthReports.indexOf(report),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5.0, right: 18, left: 18),
+        child: Container(
+          width: 386,
+          height: 120,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF48116A), Color(0xFFC22054)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFC22054).withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(-5, 5),
+              ),
+              BoxShadow(
+                color: const Color(0xFF48116A).withOpacity(0.5),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(2, 4),
+              ),
             ],
-            begin: Alignment.topCenter, // Start the gradient at the top
-            end: Alignment.bottomCenter,
           ),
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFC22054).withValues(alpha: 0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(-5, 5),
-            ),
-            BoxShadow(
-              color: const Color(0xFF48116A).withValues(alpha: 0.5),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(2, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 10.0, right: 10, bottom: 10, top: 0),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(left: 20.0, top: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Current Month',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.only(
+                left: 10.0, right: 10, bottom: 10, top: 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0, top: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Current Month',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '24 Jan 2025 - Today',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white,
+                        Text(
+                          '$formattedStart - Today',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        const Text(
+                          'View Report',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 10.0),
-                  child: Image.asset(
-                    'assets/listaim@3x.png',
-                    width: 100,
-                    height: 95,
+                Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 10.0),
+                    child: Image.asset(
+                      'assets/listaim@3x.png',
+                      width: 100,
+                      height: 95,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -489,19 +435,19 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
     required String date,
     required String time,
     required String marks,
+    required String total,
     required String reportUrl,
     required String cardColors,
     required int index,
+    required bool isDialog,
   }) {
     String filename = '${subject}_report_$date.jpg';
-    bool isDownloaded = downloadedFiles.containsKey(filename);
     List<Color> currentCircleColors = getCircleColors(index);
-
     return Padding(
       padding: const EdgeInsets.only(left: 18.0, right: 18, top: 0, bottom: 10),
       child: Container(
         width: 386,
-        height: 126,
+        height: 136,
         decoration: BoxDecoration(
           color: getContainerColor(index),
           borderRadius: BorderRadius.circular(10),
@@ -510,7 +456,7 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
           children: [
             Positioned(
               top: -30,
-              left: -35,
+              left: isDialog ? -40 : -35,
               child: Image.asset(
                 color: currentCircleColors[0],
                 'assets/circleleft.png',
@@ -524,8 +470,8 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
               child: Image.asset(
                 color: currentCircleColors[0],
                 'assets/circleright.png',
-                width: 150,
-                height: 150,
+                width: 160,
+                height: 160,
               ),
             ),
             Padding(
@@ -544,7 +490,7 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                         ),
                       ),
                       Text(
-                        'Marks Obtained: $marks',
+                        'Marks Obtained: $marks/$total',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
@@ -564,8 +510,8 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                     alignment: Alignment.topRight,
                     child: Text(
                       time,
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: isDialog ? 10 : 12,
                         color: Colors.black54,
                       ),
                     ),
@@ -579,10 +525,11 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                 padding:
                     const EdgeInsets.only(left: 10, right: 10, bottom: 10.0),
                 child: Container(
-                  height: 35,
-                  width: 357,
+                  height: 48,
+                  width: isDialog ? 300 : 357,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
+                    vertical: 5,
                   ),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
@@ -590,24 +537,20 @@ class _ProgressReportPageState extends State<ProgressReportPage> {
                   ),
                   child: TextButton(
                     onPressed: () {
-                      if (isDownloaded) {
-                        _openFile(filename);
-                      } else {
-                        _downloadFile(reportUrl, filename);
-                      }
+                      FileDownloader.openFile(context, filename, reportUrl);
                     },
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isDownloaded ? 'Open Report' : 'Download Report',
-                          style: const TextStyle(
+                          'Open Report',
+                          style: TextStyle(
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Icon(
-                          isDownloaded ? Icons.open_in_new : Icons.download,
+                          Icons.open_in_new,
                           color: Colors.black,
                           size: 19,
                         ),

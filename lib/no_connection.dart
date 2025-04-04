@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'main.dart';
+// import 'main.dart';
 
 class NoConnectionScreen extends StatefulWidget {
   const NoConnectionScreen({super.key});
@@ -19,9 +19,10 @@ class _NoConnectionScreenState extends State<NoConnectionScreen> {
 
     if (result.first != ConnectivityResult.none) {
       // If internet is available, refresh app
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SplashScreen()),
-      );
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (context) => const SplashScreen()),
+      // );
+      Navigator.pop(context);
     } else {
       setState(() => isChecking = false); // Re-enable button if still offline
     }
