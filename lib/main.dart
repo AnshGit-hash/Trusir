@@ -7,8 +7,8 @@ import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:trusir/common/notificationhelper.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:trusir/no_connection.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:trusir/no_connection.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
