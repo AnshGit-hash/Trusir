@@ -121,7 +121,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
               phonenum == '9026154436' ||
               phonenum == '8294448444' ||
               phonenum == '8809575556' ||
-              phonenum == '7493027720') {
+              phonenum == '9801458766') {
             storePhoneNo();
             Navigator.push(
                 context,

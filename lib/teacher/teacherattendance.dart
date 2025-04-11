@@ -8,24 +8,20 @@ import 'package:trusir/teacher/teacher_facilities.dart';
 
 class StudentAttendanceRecord {
   final int id;
-  final String subjectID;
-  final String subjectName;
+  final String slotTime;
+  final String amountAddedtoTeacher;
   final String studentID;
   final String teacherID;
-  final String year;
-  final String month;
   final String date;
   final String slotID;
   final String status;
 
   StudentAttendanceRecord({
     required this.id,
-    required this.subjectID,
-    required this.subjectName,
+    required this.slotTime,
+    required this.amountAddedtoTeacher,
     required this.studentID,
     required this.teacherID,
-    required this.year,
-    required this.month,
     required this.date,
     required this.slotID,
     required this.status,
@@ -34,12 +30,10 @@ class StudentAttendanceRecord {
   factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
     return StudentAttendanceRecord(
       id: json['id'],
-      subjectID: json['subjectID'],
-      subjectName: json['subject_name'],
+      slotTime: json['slotTime'] ?? 'No time alloted',
+      amountAddedtoTeacher: json['amount_added_to_teacher'],
       studentID: json['studentID'],
       teacherID: json['teacherID'],
-      year: json['year'],
-      month: json['month'],
       date: json['date'],
       slotID: json['slotID'],
       status: json['status'],
@@ -237,13 +231,12 @@ class _TeacherattendanceState extends State<Teacherattendance> {
   }
 
   Future<List<StudentAttendanceRecord>> fetchAttendanceRecords({
-    required String year,
-    required String month,
     required String slotID,
+    required int year,
+    required int month,
   }) async {
     final url = Uri.parse(
-        'https://admin.trusir.com/view-attendance/$selectedUserID/$year/$month/$slotID');
-
+        'https://admin.trusir.com/view-attendance/$slotID/$year/${month.toString().padLeft(2, '0')}');
     try {
       final response = await http.get(url);
 
@@ -268,12 +261,13 @@ class _TeacherattendanceState extends State<Teacherattendance> {
         attendanceHierarchy = {};
 
     for (var record in records) {
-      String year = record.year;
-      String month = record.month;
-      String date = record.date;
+      // Parse the date string (format: "YYYY-MM-DD")
+      DateTime dateTime = DateTime.parse(record.date);
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString();
+      String day = dateTime.day.toString();
       String status = record.status;
-      String id =
-          record.id.toString(); // Convert id to a string for consistency
+      String id = record.slotID.toString();
 
       // Ensure year exists in the map
       if (!attendanceHierarchy.containsKey(year)) {
@@ -285,22 +279,25 @@ class _TeacherattendanceState extends State<Teacherattendance> {
         attendanceHierarchy[year]![month] = {};
       }
 
-      // Ensure date exists in the map
-      if (!attendanceHierarchy[year]![month]!.containsKey(date)) {
-        attendanceHierarchy[year]![month]![date] = {};
+      // Ensure date exists in the map (using day only since we have year/month in hierarchy)
+      if (!attendanceHierarchy[year]![month]!.containsKey(day)) {
+        attendanceHierarchy[year]![month]![day] = {};
       }
 
       // Add both id and status to the date map
-      attendanceHierarchy[year]![month]![date] = {"id": id, "status": status};
+      attendanceHierarchy[year]![month]![day] = {
+        "id": id,
+        "status": status,
+        "date": record.date // Keep the full date string if needed
+      };
     }
     return attendanceHierarchy;
   }
 
   Future<Map<String, dynamic>> attendanceconvert(
       int month, String year, String slotID) async {
-    final mon = getMonthName(month);
-    final records =
-        await fetchAttendanceRecords(year: year, month: mon, slotID: slotID);
+    final records = await fetchAttendanceRecords(
+        year: int.parse(year), month: month, slotID: slotID);
     return attendancedata(records); // Return the hierarchical data
   }
 

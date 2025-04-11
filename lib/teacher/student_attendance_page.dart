@@ -1,30 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StudentAttendanceRecord {
   final int id;
-  final String subjectID;
-  final String subjectName;
+  final String slotTime;
+  final String amountAddedtoTeacher;
   final String studentID;
   final String teacherID;
-  final String year;
-  final String month;
   final String date;
   final String slotID;
   final String status;
 
   StudentAttendanceRecord({
     required this.id,
-    required this.subjectID,
-    required this.subjectName,
+    required this.slotTime,
+    required this.amountAddedtoTeacher,
     required this.studentID,
     required this.teacherID,
-    required this.year,
-    required this.month,
     required this.date,
     required this.slotID,
     required this.status,
@@ -33,12 +30,10 @@ class StudentAttendanceRecord {
   factory StudentAttendanceRecord.fromJson(Map<String, dynamic> json) {
     return StudentAttendanceRecord(
       id: json['id'],
-      subjectID: json['subjectID'],
-      subjectName: json['subject_name'],
+      slotTime: json['slotTime'] ?? 'No time alloted',
+      amountAddedtoTeacher: json['amount_added_to_teacher'],
       studentID: json['studentID'],
       teacherID: json['teacherID'],
-      year: json['year'],
-      month: json['month'],
       date: json['date'],
       slotID: json['slotID'],
       status: json['status'],
@@ -84,7 +79,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   List<Map<String, String>> slots = [];
 
   Future<List<Course>> fetchCourses() async {
-    final url = Uri.parse('$baseUrl/view-slots/${widget.userID}');
+    final url = Uri.parse('$baseUrl/get-individual-slots/${widget.userID}');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -143,38 +138,29 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     super.dispose();
   }
 
-  Future<void> _submitAttendance({
-    required String id,
-    required String status,
+  Future<void> markAbsent({
+    required String date,
+    required String slotID,
   }) async {
-    final payload = {
-      "status": status,
-    };
+    final url = Uri.parse(
+        'https://admin.trusir.com/mark-absent/$date/${widget.userID}/$slotID');
 
     try {
-      final response = await http.post(
-        Uri.parse(
-            '$baseUrl/api/update-attendance/$id'), // Append the ID as a parameter to the URL
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(payload),
-      );
+      final response = await http.get(url);
 
       if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
         setState(() {
           // Update the status locally
           _fetchAttendanceData(selectedslotID!);
           _updateSummary(); // Update the summary
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Attendance updated successfully!")),
-        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to update attendance!")),
-        );
+        throw Exception('Failed to mark absent Status: ${response.statusCode}');
       }
     } catch (error) {
-      print("Error: $error");
+      throw Exception('Error while marking absent: $error');
     }
   }
 
@@ -212,13 +198,12 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   }
 
   Future<List<StudentAttendanceRecord>> fetchAttendanceRecords({
-    required String year,
-    required String month,
     required String slotID,
+    required int year,
+    required int month,
   }) async {
     final url = Uri.parse(
-        'https://admin.trusir.com/view-attendance/${widget.userID}/$year/$month/$slotID');
-
+        'https://admin.trusir.com/view-attendance/$slotID/$year/${month.toString().padLeft(2, '0')}');
     try {
       final response = await http.get(url);
 
@@ -243,12 +228,13 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         attendanceHierarchy = {};
 
     for (var record in records) {
-      String year = record.year;
-      String month = record.month;
-      String date = record.date;
+      // Parse the date string (format: "YYYY-MM-DD")
+      DateTime dateTime = DateTime.parse(record.date);
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString();
+      String day = dateTime.day.toString();
       String status = record.status;
-      String id =
-          record.id.toString(); // Convert id to a string for consistency
+      String id = record.slotID.toString();
 
       // Ensure year exists in the map
       if (!attendanceHierarchy.containsKey(year)) {
@@ -260,22 +246,25 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         attendanceHierarchy[year]![month] = {};
       }
 
-      // Ensure date exists in the map
-      if (!attendanceHierarchy[year]![month]!.containsKey(date)) {
-        attendanceHierarchy[year]![month]![date] = {};
+      // Ensure date exists in the map (using day only since we have year/month in hierarchy)
+      if (!attendanceHierarchy[year]![month]!.containsKey(day)) {
+        attendanceHierarchy[year]![month]![day] = {};
       }
 
       // Add both id and status to the date map
-      attendanceHierarchy[year]![month]![date] = {"id": id, "status": status};
+      attendanceHierarchy[year]![month]![day] = {
+        "id": id,
+        "status": status,
+        "date": record.date // Keep the full date string if needed
+      };
     }
     return attendanceHierarchy;
   }
 
   Future<Map<String, dynamic>> attendanceconvert(
       int month, String year, String slotID) async {
-    final mon = getMonthName(month);
-    final records =
-        await fetchAttendanceRecords(year: year, month: mon, slotID: slotID);
+    final records = await fetchAttendanceRecords(
+        year: int.parse(year), month: month, slotID: slotID);
     return attendancedata(records); // Return the hierarchical data
   }
 
@@ -565,6 +554,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                               String status =
                                   _attendanceData[day]?['status'] ?? "no_data";
                               String? id = _attendanceData[day]?['id'];
+                              String? date = _attendanceData[day]?['date'];
 
                               return GestureDetector(
                                 onTap: () {
@@ -572,31 +562,35 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title:
-                                            Text("Update Attendance for $day"),
-                                        content: DropdownButton<String>(
-                                          value: status,
-                                          items: const [
-                                            DropdownMenuItem(
-                                                value: 'present',
-                                                child: Text('Present')),
-                                            DropdownMenuItem(
-                                                value: 'absent',
-                                                child: Text('Absent')),
-                                            DropdownMenuItem(
-                                                value: 'No class',
-                                                child: Text('No class')),
-                                          ],
-                                          onChanged: (newStatus) {
-                                            if (newStatus != null) {
-                                              _submitAttendance(
-                                                      id: id, status: newStatus)
-                                                  .then((_) {
-                                                Navigator.pop(context);
-                                              });
-                                            }
-                                          },
-                                        ),
+                                        title: const Text("Confirm Absent"),
+                                        content: const Text(
+                                            "Are you sure you want to mark this student as absent?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(
+                                                  context); // Close dialog on cancel
+                                            },
+                                            child: const Text("Cancel"),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              Navigator.pop(
+                                                  context); // Close dialog before API call
+                                              try {
+                                                await markAbsent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark absent: $e');
+                                              }
+                                            },
+                                            child: const Text("OK"),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   } else {
