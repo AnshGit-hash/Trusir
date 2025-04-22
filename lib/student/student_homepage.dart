@@ -166,8 +166,7 @@ class _StudentHomepageState extends State<StudentHomepage> {
                 Image.asset(
                   // height: isWeb ? 2000 : null,
                   'assets/student_homepage.png',
-                  width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.cover,
                 ),
 
                 // Additional text sections

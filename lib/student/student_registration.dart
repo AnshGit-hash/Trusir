@@ -691,44 +691,42 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
               SizedBox(height: isWeb ? 50 : 20),
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: agreeToTerms,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              agreeToTerms = value!;
-                            });
-                          },
-                        ),
-                        Text('I agree with the ',
-                            style: TextStyle(
-                              fontSize: isWeb ? 20 : null,
-                              fontFamily: 'Poppins',
-                            )),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const TrusirTermsPage(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'Terms and Conditions',
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontSize: isWeb ? 20 : null,
-                              fontFamily: 'Poppins',
-                              color: Colors.blue,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        value: agreeToTerms,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            agreeToTerms = value!;
+                          });
+                        },
+                      ),
+                      Text('I agree with the ',
+                          style: TextStyle(
+                            fontSize: isWeb ? 20 : 13,
+                            fontFamily: 'Poppins',
+                          )),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TrusirTermsPage(),
                             ),
+                          );
+                        },
+                        child: Text(
+                          'Terms and Conditions',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            fontSize: isWeb ? 20 : 13,
+                            fontFamily: 'Poppins',
+                            color: Colors.blue,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: isWeb ? 20 : 0),
                   // Registration Fee

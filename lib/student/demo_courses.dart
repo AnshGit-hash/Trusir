@@ -270,19 +270,22 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                       name: widget.course['name'],
                                       balance: '$balance',
                                       onPhonePayment: () {
-                                        merchantTransactionID = paymentService
-                                            .generateUniqueTransactionId(
-                                                userID!);
-                                        body = getChecksum(
-                                          int.parse(
-                                              '${widget.course['new_amount']}00'),
-                                        ).toString();
-                                        paymentService.startTransaction(
-                                            body,
-                                            checksum,
-                                            checkStatus,
-                                            showLoadingDialog,
-                                            paymentstatusnavigation);
+                                        // merchantTransactionID = paymentService
+                                        //     .generateUniqueTransactionId(
+                                        //         userID!);
+                                        // body = getChecksum(
+                                        //   int.parse(
+                                        //       '${widget.course['new_amount']}00'),
+                                        // ).toString();
+                                        // paymentService.startTransaction(
+                                        //     body,
+                                        //     checksum,
+                                        //     checkStatus,
+                                        //     showLoadingDialog,
+                                        //     paymentstatusnavigation);
+                                        Fluttertoast.showToast(
+                                            msg:
+                                                'Coming soon Kindly proceed with wallet payment');
                                       },
                                       onWalletPayment: () {
                                         Navigator.pop(context);
