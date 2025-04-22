@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
           await prefs.setString('adhaar_back', responseData['adhaar_back']);
           await prefs.setString('profile', responseData['profile']);
         } else if (responseData['role'] == 'teacher') {
-          await prefs.setString('id', responseData['id'].toString());
+          await prefs.setString('userID', responseData['id'].toString());
           await prefs.setString('name', responseData['name']);
           await prefs.setString('father_name', responseData['father_name']);
           await prefs.setString('mother_name', responseData['mother_name']);

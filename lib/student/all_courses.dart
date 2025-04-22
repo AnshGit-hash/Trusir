@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
@@ -219,17 +220,18 @@ class _CourseCardState extends State<CourseCard> {
                                 name: widget.course.name,
                                 balance: '$balance',
                                 onPhonePayment: () {
-                                  merchantTransactionID = paymentService
-                                      .generateUniqueTransactionId(userID!);
-                                  body = getChecksum(
-                                    int.parse('${widget.course.newAmount}00'),
-                                  ).toString();
-                                  paymentService.startTransaction(
-                                      body,
-                                      checksum,
-                                      checkStatus,
-                                      showLoadingDialog,
-                                      paymentstatusnavigation);
+                                  // merchantTransactionID = paymentService
+                                  //     .generateUniqueTransactionId(userID!);
+                                  // body = getChecksum(
+                                  //   int.parse('${widget.course.newAmount}00'),
+                                  // ).toString();
+                                  // paymentService.startTransaction(
+                                  //     body,
+                                  //     checksum,
+                                  //     checkStatus,
+                                  //     showLoadingDialog,
+                                  //     paymentstatusnavigation);
+                                  Fluttertoast.showToast(msg: 'Coming Soon');
                                 },
                                 onWalletPayment: () {
                                   Navigator.pop(context);
@@ -260,7 +262,9 @@ class _CourseCardState extends State<CourseCard> {
                   width: isWeb ? 200 : 142,
                   height: isWeb ? 40 : null,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      bookDemo();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 225, 143, 55),
                       shape: RoundedRectangleBorder(
@@ -289,28 +293,30 @@ class _CourseCardState extends State<CourseCard> {
       payviawallet = true;
     });
     if (double.parse(amount) > balance) {
-      bool success =
-          await paymentService.subWalletBalance(context, '$balance', userID);
-      if (success) {
-        merchantTransactionID =
-            paymentService.generateUniqueTransactionId(userID!);
-        body = getChecksum(
-          int.parse('${double.parse(amount) - balance}00'),
-        ).toString();
-        paymentService.startTransaction(body, checksum, checkStatus,
-            showLoadingDialog, paymentstatusnavigation);
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentPopUpPage(
-                  isWallet: false,
-                  adjustedAmount: double.parse(amount),
-                  isSuccess: false,
-                  transactionID: 'transactionID',
-                  transactionType: 'WALLET')),
-        );
-      }
+      // bool success =
+      //     await paymentService.subWalletBalance(context, '$balance', userID);
+      // if (success) {
+      //   merchantTransactionID =
+      //       paymentService.generateUniqueTransactionId(userID!);
+      //   body = getChecksum(
+      //     int.parse('${double.parse(amount) - balance}00'),
+      //   ).toString();
+      //   paymentService.startTransaction(body, checksum, checkStatus,
+      //       showLoadingDialog, paymentstatusnavigation);
+      // } else {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentPopUpPage(
+      //             isWallet: false,
+      //             adjustedAmount: double.parse(amount),
+      //             isSuccess: false,
+      //             transactionID: 'transactionID',
+      //             transactionType: 'WALLET')),
+      //   );
+      // }
+      Fluttertoast.showToast(
+          msg: 'Insufficient Balance, Contact Customer Support');
     } else {
       bool success =
           await paymentService.subWalletBalance(context, amount, userID);
@@ -363,6 +369,27 @@ class _CourseCardState extends State<CourseCard> {
       userID = prefs.getString('userID');
       phone = prefs.getString('phone_number');
     });
+  }
+
+  Future<void> bookDemo() async {
+    final prefs = await SharedPreferences.getInstance();
+    userID = prefs.getString('userID');
+    // Replace with your API URL
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/book-demo/$userID/${widget.course.id}'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
+        // Convert balance to an integer
+      } else {
+        throw Exception('Failed to Book Demo');
+      }
+    } catch (e) {
+      print('Error: $e');
+      // Return 0 in case of an error
+    }
   }
 
   Future<double> fetchBalance() async {

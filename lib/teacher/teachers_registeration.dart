@@ -9,7 +9,7 @@ import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/common/login_page.dart';
 import 'package:trusir/common/otp_screen.dart';
 import 'package:trusir/common/registration_splash_screen.dart';
-import 'package:trusir/common/terms_and_conditions.dart';
+import 'package:trusir/teacher/teacher_tnc.dart';
 
 class TeacherRegistrationData {
   String? teacherName;
@@ -1586,7 +1586,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const TermsAndConditionsPage(),
+                                            const TrusirTermsWidget(),
                                       ),
                                     );
                                   },
@@ -2415,7 +2415,12 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                   }
                                 },
                               ),
-                              const Text('I agree with the '),
+                              const Text(
+                                'I agree with the ',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
                               GestureDetector(
                                 onTap: () {
                                   _showTermsPopup(); // Open popup when clicking on Terms
@@ -2424,6 +2429,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                   'Terms and Conditions',
                                   style: TextStyle(
                                     decoration: TextDecoration.underline,
+                                    fontFamily: 'Poppins',
                                     color: Colors.blue,
                                   ),
                                 ),
@@ -2505,14 +2511,19 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
               children: [
                 const Text(
                   "Please read and accept the",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
                 const SizedBox(height: 5),
                 const Text(
-                  "Gold+ Terms",
+                  "Terms and Conditions",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
                     color: Colors.black,
                   ),
                 ),
@@ -2520,21 +2531,199 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                 const SizedBox(
                   height: 500,
                   child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '"Interest Rate" means, with respect to the relevant Leased Precious Metal, such rate, in percentage, used in the calculation of Interest, as specified in the Lease Terms.\n\n'
-                          '"Interest-Free Period" means, with respect to the Lease Terms, the period (if applicable) indicated by Gullak to the Lessor as it may deem fit in its sole discretion, for which interest shall not be payable.\n\n'
-                          '"Repayment Date" shall mean the date on which the request is raised by You for withdrawing the Leased Precious Metal, either wholly or partially in accordance with the Lease Terms or the maturity date of the respective Lease Scheme, whichever is earlier.\n\n'
-                          '"Security" shall mean the security provided by Lessee to Augmont-Bullion in such form and... '
-                          '"Interest Rate" means, with respect to the relevant Leased Precious Metal, such rate, in percentage, used in the calculation of Interest, as specified in the Lease Terms.\n\n'
-                          '"Interest-Free Period" means, with respect to the Lease Terms, the period (if applicable) indicated by Gullak to the Lessor as it may deem fit in its sole discretion, for which interest shall not be payable.\n\n'
-                          '"Repayment Date" shall mean the date on which the request is raised by You for withdrawing the Leased Precious Metal, either wholly or partially in accordance with the Lease Terms or the maturity date of the respective Lease Scheme, whichever is earlier.\n\n'
-                          '"Security" shall mean the security provided by Lessee to Augmont-Bullion in such form and... ',
-                          style: TextStyle(fontSize: 14, color: Colors.black87),
-                        ),
-                      ],
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("1. About Trusir",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                            "Trusir is a platform that connects students (from kids to teenagers) with qualified tutors for offline, in-person home tuition in subjects like Hindi, English, Math, Science, and Social Science. Tutors are independent service providers, not employees of Trusir.",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Text("2. Eligibility & Registration",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• You must be at least 18 years old to register as a tutor.\n"
+                              "• You must provide accurate, complete, and verifiable information including qualifications, ID proof, and address.\n"
+                              "• Trusir reserves the right to accept or reject tutor registrations at its sole discretion.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("3. Role & Responsibilities of Tutors",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Provide quality offline tutoring sessions at the student’s location as per the agreed schedule.\n"
+                              "• Maintain a professional, respectful, and safe teaching environment.\n"
+                              "• Inform Trusir and the student/parent in advance if a session needs to be rescheduled.\n"
+                              "• Do not share personal contact details unnecessarily or request direct payments from parents/students.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("4. Prohibited Conduct: Direct Dealings",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Strictly prohibited: After being introduced to a student/parent through Trusir, you must not work with them independently, bypassing Trusir, for any future sessions.\n"
+                              "• Attempting to arrange tuition directly with a student or parent introduced through Trusir will result in immediate blacklisting and removal from the platform, and possible legal action.\n"
+                              "• This restriction applies during your time on Trusir and for 12 months after your last session with that student.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("5. Payments",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• All payments for sessions must be handled through Trusir.\n"
+                              "• You will receive payment after deduction of Trusir’s service fee/commission.\n"
+                              "• Delays caused by incomplete attendance updates or policy violations may result in withheld payments.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("6. Code of Conduct",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Tutors must behave professionally and respectfully with students and parents.\n"
+                              "• Any form of harassment, misconduct, or unprofessional behavior may lead to permanent suspension and reporting to relevant authorities.\n"
+                              "• You must not promote any external services, platforms, or personal business while working through Trusir.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("7. Background & Verification",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Trusir may conduct background checks for safety and quality purposes.\n"
+                              "• Falsifying documents or information will lead to immediate termination and possible legal action.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("8. Termination of Association",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Trusir reserves the right to suspend or remove any tutor who violates these Terms, receives consistent negative feedback, or engages in unethical behavior.\n"
+                              "• Tutors can deactivate their profile by submitting a written request to support@trusir.com.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("9. Limitation of Liability",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Trusir is not responsible for any injury, loss, or dispute arising from your sessions with students.\n"
+                              "• You are responsible for your conduct, safety, and interactions during offline sessions.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("10. Modification of Terms",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• Trusir reserves the right to modify these Terms at any time.\n"
+                              "• Continued use of the platform after updates implies acceptance of the revised Terms.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("11. Contact Us",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "For questions or support:\n"
+                              "Email: support@trusir.com\n"
+                              "Website: www.trusir.com\n"
+                              "App Support: Available through the Trusir app (Android & iOS)",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 12),
+                          Text("12. Jurisdiction",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              )),
+                          SizedBox(height: 6),
+                          Text(
+                              "• All disputes arising from the use of our services shall be subject to the exclusive jurisdiction of the courts at Motihari, Bihar.",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                              )),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -2548,8 +2737,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.purple[700], // Match the button color
+                    backgroundColor: Colors.purple[700],
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -2557,7 +2745,11 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                   ),
                   child: const Text(
                     "I accept",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                    ),
                   ),
                 ),
                 TextButton(
@@ -2568,6 +2760,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                     "Cancel",
                     style: TextStyle(
                       fontSize: 14,
+                      fontFamily: 'Poppins',
                       color: Colors.grey,
                     ),
                   ),

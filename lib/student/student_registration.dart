@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:trusir/common/otp_screen.dart';
 import 'package:trusir/common/registration_splash_screen.dart';
-import 'package:trusir/common/terms_and_conditions.dart';
+import 'package:trusir/student/student_tnc.dart';
 
 class StudentRegistrationData {
   String? studentName;
@@ -706,14 +706,14 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                         Text('I agree with the ',
                             style: TextStyle(
                               fontSize: isWeb ? 20 : null,
+                              fontFamily: 'Poppins',
                             )),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    const TermsAndConditionsPage(),
+                                builder: (context) => const TrusirTermsPage(),
                               ),
                             );
                           },
@@ -722,6 +722,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                             style: TextStyle(
                               decoration: TextDecoration.underline,
                               fontSize: isWeb ? 20 : null,
+                              fontFamily: 'Poppins',
                               color: Colors.blue,
                             ),
                           ),

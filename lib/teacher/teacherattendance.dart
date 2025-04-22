@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,41 +84,6 @@ class _TeacherattendanceState extends State<Teacherattendance> {
   List<StudentProfile> students = [];
   Map<String, String> nameUserMap = {};
 
-  Future<void> _submitAttendance({
-    required String id,
-    required String status,
-  }) async {
-    final payload = {
-      "status": status,
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(
-            '$baseUrl/api/update-attendance/$id'), // Append the ID as a parameter to the URL
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(payload),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          // Update the status locally
-          _fetchAttendanceData(selectedslotID!);
-          _updateSummary(); // Update the summary
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Attendance updated successfully!")),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to update attendance!")),
-        );
-      }
-    } catch (error) {
-      print("Error: $error");
-    }
-  }
-
   @override
   void dispose() {
     // Reset status bar to default when leaving the page
@@ -147,7 +113,7 @@ class _TeacherattendanceState extends State<Teacherattendance> {
   }
 
   Future<List<Course>> fetchCourses() async {
-    final url = Uri.parse('$baseUrl/view-slots/$selectedUserID');
+    final url = Uri.parse('$baseUrl/get-individual-slots/$selectedUserID');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -194,12 +160,13 @@ class _TeacherattendanceState extends State<Teacherattendance> {
       students = widget.studentprofile;
       extractStudentData(students, names, nameUserMap);
     });
+    print(nameUserMap);
   }
 
   Future<void> initializeData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      teacheruserID = prefs.getString('userID');
+      teacheruserID = prefs.getString('id');
     });
     try {
       final courses = await fetchCourses(); // Wait for fetchCourses to complete
@@ -317,7 +284,7 @@ class _TeacherattendanceState extends State<Teacherattendance> {
         return;
       }
 
-      final monthKey = getMonthName(month);
+      final monthKey = month.toString();
       if (apiResponse[year].containsKey(monthKey)) {
         setState(() {
           _attendanceData =
@@ -327,7 +294,6 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                 int.parse(date), idAndStatus as Map<String, String>);
           });
         });
-
         _updateSummary(); // Update summary after fetching data
       } else {
         _showNoDataMessage();
@@ -365,6 +331,58 @@ class _TeacherattendanceState extends State<Teacherattendance> {
         _fetchAttendanceData(selectedslotID!);
         _updateSummary();
       });
+    }
+  }
+
+  Future<void> markPresent({
+    required String date,
+    required String slotID,
+  }) async {
+    final url = Uri.parse(
+        'https://admin.trusir.com/mark-present/$date/$selectedUserID/$slotID');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
+        setState(() {
+          // Update the status locally
+          _fetchAttendanceData(selectedslotID!);
+          _updateSummary(); // Update the summary
+        });
+      } else {
+        throw Exception('Failed to mark absent Status: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error while marking absent: $error');
+    }
+  }
+
+  Future<void> markAbsent({
+    required String date,
+    required String slotID,
+  }) async {
+    final url = Uri.parse(
+        'https://admin.trusir.com/mark-absent/$date/$selectedUserID/$slotID');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
+        setState(() {
+          // Update the status locally
+          _fetchAttendanceData(selectedslotID!);
+          _updateSummary(); // Update the summary
+        });
+      } else {
+        throw Exception('Failed to mark absent Status: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error while marking absent: $error');
     }
   }
 
@@ -406,11 +424,11 @@ class _TeacherattendanceState extends State<Teacherattendance> {
 
       if (status != null) {
         totalClassesTaken++;
-        if (status == 'present') {
+        if (status == 'P') {
           presentCount++;
-        } else if (status == 'absent') {
+        } else if (status == 'A') {
           absentCount++;
-        } else if (status == 'No class') {
+        } else if (status == 'H') {
           classNotTakenCount++;
         }
       }
@@ -590,9 +608,11 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                               String status =
                                   _attendanceData[day]?['status'] ?? "no_data";
                               String? id = _attendanceData[day]?['id'];
+                              String? date = _attendanceData[day]?['date'];
 
                               return GestureDetector(
                                 onTap: () {
+                                  print(_attendanceData);
                                   if (id != null) {
                                     showDialog(
                                       context: context,
@@ -603,22 +623,40 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                                           value: status,
                                           items: const [
                                             DropdownMenuItem(
-                                                value: 'present',
+                                                value: 'P',
                                                 child: Text('Present')),
                                             DropdownMenuItem(
-                                                value: 'absent',
+                                                value: 'A',
                                                 child: Text('Absent')),
-                                            DropdownMenuItem(
-                                                value: 'No class',
-                                                child: Text('No class')),
                                           ],
                                           onChanged: (newStatus) {
-                                            if (newStatus != null) {
-                                              _submitAttendance(
-                                                      id: id, status: newStatus)
-                                                  .then((_) {
+                                            if (newStatus == 'A') {
+                                              // Close dialog before API call
+                                              try {
+                                                markAbsent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
                                                 Navigator.pop(context);
-                                              });
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark absent: $e');
+                                                Navigator.pop(context);
+                                              }
+                                            } else if (newStatus == 'P') {
+                                              try {
+                                                markPresent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark present: $e');
+                                                Navigator.pop(context);
+                                              }
                                             }
                                           },
                                         ),
@@ -635,9 +673,9 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                                 child: Container(
                                   margin: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
-                                    color: status == "present"
+                                    color: status == "P"
                                         ? Colors.green
-                                        : status == "absent"
+                                        : status == "A"
                                             ? Colors.red
                                             : Colors.grey[400],
                                     borderRadius: BorderRadius.circular(8),

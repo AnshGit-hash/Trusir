@@ -136,34 +136,13 @@ class _StudentHomepageState extends State<StudentHomepage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Services ListView (Horizontal)
-                SizedBox(
-                  height: isWeb ? 300 : 200,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _serviceCard(
-                        isWeb: isWeb,
-                        title: 'Trusted Teachers',
-                        imagePath: 'assets/girlimage@4x.png',
-                        backgroundColor:
-                            const Color.fromARGB(214, 193, 226, 252),
-                      ),
-                      _serviceCard(
-                        isWeb: isWeb,
-                        title: 'Home to Home Tuition',
-                        imagePath: 'assets/girlimage@4x.png',
-                        backgroundColor:
-                            const Color.fromARGB(210, 251, 197, 216),
-                      ),
-                      _serviceCard(
-                        isWeb: isWeb,
-                        title: 'Qualified And Trusted Teachers',
-                        imagePath: 'assets/girlimage@4x.png',
-                        backgroundColor:
-                            const Color.fromARGB(229, 252, 211, 215),
-                      ),
-                    ],
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Image.asset(
+                    'assets/student_homepage_scroll.png', // or use Image.network / Image.memory if needed
+                    height: 300,
+                    // Optional: match image height
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -184,21 +163,11 @@ class _StudentHomepageState extends State<StudentHomepage> {
                 const SizedBox(height: 20),
 
                 // Offline Payment Button with descriptive text
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Define your onTap action here
-                    },
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          height: isWeb ? 2000 : null,
-                          'assets/g2@4x.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  ),
+                Image.asset(
+                  // height: isWeb ? 2000 : null,
+                  'assets/student_homepage.png',
+                  width: MediaQuery.of(context).size.width,
+                  fit: BoxFit.fitWidth,
                 ),
 
                 // Additional text sections
@@ -599,38 +568,6 @@ class _StudentHomepageState extends State<StudentHomepage> {
           height: isWeb ? 80 : 120,
           fit: BoxFit.contain,
         ),
-      ),
-    );
-  }
-
-  Widget _serviceCard({
-    required String title,
-    required String imagePath,
-    required Color backgroundColor,
-    required bool isWeb,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      width: isWeb ? 300 : 160,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(imagePath, height: 100, fit: BoxFit.cover),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              color: Colors.black,
-            ),
-          ),
-        ],
       ),
     );
   }

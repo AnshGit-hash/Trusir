@@ -170,9 +170,9 @@ class _OTPScreenState extends State<OTPScreen> {
           await fetchUserData(phone);
           showVerificationDialog(context);
         } else if (phone == '7084696179' ||
-            phone == '8809575556' ||
+            phone == '8582040204' ||
             phone == '9801458766' ||
-            phone == '8294448444' ||
+            phone == '9504072969' ||
             phone == '9026154436' && otp == '0000') {
           await fetchUserData(phone);
           showVerificationDialog(context);

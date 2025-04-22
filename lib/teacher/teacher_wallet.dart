@@ -25,6 +25,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
   }
 
   double balance = 0;
+  double hold = 0;
   List<Map<String, dynamic>> walletTransactions = [];
   PaymentService paymentService = PaymentService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -91,6 +92,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
         print(double.parse(data['balance']));
         setState(() {
           balance = double.parse(data['balance']);
+          hold = double.parse(data['holdAmount']);
           prefs.setString('wallet_balance', '$balance');
         });
         return balance; // Convert balance to an integer
@@ -362,13 +364,28 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '₹ $balance',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text(
+                          '₹ $balance',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        Text(
+                          "  (Amount on Hold : ₹ $hold)",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),

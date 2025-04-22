@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/contactus.dart';
-import 'package:trusir/student/editprofilescreen.dart';
 import 'package:trusir/common/parents_doubts.dart';
-import 'package:trusir/common/terms_and_conditions.dart';
 import 'package:trusir/common/about_us.dart';
 import 'package:trusir/student/main_screen.dart';
+import 'package:trusir/student/student_tnc.dart';
 import 'package:trusir/student/your_doubt.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -46,12 +45,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // Define the settings items
     final List<Map<String, dynamic>> settingsItems = [
       {
-        'image': 'assets/editprofile.png',
-        'color': Colors.blue.shade200,
-        'title': 'Edit Profile',
-        'route': const EditProfileScreen(),
-      },
-      {
         'image': 'assets/pensp@3x.png',
         'color': Colors.indigo.shade200,
         'title': 'Your Doubts',
@@ -79,7 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'image': 'assets/tnc.png',
         'color': Colors.pink.shade200,
         'title': 'Terms & Conditions',
-        'route': const TermsAndConditionsPage(),
+        'route': const TrusirTermsPage(),
       },
     ];
 

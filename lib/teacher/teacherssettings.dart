@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:trusir/common/contactus.dart';
-import 'package:trusir/teacher/teacher_edit_profile.dart';
-import 'package:trusir/common/terms_and_conditions.dart';
 import 'package:trusir/common/about_us.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
+import 'package:trusir/teacher/teacher_tnc.dart';
 
 class Teacherssettings extends StatefulWidget {
   const Teacherssettings({super.key});
@@ -80,12 +80,9 @@ class _TeacherssettingsState extends State<Teacherssettings> {
                 isWeb ? 450 : 306,
                 'assets/editprofile.png',
                 Colors.blue.shade200,
-                () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const TeacherEditProfileScreen(),
-                      ),
-                    ),
+                () => Fluttertoast.showToast(
+                    msg:
+                        'Error: You can\'t edit your profile kindly contact Customer Support'),
                 'Edit Profile'),
             SizedBox(height: isWeb ? 10 : 15),
             _settingscard(
@@ -134,7 +131,7 @@ class _TeacherssettingsState extends State<Teacherssettings> {
                 () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TermsAndConditionsPage(),
+                        builder: (context) => const TrusirTermsWidget(),
                       ),
                     ),
                 'Terms & Conditions'),

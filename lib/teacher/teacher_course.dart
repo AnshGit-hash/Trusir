@@ -204,7 +204,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
   List<StudentProfile> studentprofile = [];
   Future<void> fetchStudentProfiles({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userID = prefs.getString('userID');
+    String? userID = prefs.getString('id');
     final url = '$apiBase/$userID';
     final response = await http.get(Uri.parse(url));
 
@@ -223,7 +223,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
 
   Future<List<MyCourseModel>> fetchCourses(String userID) async {
     final prefs = await SharedPreferences.getInstance();
-    final String? teacherID = prefs.getString('userID');
+    final String? teacherID = prefs.getString('id');
 
     final url = Uri.parse('$baseUrl/get-courses/$userID');
     final response = await http.get(url);

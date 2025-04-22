@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:trusir/common/menu.dart';
 import 'package:trusir/student/student_enquiry.dart';
 import 'package:trusir/teacher/teacher_enquiry.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -103,6 +104,21 @@ class EnquiryPage extends StatelessWidget {
                 height: 225,
               ),
             ),
+            TextButton(
+              onPressed: () {
+                showPopupDialog(context);
+              },
+              child: const Text(
+                'Skip to Registration',
+                style: TextStyle(
+                  fontSize: 20,
+                  decoration: TextDecoration.underline,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8C4C92),
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
             kIsWeb ? const Spacer() : const SizedBox(height: 20),
             const Text(
               'Or Enquire On',
@@ -150,6 +166,16 @@ class EnquiryPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void showPopupDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.3),
+      builder: (BuildContext context) {
+        return const PopupScreen();
+      },
     );
   }
 }
