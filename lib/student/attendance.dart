@@ -190,7 +190,6 @@ class _AttendancePageState extends State<AttendancePage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        print(data);
         return data.map((json) => AttendanceRecord.fromJson(json)).toList();
       } else {
         throw Exception(
@@ -210,6 +209,10 @@ class _AttendancePageState extends State<AttendancePage> {
       // Extract the day from the date string (format: "2025-04-10")
       int day = int.parse(record.date.split('-')[2]);
 
+      // Parse the full date to get the weekday
+      DateTime date = DateTime.parse(record.date);
+      String dayName = _getDayName(date.weekday);
+
       // Map the status to match your existing UI expectations
       String status = record.status == 'P'
           ? 'present'
@@ -218,7 +221,8 @@ class _AttendancePageState extends State<AttendancePage> {
       processedData[day] = {
         'id': record.slotID.toString(),
         'status': status,
-        'date': record.date
+        'date': record.date,
+        'day': dayName, // Add the day name here
       };
     }
 
@@ -247,6 +251,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
       setState(() {
         _attendanceData = processAttendanceData(records);
+        print(_attendanceData);
       });
 
       _updateSummary(); // Update summary after fetching data
@@ -254,6 +259,19 @@ class _AttendancePageState extends State<AttendancePage> {
       print("Error fetching attendance data: $error");
       _showNoDataMessage();
     }
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ];
+    return days[weekday % 7];
   }
 
   void _showNoDataMessage() {
@@ -346,8 +364,6 @@ class _AttendancePageState extends State<AttendancePage> {
       } else {
         _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
       }
-      print(_selectedDate.year);
-      print(_selectedDate.month);
       _fetchAttendanceData(selectedslotID!);
     });
   }

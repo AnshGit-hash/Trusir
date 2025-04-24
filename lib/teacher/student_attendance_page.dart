@@ -221,6 +221,19 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     }
   }
 
+  String _getDayName(int weekday) {
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday'
+    ];
+    return days[weekday % 7];
+  }
+
 // Function to convert fetched attendance data into a hierarchical structure
   Map<String, dynamic> attendancedata(List<StudentAttendanceRecord> records) {
     // Define a hierarchical map to store attendance data
@@ -235,6 +248,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
       String day = dateTime.day.toString();
       String status = record.status;
       String id = record.slotID.toString();
+      String dayName = _getDayName(dateTime.weekday); // Get day name
 
       // Ensure year exists in the map
       if (!attendanceHierarchy.containsKey(year)) {
@@ -251,11 +265,12 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         attendanceHierarchy[year]![month]![day] = {};
       }
 
-      // Add both id and status to the date map
+      // Add id, status, date, and day to the date map
       attendanceHierarchy[year]![month]![day] = {
         "id": id,
         "status": status,
-        "date": record.date // Keep the full date string if needed
+        "date": record.date,
+        "day": dayName, // Add day name
       };
     }
     return attendanceHierarchy;
