@@ -38,20 +38,100 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
     super.dispose();
   }
 
+  Future<Map<String, List<String>>> fetchTeacherSubjects() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userID = prefs.getString('userID');
+    final url = Uri.parse(
+        '$baseUrl/get-individual-slots/$userID'); // Replace with your actual URL
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+
+      // Create a map of teacherID to subject (if subject is not null)
+      Map<String, List<String>> teacherSubjects = {};
+
+      for (var item in data) {
+        final teacherID = item['teacherID'];
+        final subject = item['subject'] ?? 'No Subject';
+
+        if (teacherID != null && subject != null) {
+          if (!teacherSubjects.containsKey(teacherID)) {
+            teacherSubjects[teacherID] = [];
+          }
+          if (!teacherSubjects[teacherID]!.contains(subject)) {
+            teacherSubjects[teacherID]!.add(subject);
+          }
+        }
+      }
+      print(teacherSubjects);
+
+      return teacherSubjects;
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
   Future<void> fetchTeachers() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userID = prefs.getString('userID');
     studentClass = prefs.getString('class');
-    final response = await http.get(Uri.parse('$baseUrl/teacher/$userID'));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        teachers = data.map((json) => Teacher.fromJson(json)).toList();
-        isLoading = false;
-      });
-    } else {
-      throw Exception('Failed to load teachers');
+    try {
+      final subjectsMap =
+          await fetchTeacherSubjects(); // fetch subject mappings
+      final response = await http.get(Uri.parse('$baseUrl/teacher/$userID'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final List<Teacher> loadedTeachers = [];
+
+        for (var jsonTeacher in data) {
+          Teacher teacher = Teacher.fromJson(jsonTeacher);
+
+          // Replace the subject with the mapped subject(s) if available
+          if (subjectsMap.containsKey(teacher.id.toString())) {
+            teacher = Teacher(
+              id: teacher.id,
+              name: teacher.name,
+              userID: teacher.userID,
+              fatherName: teacher.fatherName,
+              motherName: teacher.motherName,
+              gender: teacher.gender,
+              teacherClass: teacher.teacherClass,
+              subject: subjectsMap[teacher.id.toString()]!
+                  .join(', '), // Overwrite subject
+              dob: teacher.dob,
+              phone: teacher.phone,
+              role: teacher.role,
+              school: teacher.school,
+              medium: teacher.medium,
+              state: teacher.state,
+              city: teacher.city,
+              address: teacher.address,
+              area: teacher.area,
+              pincode: teacher.pincode,
+              qualification: teacher.qualification,
+              experience: teacher.experience,
+              adhaarFront: teacher.adhaarFront,
+              adhaarBack: teacher.adhaarBack,
+              profile: teacher.profile,
+              timeSlot: teacher.timeSlot,
+            );
+          }
+          loadedTeachers.add(teacher);
+        }
+
+        setState(() {
+          teachers = loadedTeachers;
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load teachers');
+      }
+    } catch (e) {
+      print("Error fetching teacher data: $e");
     }
   }
 
@@ -175,7 +255,7 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
                                 // Tag
                                 Positioned(
-                                  top: -10,
+                                  top: -5,
                                   left: -30,
                                   child: Transform.rotate(
                                     angle: -0.785398,
@@ -193,11 +273,20 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
                                         ),
                                         child: Text(
                                           teacher.teacherClass
-                                              .split(',')
-                                              .where((cls) =>
-                                                  cls.trim() == studentClass)
-                                              .join(
-                                                  ', '), // Show only matching class
+                                                      .split(',')
+                                                      .where((cls) =>
+                                                          cls.trim() ==
+                                                          studentClass)
+                                                      .join(', ') ==
+                                                  ''
+                                              ? studentClass!
+                                              : teacher.teacherClass
+                                                  .split(',')
+                                                  .where((cls) =>
+                                                      cls.trim() ==
+                                                      studentClass)
+                                                  .join(
+                                                      ', '), // Show only matching class
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -372,7 +461,7 @@ class Teacher {
       fatherName: json['father_name'] ?? 'N/A',
       motherName: json['mother_name'] ?? 'N/A',
       gender: json['gender'] ?? 'N/A',
-      teacherClass: json['class'] ?? 'N/A',
+      teacherClass: json['class'],
       subject: json['subject'] ?? 'N/A',
       dob: json['DOB'] ?? 'N/A',
       phone: json['phone'] ?? 'N/A',

@@ -216,7 +216,7 @@ class _AttendancePageState extends State<AttendancePage> {
       // Map the status to match your existing UI expectations
       String status = record.status == 'P'
           ? 'present'
-          : (record.status == 'A' ? 'absent' : 'No class');
+          : (record.status == 'A' ? 'absent' : 'holiday');
 
       processedData[day] = {
         'id': record.slotID.toString(),
@@ -281,6 +281,32 @@ class _AttendancePageState extends State<AttendancePage> {
         duration: Duration(seconds: 3),
       ),
     );
+  }
+
+  Future<void> markHoliday({
+    required String date,
+    required String slotID,
+  }) async {
+    final url = Uri.parse(
+        'https://admin.trusir.com/mark-holiday/$date/${widget.userID}/$slotID');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
+        setState(() {
+          // Update the status locally
+          _fetchAttendanceData(selectedslotID!);
+          _updateSummary(); // Update the summary
+        });
+      } else {
+        throw Exception('Failed to mark absent Status: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error while marking absent: $error');
+    }
   }
 
   Future<void> markAbsent({
@@ -396,7 +422,7 @@ class _AttendancePageState extends State<AttendancePage> {
           presentCount++;
         } else if (status == 'absent') {
           absentCount++;
-        } else if (status == 'No class') {
+        } else if (status == 'holiday') {
           classNotTakenCount++;
         }
       }
@@ -407,7 +433,7 @@ class _AttendancePageState extends State<AttendancePage> {
         'total_classes_taken': totalClassesTaken,
         'present': presentCount,
         'absent': absentCount,
-        'No class': classNotTakenCount,
+        'holiday': classNotTakenCount,
       };
     });
   }
@@ -603,10 +629,14 @@ class _AttendancePageState extends State<AttendancePage> {
                                                 _attendanceData[day]?['id'];
                                             String? date =
                                                 _attendanceData[day]?['date'];
-
+                                            String? dayName =
+                                                _attendanceData[day]?['day'];
                                             return GestureDetector(
                                               onTap: () {
-                                                if (id != null) {
+                                                if (id != null &&
+                                                    dayName != 'Sunday' &&
+                                                    status
+                                                        .contains('holiday')) {
                                                   showDialog(
                                                     context: context,
                                                     builder: (context) =>
@@ -625,6 +655,10 @@ class _AttendancePageState extends State<AttendancePage> {
                                                               value: 'absent',
                                                               child: Text(
                                                                   'Absent')),
+                                                          DropdownMenuItem(
+                                                              value: 'holiday',
+                                                              child: Text(
+                                                                  'Holiday')),
                                                         ],
                                                         onChanged: (newStatus) {
                                                           if (newStatus ==
@@ -659,6 +693,126 @@ class _AttendancePageState extends State<AttendancePage> {
                                                                   .showToast(
                                                                       msg:
                                                                           'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'holiday') {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'Holiday can only be marked from admin');
+                                                            Navigator.pop(
+                                                                context);
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (id != null &&
+                                                    dayName == 'Sunday' &&
+                                                    status
+                                                        .contains('holiday')) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text(
+                                                          "Update Attendance for $day"),
+                                                      content: DropdownButton<
+                                                          String>(
+                                                        value: status,
+                                                        items: const [
+                                                          DropdownMenuItem(
+                                                              value: 'present',
+                                                              child: Text(
+                                                                  'Present')),
+                                                          DropdownMenuItem(
+                                                              value: 'holiday',
+                                                              child: Text(
+                                                                  'Holiday')),
+                                                        ],
+                                                        onChanged: (newStatus) {
+                                                          if (newStatus ==
+                                                              'present') {
+                                                            try {
+                                                              markPresent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'holiday') {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'Holiday can only be marked from admin');
+                                                            Navigator.pop(
+                                                                context);
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (id != null) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text(
+                                                          "Update Attendance for $day"),
+                                                      content: DropdownButton<
+                                                          String>(
+                                                        value: status,
+                                                        items: const [
+                                                          DropdownMenuItem(
+                                                              value: 'present',
+                                                              child: Text(
+                                                                  'Present')),
+                                                          DropdownMenuItem(
+                                                              value: 'absent',
+                                                              child: Text(
+                                                                  'Absent')),
+                                                        ],
+                                                        onChanged: (newStatus) {
+                                                          if (newStatus ==
+                                                              'present') {
+                                                            try {
+                                                              markPresent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'absent') {
+                                                            try {
+                                                              markAbsent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark absent: $e');
                                                               Navigator.pop(
                                                                   context);
                                                             }
@@ -876,10 +1030,14 @@ class _AttendancePageState extends State<AttendancePage> {
                                                 _attendanceData[day]?['id'];
                                             String? date =
                                                 _attendanceData[day]?['date'];
-
+                                            String? dayName =
+                                                _attendanceData[day]?['day'];
                                             return GestureDetector(
                                               onTap: () {
-                                                if (id != null) {
+                                                if (id != null &&
+                                                    dayName != 'Sunday' &&
+                                                    status
+                                                        .contains('holiday')) {
                                                   showDialog(
                                                     context: context,
                                                     builder: (context) =>
@@ -898,6 +1056,10 @@ class _AttendancePageState extends State<AttendancePage> {
                                                               value: 'absent',
                                                               child: Text(
                                                                   'Absent')),
+                                                          DropdownMenuItem(
+                                                              value: 'holiday',
+                                                              child: Text(
+                                                                  'Holiday')),
                                                         ],
                                                         onChanged: (newStatus) {
                                                           if (newStatus ==
@@ -932,6 +1094,126 @@ class _AttendancePageState extends State<AttendancePage> {
                                                                   .showToast(
                                                                       msg:
                                                                           'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'holiday') {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'Holiday can only be marked from admin');
+                                                            Navigator.pop(
+                                                                context);
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (id != null &&
+                                                    dayName == 'Sunday' &&
+                                                    status
+                                                        .contains('holiday')) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text(
+                                                          "Update Attendance for $day"),
+                                                      content: DropdownButton<
+                                                          String>(
+                                                        value: status,
+                                                        items: const [
+                                                          DropdownMenuItem(
+                                                              value: 'present',
+                                                              child: Text(
+                                                                  'Present')),
+                                                          DropdownMenuItem(
+                                                              value: 'holiday',
+                                                              child: Text(
+                                                                  'Holiday')),
+                                                        ],
+                                                        onChanged: (newStatus) {
+                                                          if (newStatus ==
+                                                              'present') {
+                                                            try {
+                                                              markPresent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'holiday') {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    'Holiday can only be marked from admin');
+                                                            Navigator.pop(
+                                                                context);
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else if (id != null) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        AlertDialog(
+                                                      title: Text(
+                                                          "Update Attendance for $day"),
+                                                      content: DropdownButton<
+                                                          String>(
+                                                        value: status,
+                                                        items: const [
+                                                          DropdownMenuItem(
+                                                              value: 'present',
+                                                              child: Text(
+                                                                  'Present')),
+                                                          DropdownMenuItem(
+                                                              value: 'absent',
+                                                              child: Text(
+                                                                  'Absent')),
+                                                        ],
+                                                        onChanged: (newStatus) {
+                                                          if (newStatus ==
+                                                              'present') {
+                                                            try {
+                                                              markPresent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark present: $e');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            }
+                                                          } else if (newStatus ==
+                                                              'absent') {
+                                                            try {
+                                                              markAbsent(
+                                                                date: date!,
+                                                                slotID: id,
+                                                              );
+                                                              Navigator.pop(
+                                                                  context);
+                                                            } catch (e) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Failed to mark absent: $e');
                                                               Navigator.pop(
                                                                   context);
                                                             }
@@ -1001,7 +1283,7 @@ class _AttendancePageState extends State<AttendancePage> {
                                   'Absent', _summaryData['absent'], Colors.red),
                               _buildSummaryCard(
                                   'Holiday',
-                                  _summaryData['No class'],
+                                  _summaryData['holiday'],
                                   Colors.grey.shade400),
                               _buildSummaryCard(
                                   'Total Classes Taken',

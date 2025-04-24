@@ -376,6 +376,32 @@ class _TeacherattendanceState extends State<Teacherattendance> {
     }
   }
 
+  Future<void> markHoliday({
+    required String date,
+    required String slotID,
+  }) async {
+    final url = Uri.parse(
+        'https://admin.trusir.com/mark-holiday/$date/$selectedUserID/$slotID');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        Fluttertoast.showToast(msg: data['message']);
+        setState(() {
+          // Update the status locally
+          _fetchAttendanceData(selectedslotID!);
+          _updateSummary(); // Update the summary
+        });
+      } else {
+        throw Exception('Failed to mark absent Status: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error while marking absent: $error');
+    }
+  }
+
   Future<void> markAbsent({
     required String date,
     required String slotID,
@@ -625,11 +651,114 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                                   _attendanceData[day]?['status'] ?? "no_data";
                               String? id = _attendanceData[day]?['id'];
                               String? date = _attendanceData[day]?['date'];
+                              String? dayName = _attendanceData[day]?['day'];
 
                               return GestureDetector(
                                 onTap: () {
-                                  print(_attendanceData);
-                                  if (id != null) {
+                                  if (id != null &&
+                                      status.contains('H') &&
+                                      dayName != 'Sunday') {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title:
+                                            Text("Update Attendance for $day"),
+                                        content: DropdownButton<String>(
+                                          value: status,
+                                          items: const [
+                                            DropdownMenuItem(
+                                                value: 'P',
+                                                child: Text('Present')),
+                                            DropdownMenuItem(
+                                                value: 'A',
+                                                child: Text('Absent')),
+                                            DropdownMenuItem(
+                                                value: 'H',
+                                                child: Text('Holiday')),
+                                          ],
+                                          onChanged: (newStatus) {
+                                            if (newStatus == 'A') {
+                                              // Close dialog before API call
+                                              try {
+                                                markAbsent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark absent: $e');
+                                                Navigator.pop(context);
+                                              }
+                                            } else if (newStatus == 'H') {
+                                              // Close dialog before API call
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Holiday can only be marked by admin');
+                                              Navigator.pop(context);
+                                            } else if (newStatus == 'P') {
+                                              try {
+                                                markPresent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark present: $e');
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  } else if (id != null &&
+                                      status.contains('H') &&
+                                      dayName == 'Sunday') {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title:
+                                            Text("Update Attendance for $day"),
+                                        content: DropdownButton<String>(
+                                          value: status,
+                                          items: const [
+                                            DropdownMenuItem(
+                                                value: 'P',
+                                                child: Text('Present')),
+                                            DropdownMenuItem(
+                                                value: 'H',
+                                                child: Text('Holiday')),
+                                          ],
+                                          onChanged: (newStatus) {
+                                            if (newStatus == 'H') {
+                                              // Close dialog before API call
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      'Holiday can only be marked by admin');
+                                              Navigator.pop(context);
+                                            } else if (newStatus == 'P') {
+                                              try {
+                                                markPresent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark present: $e');
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  } else if (id != null) {
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
