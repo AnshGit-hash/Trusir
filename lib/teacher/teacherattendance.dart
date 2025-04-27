@@ -693,10 +693,18 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                                               }
                                             } else if (newStatus == 'H') {
                                               // Close dialog before API call
-                                              Fluttertoast.showToast(
-                                                  msg:
-                                                      'Holiday can only be marked by admin');
-                                              Navigator.pop(context);
+                                              try {
+                                                markAbsent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark absent: $e');
+                                                Navigator.pop(context);
+                                              }
                                             } else if (newStatus == 'P') {
                                               try {
                                                 markPresent(
@@ -736,10 +744,18 @@ class _TeacherattendanceState extends State<Teacherattendance> {
                                           onChanged: (newStatus) {
                                             if (newStatus == 'H') {
                                               // Close dialog before API call
-                                              Fluttertoast.showToast(
-                                                  msg:
-                                                      'Holiday can only be marked by admin');
-                                              Navigator.pop(context);
+                                              try {
+                                                markAbsent(
+                                                  date: date!,
+                                                  slotID: id,
+                                                );
+                                                Navigator.pop(context);
+                                              } catch (e) {
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                        'Failed to mark absent: $e');
+                                                Navigator.pop(context);
+                                              }
                                             } else if (newStatus == 'P') {
                                               try {
                                                 markPresent(
