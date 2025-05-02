@@ -1,17 +1,20 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/main.dart';
 import 'package:image/image.dart' as img;
 
 class ImageUploadUtils {
   static Future<void> requestPermissions() async {
+    if (kIsWeb) return; // No permissions needed on web
+
     if (await Permission.camera.isGranted) {
       return;
     }
@@ -36,13 +39,13 @@ class ImageUploadUtils {
     }
   }
 
-  static Future<File?> compressImage(File file) async {
+  static Future<File?> compressImage(File file, BuildContext context) async {
     try {
       final bytes = await file.readAsBytes();
       img.Image? image = img.decodeImage(bytes);
 
       if (image == null) {
-        Fluttertoast.showToast(msg: 'Error decoding image.');
+        showCustomToast(context, 'Error decoding image.');
         return null;
       }
 
@@ -56,52 +59,65 @@ class ImageUploadUtils {
 
       return compressedFile;
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error compressing image: $e');
+      showCustomToast(context, 'Error compressing image: $e');
       return null;
     }
   }
 
-  static Future<String> uploadSingleImageFromGallery() async {
+  static Future<String> uploadSingleImageFromGallery(
+      BuildContext context) async {
     await requestPermissions();
 
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image == null) {
-      Fluttertoast.showToast(msg: 'No image selected.');
+      showCustomToast(context, 'No image selected.');
       return 'null';
     }
 
-    final compressedImage = await compressImage(File(image.path));
-    if (compressedImage == null) {
-      Fluttertoast.showToast(msg: 'Failed to compress image.');
-      return 'null';
+    if (kIsWeb) {
+      // Handle web upload directly
+      return await _uploadWebImage(image, context);
+    } else {
+      // Mobile handling with compression
+      final compressedImage = await compressImage(File(image.path), context);
+      if (compressedImage == null) {
+        showCustomToast(context, 'Failed to compress image.');
+        return 'null';
+      }
+      return await _uploadImage(compressedImage, context);
     }
-
-    return await _uploadImage(compressedImage);
   }
 
-  static Future<String> uploadSingleImageFromCamera() async {
+  static Future<String> uploadSingleImageFromCamera(
+      BuildContext context) async {
+    if (kIsWeb) {
+      showCustomToast(context, 'Camera access not supported on web.');
+      return 'null';
+    }
+
     await requestPermissions();
 
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
 
     if (image == null) {
-      Fluttertoast.showToast(msg: 'No image captured.');
+      showCustomToast(context, 'No image captured.');
       return 'null';
     }
 
-    final compressedImage = await compressImage(File(image.path));
+    final compressedImage = await compressImage(File(image.path), context);
     if (compressedImage == null) {
-      Fluttertoast.showToast(msg: 'Failed to compress image.');
+      showCustomToast(context, 'Failed to compress image.');
       return 'null';
     }
 
-    return await _uploadImage(compressedImage);
+    return await _uploadImage(compressedImage, context);
   }
 
-  static Future<String> uploadMultipleImagesFromGallery() async {
+  static Future<String> uploadMultipleImagesFromGallery(
+      BuildContext context) async {
     await requestPermissions();
     final ImagePicker picker = ImagePicker();
     List<XFile> selectedImages = [];
@@ -109,7 +125,12 @@ class ImageUploadUtils {
     bool continueSelecting = true;
 
     while (continueSelecting) {
-      final List<XFile> images = await picker.pickMultiImage();
+      final List<XFile> images = kIsWeb
+          ? [await picker.pickImage(source: ImageSource.gallery)]
+              .whereType<XFile>()
+              .toList() // Web can only pick one at a time
+          : await picker.pickMultiImage();
+
       if (images.isNotEmpty) {
         selectedImages.addAll(images);
       }
@@ -117,23 +138,30 @@ class ImageUploadUtils {
       if (selectedImages.isNotEmpty) {
         continueSelecting = await _showImageDialog(selectedImages);
       } else {
-        break; // Prevents the dialog from appearing if no images were selected
+        break;
       }
     }
 
     if (selectedImages.isEmpty) {
-      Fluttertoast.showToast(msg: 'No images selected.');
+      showCustomToast(context, 'No images selected.');
       return 'null';
     }
 
     List<String> downloadUrls = [];
     for (var image in selectedImages) {
-      final compressedImage = await compressImage(File(image.path));
-      if (compressedImage == null) {
-        Fluttertoast.showToast(msg: 'Failed to compress an image. Skipping.');
-        continue;
+      final String downloadUrl;
+
+      if (kIsWeb) {
+        downloadUrl = await _uploadWebImage(image, context);
+      } else {
+        final compressedImage = await compressImage(File(image.path), context);
+        if (compressedImage == null) {
+          showCustomToast(context, 'Failed to compress an image. Skipping.');
+          continue;
+        }
+        downloadUrl = await _uploadImage(compressedImage, context);
       }
-      final String downloadUrl = await _uploadImage(compressedImage);
+
       if (downloadUrl != 'null') {
         downloadUrls.add(downloadUrl);
       }
@@ -142,8 +170,13 @@ class ImageUploadUtils {
     return downloadUrls.isEmpty ? 'null' : downloadUrls.join(',');
   }
 
-  // Function to upload multiple images from the camera
-  static Future<String> uploadMultipleImagesFromCamera() async {
+  static Future<String> uploadMultipleImagesFromCamera(
+      BuildContext context) async {
+    if (kIsWeb) {
+      showCustomToast(context, 'Camera access not supported on web.');
+      return 'null';
+    }
+
     await requestPermissions();
     final ImagePicker picker = ImagePicker();
     List<XFile> capturedImages = [];
@@ -159,24 +192,24 @@ class ImageUploadUtils {
       if (capturedImages.isNotEmpty) {
         continueCapturing = await _showImageDialog(capturedImages);
       } else {
-        break; // Prevents the dialog from appearing if no images were captured
+        break;
       }
     }
 
     if (capturedImages.isEmpty) {
-      Fluttertoast.showToast(msg: 'No images captured.');
+      showCustomToast(context, 'No images captured.');
       return 'null';
     }
 
     List<String> downloadUrls = [];
     for (var image in capturedImages) {
-      final compressedImage = await compressImage(File(image.path));
+      final compressedImage = await compressImage(File(image.path), context);
       if (compressedImage == null) {
-        Fluttertoast.showToast(msg: 'Failed to compress an image. Skipping.');
+        showCustomToast(context, 'Failed to compress an image. Skipping.');
         continue;
       }
 
-      final String downloadUrl = await _uploadImage(compressedImage);
+      final String downloadUrl = await _uploadImage(compressedImage, context);
       if (downloadUrl != 'null') {
         downloadUrls.add(downloadUrl);
       }
@@ -206,12 +239,19 @@ class ImageUploadUtils {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Image.file(
-                                  File(images[index].path),
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: kIsWeb
+                                    ? Image.network(
+                                        images[index].path,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Image.file(
+                                        File(images[index].path),
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                               Positioned(
                                 top: 0,
@@ -239,10 +279,11 @@ class ImageUploadUtils {
                   onPressed: () => Navigator.pop(context, false), // Done
                   child: const Text('Done'),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true), // Add More
-                  child: const Text('Add More'),
-                ),
+                if (!kIsWeb) // On web, we can't pick multiple at once
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true), // Add More
+                    child: const Text('Add More'),
+                  ),
               ],
             );
           },
@@ -250,7 +291,7 @@ class ImageUploadUtils {
         false;
   }
 
-  static Future<String> _uploadImage(File image) async {
+  static Future<String> _uploadImage(File image, BuildContext context) async {
     final uri = Uri.parse('$baseUrl/api/upload-profile');
     final request = http.MultipartRequest('POST', uri);
 
@@ -265,12 +306,51 @@ class ImageUploadUtils {
       if (jsonResponse.containsKey('download_url')) {
         return jsonResponse['download_url'] as String;
       } else {
-        Fluttertoast.showToast(msg: 'Download URL not found in the response.');
+        showCustomToast(context, 'Download URL not found in the response.');
         return 'null';
       }
     } else {
-      Fluttertoast.showToast(
-          msg: 'Failed to upload image: ${response.statusCode}');
+      showCustomToast(
+          context, 'Failed to upload image: ${response.statusCode}');
+      return 'null';
+    }
+  }
+
+  static Future<String> _uploadWebImage(
+      XFile image, BuildContext context) async {
+    try {
+      final uri = Uri.parse('$baseUrl/api/upload-profile');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Convert XFile to bytes for web
+      final bytes = await image.readAsBytes();
+      final file = http.MultipartFile.fromBytes(
+        'photo',
+        bytes,
+        filename: image.name,
+      );
+
+      request.files.add(file);
+
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        final responseBody = await response.stream.bytesToString();
+        final Map<String, dynamic> jsonResponse = jsonDecode(responseBody);
+
+        if (jsonResponse.containsKey('download_url')) {
+          return jsonResponse['download_url'] as String;
+        } else {
+          showCustomToast(context, 'Download URL not found in the response.');
+          return 'null';
+        }
+      } else {
+        showCustomToast(
+            context, 'Failed to upload image: ${response.statusCode}');
+        return 'null';
+      }
+    } catch (e) {
+      showCustomToast(context, 'Error uploading image: $e');
       return 'null';
     }
   }

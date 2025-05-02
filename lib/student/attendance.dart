@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
+
+import '../common/custom_toast.dart';
 
 class AttendanceRecord {
   final int id;
@@ -295,7 +296,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
+        showCustomToast(context, data['message']);
         setState(() {
           // Update the status locally
           _fetchAttendanceData(selectedslotID!);
@@ -321,7 +322,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
+        showCustomToast(context, data['message']);
         setState(() {
           // Update the status locally
           _fetchAttendanceData(selectedslotID!);
@@ -347,7 +348,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
+        showCustomToast(context, data['message']);
         setState(() {
           // Update the status locally
           _fetchAttendanceData(selectedslotID!);
@@ -459,940 +460,499 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   Widget build(BuildContext context) {
     isWeb = MediaQuery.of(context).size.width > 600;
+    final theme = Theme.of(context);
+
     return Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          backgroundColor: Colors.grey[50],
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Image.asset('assets/back_button.png', height: 50)),
-                const SizedBox(width: 20),
-                const Text(
-                  'Attendance',
-                  style: TextStyle(
-                    color: Color(0xFF48116A),
-                    fontSize: 25,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          toolbarHeight: 70,
-        ),
-        body: SingleChildScrollView(
-            child: isWeb
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 15, top: 5, right: 15),
-                          child: _buildSlotList(),
-                        ),
-                        // Calendar Section
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              top: 10, left: 15, bottom: 8, right: 20),
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            width: 420,
-                            decoration: BoxDecoration(
-                              color: Colors.white70,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize:
-                                  MainAxisSize.min, // Allow dynamic height
-                              children: [
-                                // Calendar Header
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                          Icons.arrow_back_ios_outlined,
-                                          size: 15),
-                                      onPressed: _prevMonth,
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          _navigateToYearMonthPicker(context),
-                                      child: Text(_monthYearString,
-                                          style: const TextStyle(fontSize: 17)),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                          Icons.arrow_forward_ios_outlined,
-                                          size: 15),
-                                      onPressed: _nextMonth,
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _selectedDate = DateTime.now();
-                                          _fetchAttendanceData(selectedslotID!);
-                                        });
-                                      },
-                                      child: const Text(
-                                        'Today',
-                                        style: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 18,
-                                            color: Color(0xFF48116A)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                // Day Headers
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: weekdays
-                                        .map((day) => Text(day,
-                                            style: const TextStyle(
-                                                color: Color(0xFF48116A),
-                                                fontWeight: FontWeight.bold)))
-                                        .toList(),
-                                  ),
-                                ),
-
-                                // Calendar Dates (Using SizedBox for dynamic height)
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    int totalRows =
-                                        ((_startingWeekday + _daysInMonth) / 7)
-                                            .ceil();
-                                    double rowHeight =
-                                        50; // Adjust row height as needed
-                                    double totalHeight = totalRows * rowHeight;
-
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: SizedBox(
-                                        height:
-                                            totalHeight, // Dynamically calculated height
-                                        child: GridView.builder(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(), // Prevent inner scrolling
-                                          gridDelegate:
-                                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 7,
-                                            childAspectRatio: 1.2,
-                                            mainAxisExtent:
-                                                50, // Height of each date box
-                                          ),
-                                          itemCount:
-                                              _startingWeekday + _daysInMonth,
-                                          itemBuilder: (context, index) {
-                                            if (index < _startingWeekday) {
-                                              return const SizedBox.shrink();
-                                            }
-
-                                            int day =
-                                                index - _startingWeekday + 1;
-                                            bool isToday =
-                                                day == DateTime.now().day &&
-                                                    _selectedDate.month ==
-                                                        DateTime.now().month &&
-                                                    _selectedDate.year ==
-                                                        DateTime.now().year;
-
-                                            String status = _attendanceData[day]
-                                                    ?['status'] ??
-                                                "no_data";
-                                            String? id =
-                                                _attendanceData[day]?['id'];
-                                            String? date =
-                                                _attendanceData[day]?['date'];
-                                            String? dayName =
-                                                _attendanceData[day]?['day'];
-                                            return GestureDetector(
-                                              onTap: () {
-                                                if (id != null &&
-                                                    dayName != 'Sunday' &&
-                                                    status
-                                                        .contains('holiday')) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'absent',
-                                                              child: Text(
-                                                                  'Absent')),
-                                                          DropdownMenuItem(
-                                                              value: 'holiday',
-                                                              child: Text(
-                                                                  'Holiday')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'absent') {
-                                                            // Close dialog before API call
-                                                            try {
-                                                              markAbsent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark absent: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'holiday') {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    'Holiday can only be marked from admin');
-                                                            Navigator.pop(
-                                                                context);
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else if (id != null &&
-                                                    dayName == 'Sunday' &&
-                                                    status
-                                                        .contains('holiday')) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'holiday',
-                                                              child: Text(
-                                                                  'Holiday')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'holiday') {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    'Holiday can only be marked from admin');
-                                                            Navigator.pop(
-                                                                context);
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else if (id != null) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'absent',
-                                                              child: Text(
-                                                                  'Absent')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'absent') {
-                                                            try {
-                                                              markAbsent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark absent: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            "No ID found for this date!")),
-                                                  );
-                                                }
-                                              },
-                                              child: Container(
-                                                margin: const EdgeInsets.all(2),
-                                                decoration: BoxDecoration(
-                                                  color: status == "present"
-                                                      ? Colors.green
-                                                      : status == "absent"
-                                                          ? Colors.red
-                                                          : Colors.grey[400],
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                    color: isToday
-                                                        ? const Color(
-                                                            0xFF48116A)
-                                                        : Colors.white,
-                                                    width: isToday ? 3 : 0,
-                                                  ),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    '$day',
-                                                    style: TextStyle(
-                                                        color:
-                                                            status == "no_data"
-                                                                ? Colors.black
-                                                                : Colors.white),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Attendance Summary Section
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              _buildSummaryCard('Present',
-                                  _summaryData['present'], Colors.green),
-                              _buildSummaryCard(
-                                  'Absent', _summaryData['absent'], Colors.red),
-                              _buildSummaryCard(
-                                  'Holiday',
-                                  _summaryData['No class'],
-                                  Colors.grey.shade400),
-                              _buildSummaryCard(
-                                  'Total Classes Taken',
-                                  _summaryData['total_classes_taken'],
-                                  Colors.yellow),
-                            ],
-                          ),
-                        ),
-                      ])
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 15, top: 5, right: 15, bottom: 10),
-                          child: _buildSlotList(),
-                        ),
-                        // Calendar Section
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              top: 10, left: 15, bottom: 8, right: 20),
-                          child: Container(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            width: 380,
-                            decoration: BoxDecoration(
-                              color: Colors.white70,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize:
-                                  MainAxisSize.min, // Allow dynamic height
-                              children: [
-                                // Calendar Header
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                          Icons.arrow_back_ios_outlined,
-                                          size: 15),
-                                      onPressed: _prevMonth,
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          _navigateToYearMonthPicker(context),
-                                      child: Text(_monthYearString,
-                                          style: const TextStyle(fontSize: 17)),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                          Icons.arrow_forward_ios_outlined,
-                                          size: 15),
-                                      onPressed: _nextMonth,
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _selectedDate = DateTime.now();
-                                          _fetchAttendanceData(selectedslotID!);
-                                        });
-                                      },
-                                      child: const Text(
-                                        'Today',
-                                        style: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 18,
-                                            color: Color(0xFF48116A)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                // Day Headers
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: weekdays
-                                        .map((day) => Text(day,
-                                            style: const TextStyle(
-                                                color: Color(0xFF48116A),
-                                                fontWeight: FontWeight.bold)))
-                                        .toList(),
-                                  ),
-                                ),
-
-                                // Calendar Dates (Using SizedBox for dynamic height)
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    int totalRows =
-                                        ((_startingWeekday + _daysInMonth) / 7)
-                                            .ceil();
-                                    double rowHeight =
-                                        50; // Adjust row height as needed
-                                    double totalHeight = totalRows * rowHeight;
-
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: SizedBox(
-                                        height:
-                                            totalHeight, // Dynamically calculated height
-                                        child: GridView.builder(
-                                          physics:
-                                              const NeverScrollableScrollPhysics(), // Prevent inner scrolling
-                                          gridDelegate:
-                                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 7,
-                                            childAspectRatio: 1.2,
-                                            mainAxisExtent:
-                                                50, // Height of each date box
-                                          ),
-                                          itemCount:
-                                              _startingWeekday + _daysInMonth,
-                                          itemBuilder: (context, index) {
-                                            if (index < _startingWeekday) {
-                                              return const SizedBox.shrink();
-                                            }
-
-                                            int day =
-                                                index - _startingWeekday + 1;
-                                            bool isToday =
-                                                day == DateTime.now().day &&
-                                                    _selectedDate.month ==
-                                                        DateTime.now().month &&
-                                                    _selectedDate.year ==
-                                                        DateTime.now().year;
-
-                                            String status = _attendanceData[day]
-                                                    ?['status'] ??
-                                                "no_data";
-                                            String? id =
-                                                _attendanceData[day]?['id'];
-                                            String? date =
-                                                _attendanceData[day]?['date'];
-                                            String? dayName =
-                                                _attendanceData[day]?['day'];
-                                            return GestureDetector(
-                                              onTap: () {
-                                                if (id != null &&
-                                                    dayName != 'Sunday' &&
-                                                    status
-                                                        .contains('holiday')) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'absent',
-                                                              child: Text(
-                                                                  'Absent')),
-                                                          DropdownMenuItem(
-                                                              value: 'holiday',
-                                                              child: Text(
-                                                                  'Holiday')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'absent') {
-                                                            // Close dialog before API call
-                                                            try {
-                                                              markAbsent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark absent: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'holiday') {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    'Holiday can only be marked from admin');
-                                                            Navigator.pop(
-                                                                context);
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else if (id != null &&
-                                                    dayName == 'Sunday' &&
-                                                    status
-                                                        .contains('holiday')) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'holiday',
-                                                              child: Text(
-                                                                  'Holiday')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'holiday') {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    'Holiday can only be marked from admin');
-                                                            Navigator.pop(
-                                                                context);
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else if (id != null) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) =>
-                                                        AlertDialog(
-                                                      title: Text(
-                                                          "Update Attendance for $day"),
-                                                      content: DropdownButton<
-                                                          String>(
-                                                        value: status,
-                                                        items: const [
-                                                          DropdownMenuItem(
-                                                              value: 'present',
-                                                              child: Text(
-                                                                  'Present')),
-                                                          DropdownMenuItem(
-                                                              value: 'absent',
-                                                              child: Text(
-                                                                  'Absent')),
-                                                        ],
-                                                        onChanged: (newStatus) {
-                                                          if (newStatus ==
-                                                              'present') {
-                                                            try {
-                                                              markPresent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark present: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          } else if (newStatus ==
-                                                              'absent') {
-                                                            try {
-                                                              markAbsent(
-                                                                date: date!,
-                                                                slotID: id,
-                                                              );
-                                                              Navigator.pop(
-                                                                  context);
-                                                            } catch (e) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Failed to mark absent: $e');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            }
-                                                          }
-                                                        },
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            "No ID found for this date!")),
-                                                  );
-                                                }
-                                              },
-                                              child: Container(
-                                                margin: const EdgeInsets.all(2),
-                                                decoration: BoxDecoration(
-                                                  color: status == "present"
-                                                      ? Colors.green
-                                                      : status == "absent"
-                                                          ? Colors.red
-                                                          : Colors.grey[400],
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  border: Border.all(
-                                                    color: isToday
-                                                        ? const Color(
-                                                            0xFF48116A)
-                                                        : Colors.white,
-                                                    width: isToday ? 3 : 0,
-                                                  ),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    '$day',
-                                                    style: TextStyle(
-                                                        color:
-                                                            status == "no_data"
-                                                                ? Colors.black
-                                                                : Colors.white),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Attendance Summary Section
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              _buildSummaryCard('Present',
-                                  _summaryData['present'], Colors.green),
-                              _buildSummaryCard(
-                                  'Absent', _summaryData['absent'], Colors.red),
-                              _buildSummaryCard(
-                                  'Holiday',
-                                  _summaryData['holiday'],
-                                  Colors.grey.shade400),
-                              _buildSummaryCard(
-                                  'Total Classes Taken',
-                                  _summaryData['total_classes_taken'],
-                                  Colors.yellow),
-                            ],
-                          ),
-                        ),
-                      ])));
-  }
-
-  Widget _buildSlotList() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(slots.length, (index) {
-          bool isSelected = selectedSlotIndex == index;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedSlotIndex = index;
-                selectedslotID = slots[index]['slotID']!; // Get slotID
-                _fetchAttendanceData(selectedslotID!); // Pass slotID
-                _updateSummary();
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 8.0),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.black : Colors.grey[200],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    '${slots[index]['courseName']!}, ', // Display slot name
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    slots[index]['timeSlot']!, // Display slot name
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(
-    String title,
-    int? count,
-    Color color,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0),
-      child: Container(
-        width: 400,
-        height: 58,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(6.0),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: EdgeInsets.only(left: isWeb ? 20.0 : 10.0),
           child: Row(
             children: [
-              Container(
-                height: 42,
-                width: 42,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(7),
+              if (!isWeb)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                child: Center(
-                  child: Text(
-                    textAlign: TextAlign.justify,
-                    count == null ? '0' : ' $count ',
-                    style: const TextStyle(color: Colors.black54, fontSize: 17),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
+              if (!isWeb) const SizedBox(width: 20),
               Text(
-                ' $title',
-                style: const TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold),
+                'Attendance',
+                style: TextStyle(
+                  color: theme.primaryColor,
+                  fontSize: isWeb ? 28 : 25,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
         ),
+        toolbarHeight: isWeb ? 80 : 70,
+      ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: isWeb ? 40.0 : 15.0,
+                vertical: 20.0,
+              ),
+              child: isWeb ? _buildWebLayout(theme) : _buildMobileLayout(theme),
+            ),
+          ),
+        ),
       ),
     );
   }
+
+  Widget _buildWebLayout(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Calendar Section
+        Container(
+          width: 500, // Fixed width for web
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildSlotList(theme),
+              const SizedBox(height: 20),
+              _buildCalendarHeader(theme),
+              const SizedBox(height: 12),
+              _buildCalendarGrid(theme),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 40),
+
+        // Summary Section
+        SizedBox(
+          width: 300,
+          child: Column(
+            children: [
+              _buildSummaryCard(
+                'Present',
+                _summaryData['present'] ?? 0,
+                Colors.green,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Absent',
+                _summaryData['absent'] ?? 0,
+                Colors.red,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Holiday',
+                _summaryData['holiday'] ?? 0,
+                Colors.grey,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Total Classes',
+                _summaryData['total_classes_taken'] ?? 0,
+                Colors.amber,
+                theme,
+                true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(ThemeData theme) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildSlotList(theme),
+        const SizedBox(height: 20),
+        // Calendar Section
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildCalendarHeader(theme),
+              const SizedBox(height: 12),
+              _buildCalendarGrid(theme),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Summary Section
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: [
+            _buildSummaryCard(
+              'Present',
+              _summaryData['present'] ?? 0,
+              Colors.green,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Absent',
+              _summaryData['absent'] ?? 0,
+              Colors.red,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Holiday',
+              _summaryData['holiday'] ?? 0,
+              Colors.grey,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Total Classes',
+              _summaryData['total_classes_taken'] ?? 0,
+              Colors.amber,
+              theme,
+              false,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlotList(ThemeData theme) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: theme.cardColor,
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: List.generate(slots.length, (index) {
+            bool isSelected = selectedSlotIndex == index;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedSlotIndex = index;
+                  selectedslotID = slots[index]['slotID']!;
+                  _fetchAttendanceData(selectedslotID!);
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.primaryColor : theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color:
+                        isSelected ? theme.primaryColor : Colors.grey.shade300,
+                  ),
+                ),
+                child: Text(
+                  '${slots[index]['courseName']!}, ${slots[index]['timeSlot']!}',
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : theme.textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarHeader(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: _prevMonth,
+        ),
+        TextButton(
+          onPressed: () => _navigateToYearMonthPicker,
+          child: Text(
+            _monthYearString,
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.arrow_forward_ios),
+          onPressed: _nextMonth,
+        ),
+        TextButton(
+          onPressed: () {
+            setState(() {
+              _selectedDate = DateTime.now();
+              _fetchAttendanceData(selectedslotID!);
+            });
+          },
+          child: Text(
+            'Today',
+            style: TextStyle(
+              color: theme.primaryColor,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendarGrid(ThemeData theme) {
+    return Column(
+      children: [
+        // Day Headers
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: weekdays
+                .map((day) => SizedBox(
+                      width: 40,
+                      child: Text(
+                        day,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: theme.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+        // Calendar Grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            childAspectRatio: 1,
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
+          ),
+          itemCount: _startingWeekday + _daysInMonth,
+          itemBuilder: (context, index) {
+            if (index < _startingWeekday) return const SizedBox.shrink();
+
+            int day = index - _startingWeekday + 1;
+            bool isToday = day == DateTime.now().day &&
+                _selectedDate.month == DateTime.now().month &&
+                _selectedDate.year == DateTime.now().year;
+
+            String status = _attendanceData[day]?['status'] ?? "no_data";
+            String? id = _attendanceData[day]?['id'];
+            String? date = _attendanceData[day]?['date'];
+            String? dayName = _attendanceData[day]?['day'];
+
+            return GestureDetector(
+              onTap: () {
+                if (id != null && date != null) {
+                  _showAttendanceDialog(
+                    day: day,
+                    id: id,
+                    date: date,
+                    dayName: dayName,
+                    status: status,
+                  );
+                } else {
+                  showCustomToast(context, "No ID found for this date!");
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _getStatusColor(status, theme),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isToday ? theme.primaryColor : Colors.transparent,
+                    width: 2,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '$day',
+                    style: TextStyle(
+                      color: _getTextColor(status, theme),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showAttendanceDialog(
+      {required String status,
+      required String? dayName,
+      required int day,
+      required String id,
+      required String date}) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Update Attendance for $day"),
+        content: DropdownButton<String>(
+          value: status,
+          items: const [
+            DropdownMenuItem(value: 'present', child: Text('Present')),
+            DropdownMenuItem(value: 'absent', child: Text('Absent')),
+            DropdownMenuItem(value: 'holiday', child: Text('Holiday')),
+          ],
+          onChanged: (newStatus) {
+            if (newStatus == 'absent') {
+              // Close dialog before API call
+              try {
+                markAbsent(
+                  date: date,
+                  slotID: id,
+                );
+                Navigator.pop(context);
+              } catch (e) {
+                showCustomToast(context, 'Failed to mark absent: $e');
+                Navigator.pop(context);
+              }
+            } else if (newStatus == 'present') {
+              try {
+                markPresent(
+                  date: date,
+                  slotID: id,
+                );
+                Navigator.pop(context);
+              } catch (e) {
+                showCustomToast(context, 'Failed to mark present: $e');
+                Navigator.pop(context);
+              }
+            } else if (newStatus == 'holiday') {
+              showCustomToast(context, 'Holiday can only be marked from admin');
+              Navigator.pop(context);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+Widget _buildSummaryCard(
+  String title,
+  int count,
+  Color color,
+  ThemeData theme,
+  bool isWeb,
+) {
+  return Container(
+    width: isWeb ? 300 : 180,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: theme.cardColor,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          spreadRadius: 1,
+          blurRadius: 5,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              '$count',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: TextStyle(
+            color: theme.textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Color _getStatusColor(String status, ThemeData theme) {
+  switch (status) {
+    case "present":
+      return Colors.green;
+    case "absent":
+      return Colors.red;
+    case "holiday":
+      return Colors.grey;
+    default:
+      return theme.cardColor;
+  }
+}
+
+Color _getTextColor(String status, ThemeData theme) {
+  return status == "no_data"
+      ? theme.textTheme.bodyLarge?.color ?? Colors.black
+      : Colors.white;
 }
 
 class YearMonthPicker extends StatelessWidget {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:trusir/common/addtestseries.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/delete.dart';
 import 'package:trusir/common/file_downloader.dart';
 
@@ -253,7 +253,9 @@ class _TestSeriesScreenState extends State<TestSeriesScreen> {
                                           TextButton(
                                             onPressed: () {
                                               DeleteUtility.deleteItem(
-                                                  'testserie', test['id']);
+                                                  'testserie',
+                                                  test['id'],
+                                                  context);
                                               Navigator.pop(context);
                                               Navigator.pop(context);
                                               Navigator.push(
@@ -273,7 +275,7 @@ class _TestSeriesScreenState extends State<TestSeriesScreen> {
                                   );
                                 }
                               : () {
-                                  Fluttertoast.showToast(msg: 'Test Inactive!');
+                                  showCustomToast(context, 'Test Inactive!');
                                 },
                           icon: const Icon(
                             Icons.close,
@@ -406,7 +408,7 @@ class _TestSeriesScreenState extends State<TestSeriesScreen> {
               );
             }
           : () {
-              Fluttertoast.showToast(msg: 'Test Inactive!');
+              showCustomToast(context, 'Test Inactive!');
             },
       child: Container(
         width: 135,

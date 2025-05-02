@@ -302,7 +302,8 @@ class _StudentNoticeScreenState extends State<StudentNoticeScreen> {
                                                             DeleteUtility
                                                                 .deleteItem(
                                                                     'notice',
-                                                                    notice.id);
+                                                                    notice.id,
+                                                                    context);
                                                             Navigator.pop(
                                                                 context);
                                                             Navigator.pop(

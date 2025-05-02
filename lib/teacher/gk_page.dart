@@ -417,7 +417,8 @@ class _StudentGKPageState extends State<StudentGKPage> {
                                                               DeleteUtility
                                                                   .deleteItem(
                                                                       'teacherGK',
-                                                                      gk.id);
+                                                                      gk.id,
+                                                                      context);
                                                               Navigator.pop(
                                                                   context);
                                                               Navigator.pop(

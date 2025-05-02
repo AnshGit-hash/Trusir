@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_uploading.dart';
 
 class GK {
@@ -36,7 +36,8 @@ class _AddGKState extends State<AddGK> {
   bool isimageUploading = false;
 
   Future<void> handleUploadFromCamera() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromCamera();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -45,9 +46,9 @@ class _AddGKState extends State<AddGK> {
           isimageUploading = false;
         });
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -55,7 +56,8 @@ class _AddGKState extends State<AddGK> {
   }
 
   Future<void> handleUploadFromGallery() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromGallery();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -64,9 +66,9 @@ class _AddGKState extends State<AddGK> {
           isimageUploading = false;
         });
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -113,16 +115,16 @@ class _AddGKState extends State<AddGK> {
 
       if (response.statusCode == 200) {
         print("GK posted");
-        Fluttertoast.showToast(
-            msg: 'GK Posted Successfully for all selected students!');
+        showCustomToast(
+            context, 'GK Posted Successfully for all selected students!');
         Navigator.pop(context);
       } else {
         print("Failed ${response.body}");
-        Fluttertoast.showToast(msg: 'Failed to post GK!');
+        showCustomToast(context, 'Failed to post GK!');
       }
     } catch (e) {
       print("Error occurred : $e");
-      Fluttertoast.showToast(msg: 'Error occurred');
+      showCustomToast(context, 'Error occurred');
     }
   }
 

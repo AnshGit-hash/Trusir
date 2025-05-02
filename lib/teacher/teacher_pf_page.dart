@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 // import 'package:trusir/teacher/teacher_edit_profile.dart';
 
 class Teacherpfpage extends StatefulWidget {
@@ -144,9 +144,8 @@ class MyProfileScreenState extends State<Teacherpfpage> {
                     //     builder: (context) => const TeacherEditProfileScreen(),
                     //   ),
                     // );
-                    Fluttertoast.showToast(
-                        msg:
-                            'Error: You can\'t edit your profile kindly contact Customer Support');
+                    showCustomToast(context,
+                        'Error: You can\'t edit your profile kindly contact Customer Support');
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/enquiry.dart';
 import 'package:trusir/common/api.dart';
 import 'dart:async';
@@ -379,8 +379,8 @@ class _OTPScreenState extends State<OTPScreen> {
                             sendOTP(widget.phonenum);
                           }
                         : () {
-                            Fluttertoast.showToast(
-                                msg: 'Please Wait for the cooldown');
+                            showCustomToast(
+                                context, 'Please Wait for the cooldown');
                           },
                     child: Text(
                       _isButtonEnabled ? 'Resend OTP' : '$_secondsRemaining',

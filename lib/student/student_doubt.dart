@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +8,8 @@ import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/student/teacher_profile.dart';
 import 'package:trusir/student/your_doubt.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../common/custom_toast.dart';
 
 class StudentDoubts {
   String? title;
@@ -194,16 +195,16 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
         print(body);
       } else {
         // Handle error
-        Fluttertoast.showToast(msg: 'Failed to submit form: ${response.body}');
+        showCustomToast(context, 'Failed to submit form: ${response.body}');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error occurred: $e');
+      showCustomToast(context, 'Error occurred: $e');
     }
   }
 
   Future<void> handleUploadFromCamera() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromCamera();
+        await ImageUploadUtils.uploadMultipleImagesFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -214,9 +215,9 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
           formData.photo = '${formData.photo},$result'; // Append new images
         }
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -225,7 +226,7 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
 
   Future<void> handleUploadFromGallery() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromGallery();
+        await ImageUploadUtils.uploadMultipleImagesFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -236,9 +237,9 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
           formData.photo = '${formData.photo},$result'; // Append new images
         }
       });
-      Fluttertoast.showToast(msg: 'Images uploaded successfully!');
+      showCustomToast(context, 'Images uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -595,8 +596,9 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
                                                                                         formData.photo = images.join(','); // Update URL string
                                                                                       });
                                                                                       setStateDialog(() {});
-                                                                                      Fluttertoast.showToast(
-                                                                                        msg: 'Image removed!',
+                                                                                      showCustomToast(
+                                                                                        context,
+                                                                                        'Image removed!',
                                                                                       );
                                                                                       print(formData.photo);
                                                                                     },

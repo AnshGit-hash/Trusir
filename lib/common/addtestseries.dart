@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/common/test_series.dart';
 
@@ -30,7 +30,7 @@ class _AddtestseriesState extends State<Addtestseries> {
 
   Future<void> handleUploadFromCamera() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromCamera();
+        await ImageUploadUtils.uploadMultipleImagesFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -52,9 +52,9 @@ class _AddtestseriesState extends State<Addtestseries> {
           }
         } // Save the download URL in the local variable
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         if (isQuestion) {
           isquestionUploading = false;
@@ -67,7 +67,7 @@ class _AddtestseriesState extends State<Addtestseries> {
 
   Future<void> handleUploadFromGallery() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromGallery();
+        await ImageUploadUtils.uploadMultipleImagesFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -89,9 +89,9 @@ class _AddtestseriesState extends State<Addtestseries> {
           }
         } // Save the download URL in the local variable
       });
-      Fluttertoast.showToast(msg: 'Images uploaded successfully!');
+      showCustomToast(context, 'Images uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         if (isQuestion) {
           isquestionUploading = false;
@@ -140,7 +140,7 @@ class _AddtestseriesState extends State<Addtestseries> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Fluttertoast.showToast(msg: 'Test Uploaded Successfully');
+        showCustomToast(context, 'Test Uploaded Successfully');
         Navigator.pop(context);
         Navigator.push(
             context,
@@ -150,10 +150,10 @@ class _AddtestseriesState extends State<Addtestseries> {
                     )));
         print(postData);
       } else {
-        Fluttertoast.showToast(msg: 'Failed to upload test');
+        showCustomToast(context, 'Failed to upload test');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Internal Server Error');
+      showCustomToast(context, 'Internal Server Error');
     }
   }
 
@@ -440,10 +440,9 @@ class _AddtestseriesState extends State<Addtestseries> {
                                                                   });
                                                                   setStateDialog(
                                                                       () {});
-                                                                  Fluttertoast
-                                                                      .showToast(
-                                                                    msg:
-                                                                        'Image removed!',
+                                                                  showCustomToast(
+                                                                    context,
+                                                                    'Image removed!',
                                                                   );
                                                                 },
                                                                 child:
@@ -765,10 +764,9 @@ class _AddtestseriesState extends State<Addtestseries> {
                                                                   });
                                                                   setStateDialog(
                                                                       () {});
-                                                                  Fluttertoast
-                                                                      .showToast(
-                                                                    msg:
-                                                                        'Image removed!',
+                                                                  showCustomToast(
+                                                                    context,
+                                                                    'Image removed!',
                                                                   );
                                                                 },
                                                                 child:

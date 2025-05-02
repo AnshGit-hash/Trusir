@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/teacher/add_gk.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
@@ -61,7 +61,8 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
   }
 
   Future<void> handleUploadFromCamera() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromCamera();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -69,15 +70,16 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
           formData.photo = result;
         });
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {});
     }
   }
 
   Future<void> handleUploadFromGallery() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromGallery();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -85,9 +87,9 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
           formData.photo = result;
         });
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
     }
   }
 
@@ -130,17 +132,14 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
         final response = await http.post(url, headers: headers, body: body);
 
         if (response.statusCode == 200) {
-          print("GK posted for $student");
-          Fluttertoast.showToast(
-              msg: 'GK Posted Successfully for all selected students!');
+          showCustomToast(
+              context, 'GK Posted Successfully for all selected students!');
           Navigator.pop(context);
         } else {
-          print("Failed for $student: ${response.body}");
-          Fluttertoast.showToast(msg: 'Failed to post GK for $student!');
+          showCustomToast(context, 'Failed to post GK for $student!');
         }
       } catch (e) {
-        print("Error occurred for $student: $e");
-        Fluttertoast.showToast(msg: 'Error occurred for $student');
+        showCustomToast(context, 'Error occurred for $student');
       }
     }
   }

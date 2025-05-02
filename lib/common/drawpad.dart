@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 
 class DrawPadPainter extends CustomPainter {
   final List<DrawPoint> points;
@@ -134,8 +134,8 @@ class DrawPadState extends State<DrawPad> {
       if (fileSize > 2 * 1024 * 1024) {
         // 2 MB limit
 
-        Fluttertoast.showToast(
-            msg: 'File size exceeds 2MB. Please select a smaller image.');
+        showCustomToast(
+            context, 'File size exceeds 2MB. Please select a smaller image.');
         return 'null'; // Return early
       }
       final uri = Uri.parse('$baseUrl/api/upload-profile');
@@ -153,11 +153,11 @@ class DrawPadState extends State<DrawPad> {
 
         return jsonResponse['download_url'] ?? 'null';
       } else {
-        Fluttertoast.showToast(msg: 'Upload Failed ${response.statusCode}');
+        showCustomToast(context, 'Upload Failed ${response.statusCode}');
         return 'null';
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error uploading image: $e');
+      showCustomToast(context, 'Error uploading image: $e');
       return 'null';
     }
   }
@@ -172,7 +172,7 @@ class DrawPadState extends State<DrawPad> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
-        Fluttertoast.showToast(msg: 'Failed to convert image');
+        showCustomToast(context, 'Failed to convert image');
         return;
       }
 
@@ -184,20 +184,20 @@ class DrawPadState extends State<DrawPad> {
       final fileSize = imageBytes.length; // Byte size of the image
       if (fileSize > 2 * 1024 * 1024) {
         // 2 MB limit
-        Fluttertoast.showToast(msg: 'File size exceeds 2MB');
+        showCustomToast(context, 'File size exceeds 2MB');
         return; // Exit if file is too large
       }
 
       final downloadUrl = await _uploadImage(file);
 
       if (downloadUrl != 'null') {
-        Fluttertoast.showToast(msg: 'Uploaded Successfully');
+        showCustomToast(context, 'Uploaded Successfully');
         Navigator.pop(context, downloadUrl); // Return the link
       } else {
-        Fluttertoast.showToast(msg: 'Failed to upload drawing');
+        showCustomToast(context, 'Failed to upload drawing');
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error: $e');
+      showCustomToast(context, 'Error: $e');
     }
   }
 

@@ -60,13 +60,15 @@ class Transaction {
   final String transactionType;
   final String transactionID;
   final String description;
+  final String type;
 
   Transaction(
       {required this.transactionName,
       required this.amount,
       required this.transactionType,
       required this.transactionID,
-      required this.description});
+      required this.description,
+      required this.type});
 
   // Convert the Transaction object to JSON
   Map<String, dynamic> toJson() {
@@ -75,7 +77,8 @@ class Transaction {
       "amount": amount,
       "transactionType": transactionType,
       "transactionID": transactionID,
-      "des": description
+      "des": description,
+      "type": type
     };
   }
 }
@@ -136,7 +139,7 @@ class _CoursePageState extends State<CoursePage> {
     // Replace with your API URL
     try {
       final response =
-          await http.get(Uri.parse('$baseUrl/user/balance/$userID'));
+          await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

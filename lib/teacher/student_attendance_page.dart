@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:trusir/common/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 
 class StudentAttendanceRecord {
   final int id;
@@ -71,53 +72,12 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   int selectedCourseIndex = 0;
   int selectedSlotIndex = 0;
   Map<int, Map<String, String>> _attendanceData = {};
-  // Day: Status
-  Map<String, int> _summaryData = {}; // Summary details
+  Map<String, int> _summaryData = {};
   List<String> weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   String? selectedslotID = '';
   String? teacheruserID;
   List<Map<String, String>> slots = [];
-
-  Future<List<Course>> fetchCourses() async {
-    final url = Uri.parse('$baseUrl/get-individual-slots/${widget.userID}');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        slots = data.map((course) {
-          return {
-            'courseName': course['courseName'] as String,
-            'timeSlot': course['timeSlot'] as String,
-            'slotID': course['id'].toString(),
-          };
-        }).toList();
-      });
-      return data.map((json) => Course.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to fetch courses');
-    }
-  }
-
-  DateTime get _firstDayOfMonth {
-    return DateTime(_selectedDate.year, _selectedDate.month, 1);
-  }
-
-  int get _daysInMonth {
-    return DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
-  }
-
-  int get _startingWeekday {
-    return _firstDayOfMonth.weekday % 7; // Adjust for week starting Sunday
-  }
-
-  List<int> get dates {
-    return List.generate(_daysInMonth, (index) => index + 1);
-  }
-
-  String get _monthYearString {
-    return "${getMonthName(_selectedDate.month)} ${_selectedDate.year}";
-  }
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -127,7 +87,6 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
 
   @override
   void dispose() {
-    // Reset status bar to default when leaving the page
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -138,60 +97,65 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     super.dispose();
   }
 
-  Future<void> markAbsent({
-    required String date,
-    required String slotID,
-  }) async {
-    final url = Uri.parse(
-        'https://admin.trusir.com/mark-absent/$date/${widget.userID}/$slotID');
-
+  Future<List<Course>> fetchCourses() async {
+    setState(() => _isLoading = true);
     try {
+      final url = Uri.parse('$baseUrl/get-individual-slots/${widget.userID}');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
+        final List<dynamic> data = json.decode(response.body);
         setState(() {
-          // Update the status locally
-          _fetchAttendanceData(selectedslotID!);
-          _updateSummary(); // Update the summary
+          slots = data.map((course) {
+            return {
+              'courseName': course['courseName'] as String,
+              'timeSlot': course['timeSlot'] as String,
+              'slotID': course['id'].toString(),
+            };
+          }).toList();
         });
+        return data.map((json) => Course.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to mark absent Status: ${response.statusCode}');
+        throw Exception('Failed to fetch courses');
       }
-    } catch (error) {
-      throw Exception('Error while marking absent: $error');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
+  DateTime get _firstDayOfMonth =>
+      DateTime(_selectedDate.year, _selectedDate.month, 1);
+  int get _daysInMonth =>
+      DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+  int get _startingWeekday => _firstDayOfMonth.weekday % 7;
+  List<int> get dates => List.generate(_daysInMonth, (index) => index + 1);
+  String get _monthYearString =>
+      "${getMonthName(_selectedDate.month)} ${_selectedDate.year}";
+
   Future<void> initializeData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      teacheruserID = prefs.getString('id');
-    });
-    try {
-      final courses = await fetchCourses(); // Wait for fetchCourses to complete
-      setState(() {
-        selectedslotID = _getMatchingSlotID(courses);
-      });
+    setState(() => teacheruserID = prefs.getString('id'));
 
+    try {
+      final courses = await fetchCourses();
+      setState(() => selectedslotID = _getMatchingSlotID(courses));
       if (selectedslotID != null) {
-        _fetchAttendanceData(selectedslotID!);
+        await _fetchAttendanceData(selectedslotID!);
       } else {
-        _showNoDataMessage(); // Handle case where no matching slot is found
-      } // Call _fetchAttendanceData after fetchCourses
+        _showNoDataMessage();
+      }
     } catch (error) {
-      print('Error during initialization: $error');
+      _showErrorSnackbar('Initialization error: $error');
     }
   }
 
   String? _getMatchingSlotID(List<Course> courses) {
     if (teacheruserID == null) return null;
-
     for (final course in courses) {
       if (course.teacherID == teacheruserID) {
         return slots.firstWhere(
-            (slot) => slot['slotID'] == course.id.toString())['slotID'];
+          (slot) => slot['slotID'] == course.id.toString(),
+        )['slotID'];
       }
     }
     return null;
@@ -204,21 +168,51 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   }) async {
     final url = Uri.parse(
         'https://admin.trusir.com/view-attendance/$slotID/$year/${month.toString().padLeft(2, '0')}');
-    try {
-      final response = await http.get(url);
+    final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data
-            .map((json) => StudentAttendanceRecord.fromJson(json))
-            .toList();
-      } else {
-        throw Exception(
-            'Failed to load attendance records. Status: ${response.statusCode}');
-      }
-    } catch (error) {
-      throw Exception('Error fetching attendance records: $error');
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data
+          .map((json) => StudentAttendanceRecord.fromJson(json))
+          .toList();
+    } else {
+      throw Exception(
+          'Failed to load attendance records. Status: ${response.statusCode}');
     }
+  }
+
+  Future<Map<String, dynamic>> attendanceconvert(
+      int month, String year, String slotID) async {
+    final records = await fetchAttendanceRecords(
+      year: int.parse(year),
+      month: month,
+      slotID: slotID,
+    );
+    return _attendancedata(records);
+  }
+
+  Map<String, dynamic> _attendancedata(List<StudentAttendanceRecord> records) {
+    Map<String, Map<String, Map<String, Map<String, String>>>>
+        attendanceHierarchy = {};
+
+    for (var record in records) {
+      DateTime dateTime = DateTime.parse(record.date);
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString();
+      String day = dateTime.day.toString();
+
+      attendanceHierarchy.putIfAbsent(year, () => {});
+      attendanceHierarchy[year]!.putIfAbsent(month, () => {});
+      attendanceHierarchy[year]![month]!.putIfAbsent(
+          day,
+          () => {
+                "id": record.slotID.toString(),
+                "status": record.status,
+                "date": record.date,
+                "day": _getDayName(dateTime.weekday),
+              });
+    }
+    return attendanceHierarchy;
   }
 
   String _getDayName(int weekday) {
@@ -234,66 +228,13 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     return days[weekday % 7];
   }
 
-// Function to convert fetched attendance data into a hierarchical structure
-  Map<String, dynamic> attendancedata(List<StudentAttendanceRecord> records) {
-    // Define a hierarchical map to store attendance data
-    Map<String, Map<String, Map<String, Map<String, String>>>>
-        attendanceHierarchy = {};
+  Future<void> _fetchAttendanceData(String slotID) async {
+    setState(() => _isLoading = true);
+    try {
+      final month = _selectedDate.month;
+      final year = _selectedDate.year.toString();
+      final apiResponse = await attendanceconvert(month, year, slotID);
 
-    for (var record in records) {
-      // Parse the date string (format: "YYYY-MM-DD")
-      DateTime dateTime = DateTime.parse(record.date);
-      String year = dateTime.year.toString();
-      String month = dateTime.month.toString();
-      String day = dateTime.day.toString();
-      String status = record.status;
-      String id = record.slotID.toString();
-      String dayName = _getDayName(dateTime.weekday); // Get day name
-
-      // Ensure year exists in the map
-      if (!attendanceHierarchy.containsKey(year)) {
-        attendanceHierarchy[year] = {};
-      }
-
-      // Ensure month exists in the map
-      if (!attendanceHierarchy[year]!.containsKey(month)) {
-        attendanceHierarchy[year]![month] = {};
-      }
-
-      // Ensure date exists in the map (using day only since we have year/month in hierarchy)
-      if (!attendanceHierarchy[year]![month]!.containsKey(day)) {
-        attendanceHierarchy[year]![month]![day] = {};
-      }
-
-      // Add id, status, date, and day to the date map
-      attendanceHierarchy[year]![month]![day] = {
-        "id": id,
-        "status": status,
-        "date": record.date,
-        "day": dayName, // Add day name
-      };
-    }
-    return attendanceHierarchy;
-  }
-
-  Future<Map<String, dynamic>> attendanceconvert(
-      int month, String year, String slotID) async {
-    final records = await fetchAttendanceRecords(
-        year: int.parse(year), month: month, slotID: slotID);
-    return attendancedata(records); // Return the hierarchical data
-  }
-
-  // Generate dropdown items by pairing courses with time slots
-
-  void _fetchAttendanceData(String slotID) {
-    final month = _selectedDate.month;
-    final year = _selectedDate.year.toString();
-
-    setState(() {
-      _attendanceData.clear(); // Clear old data before fetching new data
-    });
-
-    attendanceconvert(month, year, slotID).then((apiResponse) {
       if (apiResponse.isEmpty || !apiResponse.containsKey(year)) {
         _showNoDataMessage();
         return;
@@ -308,27 +249,31 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
             return MapEntry(
                 int.parse(date), idAndStatus as Map<String, String>);
           });
+          _updateSummary();
         });
-        _updateSummary(); // Update summary after fetching data
       } else {
         _showNoDataMessage();
       }
-    }).catchError((error) {
-      print("Error fetching attendance data: $error");
-      _showNoDataMessage();
-    });
+    } catch (error) {
+      _showErrorSnackbar('Error fetching attendance: $error');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _showNoDataMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('No attendance data available.'),
-        duration: Duration(seconds: 3),
-      ),
+      const SnackBar(content: Text('No attendance data available.')),
     );
   }
 
-  void _navigateToYearMonthPicker(BuildContext context) async {
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _navigateToYearMonthPicker() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -344,87 +289,54 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         _selectedDate =
             DateTime(result['year'], result['month'], _selectedDate.day);
         _fetchAttendanceData(selectedslotID!);
-        _updateSummary();
       });
     }
   }
 
   void _prevMonth() {
     setState(() {
-      if (_selectedDate.month == 1) {
-        _selectedDate = DateTime(
-            _selectedDate.year - 1, 12); // Go to December of the previous year
-      } else {
-        _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
-      }
-      print(_selectedDate.year);
-      print(_selectedDate.month);
+      _selectedDate = _selectedDate.month == 1
+          ? DateTime(_selectedDate.year - 1, 12)
+          : DateTime(_selectedDate.year, _selectedDate.month - 1);
       _fetchAttendanceData(selectedslotID!);
     });
-  }
-
-  Future<void> markHoliday({
-    required String date,
-    required String slotID,
-  }) async {
-    final url = Uri.parse(
-        'https://admin.trusir.com/mark-holiday/$date/${widget.userID}/$slotID');
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
-        setState(() {
-          // Update the status locally
-          _fetchAttendanceData(selectedslotID!);
-          _updateSummary(); // Update the summary
-        });
-      } else {
-        throw Exception('Failed to mark absent Status: ${response.statusCode}');
-      }
-    } catch (error) {
-      throw Exception('Error while marking absent: $error');
-    }
-  }
-
-  Future<void> markPresent({
-    required String date,
-    required String slotID,
-  }) async {
-    final url = Uri.parse(
-        'https://admin.trusir.com/mark-present/$date/${widget.userID}/$slotID');
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
-        setState(() {
-          // Update the status locally
-          _fetchAttendanceData(selectedslotID!);
-          _updateSummary(); // Update the summary
-        });
-      } else {
-        throw Exception('Failed to mark absent Status: ${response.statusCode}');
-      }
-    } catch (error) {
-      throw Exception('Error while marking absent: $error');
-    }
   }
 
   void _nextMonth() {
     setState(() {
-      if (_selectedDate.month == 12) {
-        _selectedDate = DateTime(
-            _selectedDate.year + 1, 1); // Go to January of the next year
-      } else {
-        _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
-      }
+      _selectedDate = _selectedDate.month == 12
+          ? DateTime(_selectedDate.year + 1, 1)
+          : DateTime(_selectedDate.year, _selectedDate.month + 1);
       _fetchAttendanceData(selectedslotID!);
     });
+  }
+
+  Future<void> _updateAttendanceStatus({
+    required String status,
+    required String date,
+    required String slotID,
+  }) async {
+    try {
+      final endpoint = status == 'P'
+          ? 'mark-present'
+          : status == 'A'
+              ? 'mark-absent'
+              : 'mark-holiday';
+
+      final url = Uri.parse(
+          'https://admin.trusir.com/$endpoint/$date/${widget.userID}/$slotID');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        showCustomToast(context, data['message']);
+        await _fetchAttendanceData(selectedslotID!);
+      } else {
+        throw Exception('Failed to update status: ${response.statusCode}');
+      }
+    } catch (error) {
+      _showErrorSnackbar('Error updating status: $error');
+    }
   }
 
   void _updateSummary() {
@@ -434,10 +346,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     int classNotTakenCount = 0;
 
     _attendanceData.forEach((_, dateData) {
-      // Extract the status from the nested map
       String? status = dateData['status'];
-      print(status);
-
       if (status != null) {
         totalClassesTaken++;
         if (status == 'P') {
@@ -478,415 +387,426 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     return months[month - 1];
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          backgroundColor: Colors.grey[50],
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Image.asset('assets/back_button.png', height: 50)),
-                const SizedBox(width: 20),
-                const Text(
-                  'Attendance',
-                  style: TextStyle(
-                    color: Color(0xFF48116A),
-                    fontSize: 25,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          toolbarHeight: 70,
+  void _showAttendanceDialog({
+    required int day,
+    required String? id,
+    required String? date,
+    required String? dayName,
+    required String status,
+  }) {
+    final isSunday = dayName == 'Sunday';
+    final isHoliday = status.contains('H');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Update Attendance for $day"),
+        content: DropdownButton<String>(
+          value: status,
+          items: [
+            if (!isSunday || isHoliday)
+              const DropdownMenuItem(value: 'P', child: Text('Present')),
+            if (!isHoliday)
+              const DropdownMenuItem(value: 'A', child: Text('Absent')),
+            if (!isSunday && !isHoliday)
+              const DropdownMenuItem(value: 'H', child: Text('Holiday')),
+          ].whereType<DropdownMenuItem<String>>().toList(),
+          onChanged: (newStatus) async {
+            Navigator.pop(context);
+            if (newStatus == 'H') {
+              _showErrorSnackbar('Holiday can only be marked by admin');
+            } else if (date != null && id != null) {
+              await _updateAttendanceStatus(
+                status: newStatus!,
+                date: date,
+                slotID: id,
+              );
+            }
+          },
         ),
-        body: SingleChildScrollView(
-            child: Column(children: [
-          // Calendar Section
-          Padding(
-            padding:
-                const EdgeInsets.only(top: 10, left: 15, bottom: 8, right: 20),
-            child: Container(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              width: 380,
-              decoration: BoxDecoration(
-                color: Colors.white70,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 1,
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, // Allow dynamic height
-                children: [
-                  // Calendar Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon:
-                            const Icon(Icons.arrow_back_ios_outlined, size: 15),
-                        onPressed: _prevMonth,
-                      ),
-                      TextButton(
-                        onPressed: () => _navigateToYearMonthPicker(context),
-                        child: Text(_monthYearString,
-                            style: const TextStyle(fontSize: 17)),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios_outlined,
-                            size: 15),
-                        onPressed: _nextMonth,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedDate = DateTime.now();
-                            _fetchAttendanceData(selectedslotID!);
-                          });
-                        },
-                        child: const Text(
-                          'Today',
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 18,
-                              color: Color(0xFF48116A)),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Day Headers
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: weekdays
-                          .map((day) => Text(day,
-                              style: const TextStyle(
-                                  color: Color(0xFF48116A),
-                                  fontWeight: FontWeight.bold)))
-                          .toList(),
-                    ),
-                  ),
-
-                  // Calendar Dates (Using SizedBox for dynamic height)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      int totalRows =
-                          ((_startingWeekday + _daysInMonth) / 7).ceil();
-                      double rowHeight = 50; // Adjust row height as needed
-                      double totalHeight = totalRows * rowHeight;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: SizedBox(
-                          height: totalHeight, // Dynamically calculated height
-                          child: GridView.builder(
-                            physics:
-                                const NeverScrollableScrollPhysics(), // Prevent inner scrolling
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 7,
-                              childAspectRatio: 1.2,
-                              mainAxisExtent: 50, // Height of each date box
-                            ),
-                            itemCount: _startingWeekday + _daysInMonth,
-                            itemBuilder: (context, index) {
-                              if (index < _startingWeekday) {
-                                return const SizedBox.shrink();
-                              }
-
-                              int day = index - _startingWeekday + 1;
-                              bool isToday = day == DateTime.now().day &&
-                                  _selectedDate.month == DateTime.now().month &&
-                                  _selectedDate.year == DateTime.now().year;
-
-                              String status =
-                                  _attendanceData[day]?['status'] ?? "no_data";
-                              String? id = _attendanceData[day]?['id'];
-                              String? date = _attendanceData[day]?['date'];
-                              String? dayName = _attendanceData[day]?['day'];
-
-                              return GestureDetector(
-                                onTap: () {
-                                  if (id != null &&
-                                      status.contains('H') &&
-                                      dayName != 'Sunday') {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title:
-                                            Text("Update Attendance for $day"),
-                                        content: DropdownButton<String>(
-                                          value: status,
-                                          items: const [
-                                            DropdownMenuItem(
-                                                value: 'P',
-                                                child: Text('Present')),
-                                            DropdownMenuItem(
-                                                value: 'A',
-                                                child: Text('Absent')),
-                                            DropdownMenuItem(
-                                                value: 'H',
-                                                child: Text('Holiday')),
-                                          ],
-                                          onChanged: (newStatus) {
-                                            if (newStatus == 'A') {
-                                              // Close dialog before API call
-                                              try {
-                                                markAbsent(
-                                                  date: date!,
-                                                  slotID: id,
-                                                );
-                                                Navigator.pop(context);
-                                              } catch (e) {
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        'Failed to mark absent: $e');
-                                                Navigator.pop(context);
-                                              }
-                                            } else if (newStatus == 'H') {
-                                              // Close dialog before API call
-                                              Fluttertoast.showToast(
-                                                  msg:
-                                                      'Holiday can only be marked by admin');
-                                              Navigator.pop(context);
-                                            } else if (newStatus == 'P') {
-                                              try {
-                                                markPresent(
-                                                  date: date!,
-                                                  slotID: id,
-                                                );
-                                                Navigator.pop(context);
-                                              } catch (e) {
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        'Failed to mark present: $e');
-                                                Navigator.pop(context);
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  } else if (id != null &&
-                                      status.contains('H') &&
-                                      dayName == 'Sunday') {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title:
-                                            Text("Update Attendance for $day"),
-                                        content: DropdownButton<String>(
-                                          value: status,
-                                          items: const [
-                                            DropdownMenuItem(
-                                                value: 'P',
-                                                child: Text('Present')),
-                                            DropdownMenuItem(
-                                                value: 'H',
-                                                child: Text('Holiday')),
-                                          ],
-                                          onChanged: (newStatus) {
-                                            if (newStatus == 'H') {
-                                              // Close dialog before API call
-                                              Fluttertoast.showToast(
-                                                  msg:
-                                                      'Holiday can only be marked by admin');
-                                              Navigator.pop(context);
-                                            } else if (newStatus == 'P') {
-                                              try {
-                                                markPresent(
-                                                  date: date!,
-                                                  slotID: id,
-                                                );
-                                                Navigator.pop(context);
-                                              } catch (e) {
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        'Failed to mark present: $e');
-                                                Navigator.pop(context);
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  } else if (id != null) {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title:
-                                            Text("Update Attendance for $day"),
-                                        content: DropdownButton<String>(
-                                          value: status,
-                                          items: const [
-                                            DropdownMenuItem(
-                                                value: 'P',
-                                                child: Text('Present')),
-                                            DropdownMenuItem(
-                                                value: 'A',
-                                                child: Text('Absent')),
-                                          ],
-                                          onChanged: (newStatus) {
-                                            if (newStatus == 'A') {
-                                              // Close dialog before API call
-                                              try {
-                                                markAbsent(
-                                                  date: date!,
-                                                  slotID: id,
-                                                );
-                                                Navigator.pop(context);
-                                              } catch (e) {
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        'Failed to mark absent: $e');
-                                                Navigator.pop(context);
-                                              }
-                                            } else if (newStatus == 'P') {
-                                              try {
-                                                markPresent(
-                                                  date: date!,
-                                                  slotID: id,
-                                                );
-                                                Navigator.pop(context);
-                                              } catch (e) {
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        'Failed to mark present: $e');
-                                                Navigator.pop(context);
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              "No ID found for this date!")),
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: status == "P"
-                                        ? Colors.green
-                                        : status == "A"
-                                            ? Colors.red
-                                            : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: isToday
-                                          ? const Color(0xFF48116A)
-                                          : Colors.white,
-                                      width: isToday ? 3 : 0,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      '$day',
-                                      style: TextStyle(
-                                          color: status == "no_data"
-                                              ? Colors.black
-                                              : Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Attendance Summary Section
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                _buildSummaryCard(
-                    'Present', _summaryData['present'], Colors.green),
-                _buildSummaryCard('Absent', _summaryData['absent'], Colors.red),
-                _buildSummaryCard(
-                    'Holiday', _summaryData['No class'], Colors.grey.shade400),
-                _buildSummaryCard('Total Classes Taken',
-                    _summaryData['total_classes_taken'], Colors.yellow),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 50,
-          ),
-        ])));
+      ),
+    );
   }
 
-  Widget _buildSummaryCard(
-    String title,
-    int? count,
-    Color color,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0),
-      child: Container(
-        width: 400,
-        height: 58,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(6.0),
+  @override
+  Widget build(BuildContext context) {
+    final isWeb = MediaQuery.of(context).size.width > 800;
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate calendar width - fixed maximum size for web
+    final calendarWidth = isWeb
+        ? screenWidth * 0.5 > 500
+            ? 500
+            : screenWidth * 0.5
+        : screenWidth - 40;
+
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: EdgeInsets.only(left: isWeb ? 20.0 : 10.0),
           child: Row(
             children: [
-              Container(
-                height: 42,
-                width: 42,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(7),
+              if (!isWeb)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                child: Center(
-                  child: Text(
-                    textAlign: TextAlign.justify,
-                    count == null ? '0' : ' $count ',
-                    style: const TextStyle(color: Colors.black54, fontSize: 17),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
+              if (!isWeb) const SizedBox(width: 20),
               Text(
-                ' $title',
-                style: const TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold),
+                'Attendance',
+                style: TextStyle(
+                  color: theme.primaryColor,
+                  fontSize: isWeb ? 28 : 25,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
         ),
+        toolbarHeight: isWeb ? 80 : 70,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isWeb ? 40.0 : 15.0,
+                  vertical: 20.0,
+                ),
+                child: isWeb
+                    ? _buildWebLayout(theme, calendarWidth as double)
+                    : _buildMobileLayout(theme, calendarWidth as double),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildWebLayout(ThemeData theme, double calendarWidth) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Calendar Section - Left Side
+        SizedBox(
+          width: calendarWidth,
+          child: Column(
+            children: [
+              _buildCalendar(theme, calendarWidth),
+            ],
+          ),
+        ),
+
+        // Summary Section - Right Side
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Column(
+              children: [
+                Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  children: [
+                    _buildSummaryCard(
+                      'Present',
+                      _summaryData['present'] ?? 0,
+                      Colors.green,
+                      theme,
+                      true,
+                    ),
+                    _buildSummaryCard(
+                      'Absent',
+                      _summaryData['absent'] ?? 0,
+                      Colors.red,
+                      theme,
+                      true,
+                    ),
+                    _buildSummaryCard(
+                      'Holiday',
+                      _summaryData['No class'] ?? 0,
+                      Colors.grey,
+                      theme,
+                      true,
+                    ),
+                    _buildSummaryCard(
+                      'Total Classes',
+                      _summaryData['total_classes_taken'] ?? 0,
+                      Colors.amber,
+                      theme,
+                      true,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout(ThemeData theme, double calendarWidth) {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        _buildCalendar(theme, calendarWidth),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: [
+            _buildSummaryCard(
+              'Present',
+              _summaryData['present'] ?? 0,
+              Colors.green,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Absent',
+              _summaryData['absent'] ?? 0,
+              Colors.red,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Holiday',
+              _summaryData['No class'] ?? 0,
+              Colors.grey,
+              theme,
+              false,
+            ),
+            _buildSummaryCard(
+              'Total Classes',
+              _summaryData['total_classes_taken'] ?? 0,
+              Colors.amber,
+              theme,
+              false,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendar(ThemeData theme, double width) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          // Calendar Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: _prevMonth,
+              ),
+              TextButton(
+                onPressed: _navigateToYearMonthPicker,
+                child: Text(
+                  _monthYearString,
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.arrow_forward_ios),
+                onPressed: _nextMonth,
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedDate = DateTime.now();
+                    _fetchAttendanceData(selectedslotID!);
+                  });
+                },
+                child: Text(
+                  'Today',
+                  style: TextStyle(
+                    color: theme.primaryColor,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Day Headers
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: weekdays
+                  .map((day) => SizedBox(
+                        width: width / 7 - 8,
+                        child: Text(
+                          day,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+
+          // Calendar Grid
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              childAspectRatio: 1,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+            ),
+            itemCount: _startingWeekday + _daysInMonth,
+            itemBuilder: (context, index) {
+              if (index < _startingWeekday) {
+                return const SizedBox.shrink();
+              }
+
+              int day = index - _startingWeekday + 1;
+              bool isToday = day == DateTime.now().day &&
+                  _selectedDate.month == DateTime.now().month &&
+                  _selectedDate.year == DateTime.now().year;
+
+              String status = _attendanceData[day]?['status'] ?? "no_data";
+              String? id = _attendanceData[day]?['id'];
+              String? date = _attendanceData[day]?['date'];
+              String? dayName = _attendanceData[day]?['day'];
+
+              return GestureDetector(
+                onTap: () {
+                  if (id != null && date != null) {
+                    _showAttendanceDialog(
+                      day: day,
+                      id: id,
+                      date: date,
+                      dayName: dayName,
+                      status: status,
+                    );
+                  } else {
+                    _showErrorSnackbar("No ID found for this date!");
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(status, theme),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isToday ? theme.primaryColor : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$day',
+                      style: TextStyle(
+                        color: _getTextColor(status, theme),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status, ThemeData theme) {
+    switch (status) {
+      case "P":
+        return Colors.green;
+      case "A":
+        return Colors.red;
+      case "H":
+        return Colors.grey;
+      default:
+        return theme.cardColor;
+    }
+  }
+
+  Color _getTextColor(String status, ThemeData theme) {
+    return status == "no_data"
+        ? theme.textTheme.bodyLarge?.color ?? Colors.black
+        : Colors.white;
+  }
+
+  Widget _buildSummaryCard(
+    String title,
+    int count,
+    Color color,
+    ThemeData theme,
+    bool isWeb,
+  ) {
+    return Container(
+      width: 180,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+              color: theme.textTheme.bodyLarge?.color,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -896,36 +816,63 @@ class YearMonthPicker extends StatelessWidget {
   final int selectedYear;
   final int selectedMonth;
 
-  const YearMonthPicker(
-      {super.key, required this.selectedYear, required this.selectedMonth});
+  const YearMonthPicker({
+    super.key,
+    required this.selectedYear,
+    required this.selectedMonth,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final int currentYear = DateTime.now().year;
-    final List<int> years =
-        List.generate(currentYear - 2000 + 1, (index) => 2000 + index);
+    final theme = Theme.of(context);
+    final currentYear = DateTime.now().year;
+    final years = List.generate(10, (index) => currentYear - 5 + index);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Year and Month'),
       ),
-      body: ListView.builder(
-        itemCount: years.length,
-        itemBuilder: (context, index) {
-          int year = years[index];
-          return ExpansionTile(
-            title: Text('$year'),
-            children: List.generate(12, (monthIndex) {
-              return ListTile(
-                title: Text('Month: ${monthIndex + 1}'),
-                onTap: () {
-                  Navigator.pop(
-                      context, {'year': year, 'month': monthIndex + 1});
-                },
-              );
-            }),
-          );
-        },
+      body: ListView(
+        children: [
+          for (final year in years)
+            ExpansionTile(
+              title: Text('$year', style: const TextStyle(fontSize: 18)),
+              children: [
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 3,
+                  children: List.generate(12, (month) {
+                    final monthName =
+                        DateFormat('MMM').format(DateTime(year, month + 1));
+                    return InkWell(
+                      onTap: () => Navigator.pop(
+                          context, {'year': year, 'month': month + 1}),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              year == selectedYear && month + 1 == selectedMonth
+                                  ? theme.primaryColor.withOpacity(0.2)
+                                  : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            monthName,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

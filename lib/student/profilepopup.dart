@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/login_page.dart';
 import 'package:trusir/student/popup_splash_screen.dart';
+
+import '../common/custom_toast.dart';
 
 class ProfilePopup extends StatefulWidget {
   const ProfilePopup({super.key});
@@ -266,9 +267,8 @@ class _ProfilePopupState extends State<ProfilePopup> {
                                                         selectedProfile!);
                                                   }
                                                 : () {
-                                                    Fluttertoast.showToast(
-                                                        msg:
-                                                            'Account Inactive!');
+                                                    showCustomToast(context,
+                                                        'Account Inactive!');
                                                   },
                                           ),
                                         ),

@@ -250,7 +250,8 @@ class _ParentsDoubtsPageState extends State<ParentsDoubtsPage> {
                                                                 DeleteUtility
                                                                     .deleteItem(
                                                                         'pdoubt',
-                                                                        gk.id);
+                                                                        gk.id,
+                                                                        context);
                                                                 Navigator.pop(
                                                                     context);
                                                                 Navigator.pop(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/common/login_page.dart';
 import 'package:http/http.dart' as http;
@@ -125,7 +125,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
     super.initState();
     _loadPhoneNumber();
     updateStudentForms(1);
-    fetchAllCourses();
+    fetchAllClasses();
+    fetchAllSubjects();
     numberOfStudents = '1';
     fetchLocations();
     selectedSubjectsPerForm = List.generate(
@@ -153,7 +154,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
         isadhaarBEnabled = false;
       }
     });
-    final String result = await ImageUploadUtils.uploadSingleImageFromCamera();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -174,9 +176,9 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
           isadhaarBEnabled = true;
         }
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
         isadhaarBUploading = false;
@@ -204,7 +206,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
         isadhaarBEnabled = false;
       }
     });
-    final String result = await ImageUploadUtils.uploadSingleImageFromGallery();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -225,9 +228,9 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
           isadhaarBEnabled = true;
         }
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
         isadhaarBUploading = false;
@@ -326,8 +329,32 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
 
   String? uploadedPath;
 
-  Future<void> fetchAllCourses() async {
-    final url = Uri.parse('$baseUrl/get-courses');
+  Future<void> fetchAllClasses() async {
+    final url = Uri.parse('$baseUrl/classes');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+
+      if (mounted) {
+        setState(() {
+          final Set<String> uniqueClasses = {};
+
+          for (var course in data) {
+            final courseClass =
+                course['name'] as String; // Adjust based on API response
+            uniqueClasses.add(courseClass);
+          }
+          _classes = uniqueClasses.toList();
+        });
+      }
+    } else {
+      throw Exception('Failed to fetch classes');
+    }
+  }
+
+  Future<void> fetchAllSubjects() async {
+    final url = Uri.parse('$baseUrl/subjects');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -337,26 +364,18 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
         setState(() {
           // Use a Set to ensure unique values
           final Set<String> uniqueCourses = {};
-          final Set<String> uniqueClasses = {};
-
           for (var course in data) {
             // Extract the subject and class
-            final subject = course['subject'] as String;
-            final courseClass =
-                course['class'] as String; // Adjust based on API response
-
-            // Add unique combinations to the sets
+            final subject = course['name'] as String;
             uniqueCourses.add(subject);
-            uniqueClasses.add(courseClass);
           }
 
           // Convert sets back to lists
           _courses = uniqueCourses.toList();
-          _classes = uniqueClasses.toList();
         });
       }
     } else {
-      throw Exception('Failed to fetch courses');
+      throw Exception('Failed to fetch subjects');
     }
   }
 
@@ -1143,9 +1162,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                             );
                                           }
                                         : () {
-                                            Fluttertoast.showToast(
-                                                msg:
-                                                    'Let the other upload finish first!');
+                                            showCustomToast(context,
+                                                'Let the other upload finish first!');
                                           },
                                     width: 250,
                                     displayPath: studentForms[index].photoPath),
@@ -1271,9 +1289,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                             );
                                           }
                                         : () {
-                                            Fluttertoast.showToast(
-                                                msg:
-                                                    'Let the other upload finish first!');
+                                            showCustomToast(context,
+                                                'Let the other upload finish first!');
                                           },
                                     width: 250,
                                     displayPath:
@@ -1400,9 +1417,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                             );
                                           }
                                         : () {
-                                            Fluttertoast.showToast(
-                                                msg:
-                                                    'Let the other upload finish first!');
+                                            showCustomToast(context,
+                                                'Let the other upload finish first!');
                                           },
                                     width: 250,
                                     displayPath:
@@ -1717,9 +1733,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                       );
                                     }
                                   : () {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              'Let the other upload finish first!');
+                                      showCustomToast(context,
+                                          'Let the other upload finish first!');
                                     },
                               width: 171,
                               displayPath: studentForms[index].photoPath),
@@ -1830,9 +1845,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                       );
                                     }
                                   : () {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              'Let the other upload finish first!');
+                                      showCustomToast(context,
+                                          'Let the other upload finish first!');
                                     },
                               width: 170,
                               displayPath: studentForms[index].aadharFrontPath),
@@ -1943,9 +1957,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                                       );
                                     }
                                   : () {
-                                      Fluttertoast.showToast(
-                                          msg:
-                                              'Let the other upload finish first!');
+                                      showCustomToast(context,
+                                          'Let the other upload finish first!');
                                     },
                               width: 170,
                               displayPath: studentForms[index].aadharBackPath),

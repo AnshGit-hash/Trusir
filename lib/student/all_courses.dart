@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/course.dart';
 import 'package:trusir/student/payment__status_popup.dart';
@@ -231,7 +231,7 @@ class _CourseCardState extends State<CourseCard> {
                                   //     checkStatus,
                                   //     showLoadingDialog,
                                   //     paymentstatusnavigation);
-                                  Fluttertoast.showToast(msg: 'Coming Soon');
+                                  showCustomToast(context, 'Coming Soon');
                                 },
                                 onWalletPayment: () {
                                   Navigator.pop(context);
@@ -315,8 +315,8 @@ class _CourseCardState extends State<CourseCard> {
       //             transactionType: 'WALLET')),
       //   );
       // }
-      Fluttertoast.showToast(
-          msg: 'Insufficient Balance, Contact Customer Support');
+      showCustomToast(
+          context, 'Insufficient Balance, Contact Customer Support');
     } else {
       bool success =
           await paymentService.subWalletBalance(context, amount, userID);
@@ -381,7 +381,7 @@ class _CourseCardState extends State<CourseCard> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        Fluttertoast.showToast(msg: data['message']);
+        showCustomToast(context, data['message']);
         // Convert balance to an integer
       } else {
         throw Exception('Failed to Book Demo');
@@ -562,6 +562,7 @@ class _CourseCardState extends State<CourseCard> {
 
     // Create a Transaction instance
     final Transaction transaction = Transaction(
+        type: "Purchased",
         transactionName: transactionName,
         amount: amount,
         transactionType: transactionType,

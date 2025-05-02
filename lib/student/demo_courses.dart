@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 // import 'package:trusir/common/delete.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/course.dart';
@@ -181,8 +181,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                 //                 );
                 //               }
                 //             : () {
-                //                 Fluttertoast.showToast(
-                //                     msg:
+                //                 showCustomToast(context,
                 //                         'Course Inactive, Please Contact Admin');
                 //               },
                 //         icon: const Icon(
@@ -283,9 +282,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                         //     checkStatus,
                                         //     showLoadingDialog,
                                         //     paymentstatusnavigation);
-                                        Fluttertoast.showToast(
-                                            msg:
-                                                'Coming soon Kindly proceed with wallet payment');
+                                        showCustomToast(context,
+                                            'Coming soon Kindly proceed with wallet payment');
                                       },
                                       onWalletPayment: () {
                                         Navigator.pop(context);
@@ -296,8 +294,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                 });
                           }
                         : () {
-                            Fluttertoast.showToast(
-                                msg: 'Course Inactive, Please Contact Admin');
+                            showCustomToast(context,
+                                'Course Inactive, Please Contact Admin');
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.course['active'] == 1
@@ -326,8 +324,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                     onPressed: widget.course['active']
                         ? () {
                             widget.course['teacherID'] == 'N/A'
-                                ? Fluttertoast.showToast(
-                                    msg: 'No Teachers Assigned Yet')
+                                ? showCustomToast(
+                                    context, 'No Teachers Assigned Yet')
                                 : Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -338,8 +336,8 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                                   );
                           }
                         : () {
-                            Fluttertoast.showToast(
-                                msg: 'Course Inactive, Please Contact Admin');
+                            showCustomToast(context,
+                                'Course Inactive, Please Contact Admin');
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.course['active'] == 1
@@ -380,7 +378,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
           int.parse('${double.parse(amount) - balance}00'),
         ).toString();
         paymentService.startTransaction(body, checksum, checkStatus,
-            showLoadingDialog, paymentstatusnavigation);
+            showLoadingDialog, paymentstatusnavigation, context);
       } else {
         Navigator.push(
           context,
@@ -621,6 +619,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
         amount: amount,
         transactionType: transactionType,
         transactionID: transactionID,
+        type: "Purchased",
         description: "Course Purchase");
 
     try {

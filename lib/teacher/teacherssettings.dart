@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:trusir/common/contactus.dart';
 import 'package:trusir/common/about_us.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:trusir/teacher/teacher_tnc.dart';
+
+import '../common/custom_toast.dart';
 
 class Teacherssettings extends StatefulWidget {
   const Teacherssettings({super.key});
@@ -80,9 +81,8 @@ class _TeacherssettingsState extends State<Teacherssettings> {
                 isWeb ? 450 : 306,
                 'assets/editprofile.png',
                 Colors.blue.shade200,
-                () => Fluttertoast.showToast(
-                    msg:
-                        'Error: You can\'t edit your profile kindly contact Customer Support'),
+                () => showCustomToast(context,
+                    'Error: You can\'t edit your profile kindly contact Customer Support'),
                 'Edit Profile'),
             SizedBox(height: isWeb ? 10 : 15),
             _settingscard(

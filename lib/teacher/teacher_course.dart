@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
@@ -18,172 +19,218 @@ class MyCourseModel {
   final String timeSlot;
   final String type;
   final String price;
+  final String startDate;
 
-  MyCourseModel({
-    required this.id,
-    required this.courseID,
-    required this.courseName,
-    required this.teacherName,
-    required this.teacherID,
-    required this.studentID,
-    required this.image,
-    required this.studentName,
-    required this.timeSlot,
-    required this.type,
-    required this.price,
-  });
+  MyCourseModel(
+      {required this.id,
+      required this.courseID,
+      required this.courseName,
+      required this.teacherName,
+      required this.teacherID,
+      required this.studentID,
+      required this.image,
+      required this.studentName,
+      required this.timeSlot,
+      required this.type,
+      required this.price,
+      required this.startDate});
 
-  // Factory method for creating an instance from JSON
   factory MyCourseModel.fromJson(Map<String, dynamic> json) {
     return MyCourseModel(
-      id: json['id'],
-      courseID: json['courseID'],
-      courseName: json['courseName'],
-      teacherName: json['teacherName'],
-      teacherID: json['teacherID'],
-      studentID: json['StudentID'],
-      image: json['image'],
-      studentName: json['StudentName'],
-      timeSlot: json['timeSlot'],
-      type: json['type'],
-      price: json['price'],
-    );
+        id: json['id'],
+        courseID: json['courseID'],
+        courseName: json['courseName'],
+        teacherName: json['teacherName'],
+        teacherID: json['teacherID'],
+        studentID: json['StudentID'],
+        image: json['image'],
+        studentName: json['StudentName'],
+        timeSlot: json['timeSlot'],
+        type: json['type'],
+        price: json['price'],
+        startDate: json['created_at']);
   }
 }
 
 class TeacherCourseCard extends StatelessWidget {
   final MyCourseModel course;
+  final bool isWeb;
 
-  const TeacherCourseCard({super.key, required this.course});
+  const TeacherCourseCard({
+    super.key,
+    required this.course,
+    this.isWeb = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    String formatDate(String dateString) {
+      DateTime dateTime = DateTime.parse(dateString);
+      String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+      return formattedDate;
+    }
+
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Padding(
-      padding: const EdgeInsets.only(top: 5.0),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.white, Colors.grey.shade50],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+      padding: EdgeInsets.only(
+        top: 5.0,
+        left: isWeb ? 8 : 16,
+        right: isWeb ? 8 : 16,
+      ),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Image.network(
-                        course.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Center(
-                            child: Icon(
-                              Icons.error,
-                              size: 40,
-                              color: Colors.red,
-                            ),
-                          );
-                        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDarkMode
+                  ? [Colors.grey[850]!, Colors.grey[900]!]
+                  : [Colors.white, Colors.grey[50]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(isWeb ? 16.0 : 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Course Image with Name
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: Image.network(
+                          course.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 40,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            );
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 10,
-                    left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Colors.deepPurple,
-                            Colors.pinkAccent,
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              Colors.deepPurple,
+                              Colors.pinkAccent,
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                        child: Text(
+                          course.courseName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Poppins",
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 5),
+
+                // Course Details
+                Text(
+                  'Start from - ${formatDate(course.startDate)}',
+                  style: TextStyle(
+                    fontSize: isWeb ? 16 : 15,
+                    fontFamily: 'Poppins',
+                    color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                  ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  'Time Slot: ${course.timeSlot}',
+                  style: TextStyle(
+                    fontSize: isWeb ? 15 : 14,
+                    fontFamily: 'Poppins',
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                // Price and Type
+                Row(
+                  children: [
+                    Text(
+                      '₹${course.price}',
+                      style: TextStyle(
+                        fontSize: isWeb ? 24 : 22,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isWeb ? 24 : 20,
+                          vertical: isWeb ? 20 : 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: Colors.deepPurpleAccent,
                       ),
                       child: Text(
-                        course.courseName,
-                        style: const TextStyle(
+                        course.type,
+                        style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Poppins",
-                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          fontSize: isWeb ? 15 : 14,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Start from - 01/10/2024',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontFamily: 'Poppins',
-                  color: Colors.grey.shade700,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'Time Slot: ${course.timeSlot}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'Poppins',
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    '₹${course.price}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      backgroundColor: Colors.deepPurpleAccent,
-                    ),
-                    child: Text(
-                      course.type,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -202,45 +249,73 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
   final apiBase = '$baseUrl/my-student';
   List<MyCourseModel> courses = [];
   List<StudentProfile> studentprofile = [];
+  bool _isLoading = true;
+
   Future<void> fetchStudentProfiles({int page = 1}) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userID = prefs.getString('id');
-    final url = '$apiBase/$userID';
-    final response = await http.get(Uri.parse(url));
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userID = prefs.getString('id');
+      final url = '$apiBase/$userID';
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-
-      setState(() {
-        // Initial fetch
-        studentprofile =
-            data.map((json) => StudentProfile.fromJson(json)).toList();
-      });
-    } else {
-      throw Exception('Failed to load student profiles');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          studentprofile =
+              data.map((json) => StudentProfile.fromJson(json)).toList();
+        });
+      } else if (response.statusCode == 201) {
+        setState(() {
+          studentprofile = [];
+        });
+      } else {
+        throw Exception('Failed to load student profiles');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading student profiles: $e')),
+        );
+      }
     }
   }
 
   Future<List<MyCourseModel>> fetchCourses(String userID) async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? teacherID = prefs.getString('id');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? teacherID = prefs.getString('id');
 
-    final url = Uri.parse('$baseUrl/get-courses/$userID');
-    final response = await http.get(url);
+      final url = Uri.parse('$baseUrl/get-courses/$userID');
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
 
-      // Map and filter the courses based on the teacherID
-      final List<MyCourseModel> responseData = data
-          .map((json) => MyCourseModel.fromJson(json))
-          .where((course) => course.teacherID == teacherID)
-          .toList();
+        final List<MyCourseModel> responseData = data
+            .map((json) => MyCourseModel.fromJson(json))
+            .where((course) => course.teacherID == teacherID)
+            .toList();
 
-      courses = responseData;
-      return courses;
-    } else {
-      throw Exception('Failed to fetch courses');
+        if (mounted) {
+          setState(() {
+            courses = responseData;
+            _isLoading = false;
+          });
+        }
+        return courses;
+      } else {
+        throw Exception('Failed to fetch courses');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading courses: $e')),
+        );
+      }
+      rethrow;
     }
   }
 
@@ -252,43 +327,50 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
 
   void initializeData() async {
     await fetchStudentProfiles();
-    await fetchCourses(studentprofile[0].userID);
-    setState(() {});
+    if (studentprofile.isNotEmpty && mounted) {
+      await fetchCourses(studentprofile[0].userID);
+    } else if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isWeb = MediaQuery.of(context).size.width > 600;
+    final isWeb = MediaQuery.of(context).size.width > 600;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Padding(
-          padding: const EdgeInsets.only(left: 10.0),
+          padding: EdgeInsets.only(left: isWeb ? 20.0 : 10.0),
           child: Row(
             children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherMainScreen(
-                        index: 0,
+              if (!isWeb) // Only show back button on mobile
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TeacherMainScreen(
+                          index: 0,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: Image.asset('assets/back_button.png', height: 50),
-              ),
-              const SizedBox(width: 20),
-              const Text(
+                    );
+                  },
+                  child: Image.asset('assets/back_button.png', height: 50),
+                ),
+              if (!isWeb) const SizedBox(width: 20),
+              Text(
                 'Course',
                 style: TextStyle(
-                  color: Color(0xFF48116A),
-                  fontSize: 25,
+                  color: theme.primaryColor,
+                  fontSize: isWeb ? 28 : 25,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w700,
                 ),
@@ -296,47 +378,60 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
             ],
           ),
         ),
-        toolbarHeight: 70,
+        toolbarHeight: isWeb ? 80 : 70,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
+          preferredSize: Size.fromHeight(isWeb ? 60 : 50),
           child: Padding(
-            padding:
-                const EdgeInsets.only(left: 8.0, right: 8, top: 0, bottom: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: isWeb ? 20.0 : 8.0,
+              vertical: 6,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.grey[50],
               ),
               padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 8),
               child: studentprofile.isEmpty
-                  ? const Center(child: Text('No Students Assigned yet'))
+                  ? Center(
+                      child: Text(
+                        'No Students Assigned yet',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
+                      ),
+                    )
                   : SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: List.generate(
                           studentprofile.length,
                           (index) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            margin:
+                                EdgeInsets.symmetric(horizontal: isWeb ? 8 : 4),
                             child: TextButton(
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.grey[200],
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
+                                backgroundColor: Colors.black,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: isWeb ? 24 : 20,
+                                    vertical: isWeb ? 14 : 10),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
                               onPressed: () {
                                 setState(() {
-                                  fetchCourses(studentprofile[index].userID);
+                                  _isLoading = true;
                                 });
+                                fetchCourses(studentprofile[index].userID);
                               },
                               child: Text(
                                 studentprofile[index].name,
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontSize: isWeb ? 16 : 14,
                                 ),
                               ),
                             ),
@@ -348,21 +443,51 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
           ),
         ),
       ),
-      body: courses.isEmpty
-          ? const Center(child: Text('No Courses'))
-          : GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isWeb ? 2 : 1,
-                  // mainAxisExtent: isWeb ? 560 : null,
-                  childAspectRatio: 16 / 14.5),
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              shrinkWrap: true,
-              itemCount: courses.length,
-              itemBuilder: (context, index) {
-                final course = courses[index];
-                return TeacherCourseCard(course: course);
-              },
-            ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : courses.isEmpty
+              ? Center(
+                  child: Text(
+                    'No Courses Available',
+                    style: TextStyle(
+                      fontSize: isWeb ? 20 : 18,
+                      color: theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = constraints.maxWidth > 1200
+                        ? 3
+                        : constraints.maxWidth > 800
+                            ? 2
+                            : 1;
+                    final childAspectRatio =
+                        constraints.maxWidth > 800 ? 16 / 12 : 16 / 14.5;
+
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: childAspectRatio,
+                        mainAxisSpacing: isWeb ? 20 : 10,
+                        crossAxisSpacing: isWeb ? 20 : 0,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: isWeb ? 20 : 0,
+                      ),
+                      shrinkWrap: true,
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        final course = courses[index];
+                        return TeacherCourseCard(
+                          course: course,
+                          isWeb: isWeb,
+                        );
+                      },
+                    );
+                  },
+                ),
     );
   }
 }

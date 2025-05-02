@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 // import 'package:trusir/student/editprofilescreen.dart';
 
 class MyProfileScreen extends StatefulWidget {
@@ -110,9 +110,8 @@ class MyProfileScreenState extends State<MyProfileScreen> {
                     //     builder: (context) => const EditProfileScreen(),
                     //   ),
                     // );
-                    Fluttertoast.showToast(
-                        msg:
-                            'Error: You can\'t edit your profile kindly contact Customer Support');
+                    showCustomToast(context,
+                        'Error: You can\'t edit your profile kindly contact Customer Support');
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/editprofile_splash_screen.dart';
 import 'package:trusir/common/image_uploading.dart';
 
@@ -79,28 +79,30 @@ class TeacherEditProfileScreenState extends State<TeacherEditProfileScreen> {
   }
 
   Future<void> handleUploadFromCamera() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromCamera();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromCamera(context);
 
     if (result != 'null') {
       setState(() {
         profile = result;
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
     }
   }
 
   Future<void> handleUploadFromGallery() async {
-    final String result = await ImageUploadUtils.uploadSingleImageFromGallery();
+    final String result =
+        await ImageUploadUtils.uploadSingleImageFromGallery(context);
 
     if (result != 'null') {
       setState(() {
         profile = result;
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
     }
   }
 

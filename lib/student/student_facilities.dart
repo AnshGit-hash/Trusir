@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/student/attendance.dart';
 import 'package:trusir/student/course.dart';
 // import 'package:trusir/student/extra_knowledge.dart';
@@ -363,7 +363,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -384,7 +384,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -406,7 +406,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -427,7 +427,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -448,7 +448,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -469,7 +469,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -490,7 +490,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -511,7 +511,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                         //     tileHeight,
                         //     checking
                         //         ? () {
-                        //             Fluttertoast.showToast(msg: checkTitle);
+                        //            showCustomToast(context,checkTitle);
                         //           }
                         //         : () {
                         //             Navigator.push(
@@ -532,7 +532,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -552,7 +552,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(
@@ -587,7 +587,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                             tileHeight,
                             checking
                                 ? () {
-                                    Fluttertoast.showToast(msg: checkTitle);
+                                    showCustomToast(context, checkTitle);
                                   }
                                 : () {
                                     Navigator.push(

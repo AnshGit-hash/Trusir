@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/student/student_homepage.dart';
 import 'package:trusir/student/student_registration.dart';
 import 'package:trusir/common/service_unavailable_page.dart';
@@ -124,18 +124,16 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
                 builder: (context) => const ServiceUnavailablePage()),
             (Route<dynamic> route) => false,
           );
-          Fluttertoast.showToast(msg: 'Form Submitted Successfully');
+          showCustomToast(context, 'Form Submitted Successfully');
         } else {
-          Fluttertoast.showToast(
-              msg: 'Failed to submit form: ${response.body}');
+          showCustomToast(context, 'Failed to submit form: ${response.body}');
         }
       } else if (serviceable) {
         if (response.statusCode == 200) {
           _showThankYouPopup(context);
-          Fluttertoast.showToast(msg: 'Form Submitted Successfully');
+          showCustomToast(context, 'Form Submitted Successfully');
         } else {
-          Fluttertoast.showToast(
-              msg: 'Failed to submit form: ${response.body}');
+          showCustomToast(context, 'Failed to submit form: ${response.body}');
         }
       }
     } catch (e) {

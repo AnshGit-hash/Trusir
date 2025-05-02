@@ -231,7 +231,8 @@ class _CourseCardState extends State<CourseCard> {
                                       checksum,
                                       checkStatus,
                                       showLoadingDialog,
-                                      paymentstatusnavigation);
+                                      paymentstatusnavigation,
+                                      context);
                                 },
                                 onWalletPayment: () {
                                   Navigator.pop(context);
@@ -300,7 +301,7 @@ class _CourseCardState extends State<CourseCard> {
           int.parse('${double.parse(amount) - balance}00'),
         ).toString();
         paymentService.startTransaction(body, checksum, checkStatus,
-            showLoadingDialog, paymentstatusnavigation);
+            showLoadingDialog, paymentstatusnavigation, context);
       } else {
         Navigator.push(
           context,
@@ -537,6 +538,7 @@ class _CourseCardState extends State<CourseCard> {
 
     // Create a Transaction instance
     final Transaction transaction = Transaction(
+        type: "Purchased",
         transactionName: transactionName,
         amount: amount,
         transactionType: transactionType,

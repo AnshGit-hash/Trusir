@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -7,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 
 class StudentPaymentPage extends StatefulWidget {
   const StudentPaymentPage({super.key});
@@ -154,11 +154,11 @@ class _StudentPaymentPageState extends State<StudentPaymentPage> {
           checkStatus();
         } else {
           print("Payment Failed: ${response['error']}");
-          Fluttertoast.showToast(msg: "Payment Failed");
+          showCustomToast(context, "Payment Failed");
         }
       } else {
         print("Transaction Incomplete");
-        Fluttertoast.showToast(msg: 'Transaction Incomplete');
+        showCustomToast(context, 'Transaction Incomplete');
       }
     }).catchError((error) {
       print("Error during transaction: $error");
@@ -207,13 +207,13 @@ class _StudentPaymentPageState extends State<StudentPaymentPage> {
         if (response["success"] &&
             response["code"] == "PAYMENT_SUCCESS" &&
             response["data"]["state"] == "COMPLETED") {
-          Fluttertoast.showToast(msg: response["code"]);
+          showCustomToast(context, response["code"]);
           print(response);
         } else {
-          Fluttertoast.showToast(msg: response["code"]);
+          showCustomToast(context, response["code"]);
         }
       } catch (e) {
-        Fluttertoast.showToast(msg: "error");
+        showCustomToast(context, "error");
       }
     });
   }

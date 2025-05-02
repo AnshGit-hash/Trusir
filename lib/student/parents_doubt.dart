@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_uploading.dart';
 import 'package:trusir/common/parents_doubts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -47,7 +47,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
 
   Future<void> handleUploadFromCamera() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromCamera();
+        await ImageUploadUtils.uploadMultipleImagesFromCamera(context);
 
     if (result != 'null') {
       setState(() {
@@ -58,9 +58,9 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
           formData.photo = '${formData.photo},$result'; // Append new images
         }
       });
-      Fluttertoast.showToast(msg: 'Image uploaded successfully!');
+      showCustomToast(context, 'Image uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -82,7 +82,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
 
   Future<void> handleUploadFromGallery() async {
     final String result =
-        await ImageUploadUtils.uploadMultipleImagesFromGallery();
+        await ImageUploadUtils.uploadMultipleImagesFromGallery(context);
 
     if (result != 'null') {
       setState(() {
@@ -93,9 +93,9 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
           formData.photo = '${formData.photo},$result'; // Append new images
         }
       });
-      Fluttertoast.showToast(msg: 'Images uploaded successfully!');
+      showCustomToast(context, 'Images uploaded successfully!');
     } else {
-      Fluttertoast.showToast(msg: 'Image upload failed!');
+      showCustomToast(context, 'Image upload failed!');
       setState(() {
         isimageUploading = false;
       });
@@ -470,8 +470,9 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
                                                                               formData.photo = images.join(','); // Update URL string
                                                                             });
                                                                             setDialogState(() {});
-                                                                            Fluttertoast.showToast(
-                                                                              msg: 'Image removed!',
+                                                                            showCustomToast(
+                                                                              context,
+                                                                              'Image removed!',
                                                                             );
                                                                           },
                                                                           child:

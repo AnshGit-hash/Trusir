@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/inactive_page.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
+
+import 'custom_toast.dart';
 
 class LoginSplashScreen extends StatefulWidget {
   const LoginSplashScreen({super.key});
@@ -114,7 +115,7 @@ class LoginSplashScreenState extends State<LoginSplashScreen> {
                   builder: (context) => const TeacherMainScreen(index: 0)),
             );
           }
-          Fluttertoast.showToast(msg: 'Login Successful!');
+          showCustomToast(context, 'Login Successful!');
         } else {
           Navigator.pushReplacement(
             context,

@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/payment__status_popup.dart';
@@ -439,9 +439,8 @@ class _WalletPageState extends State<WalletPage> {
                             //             ),
                             //           ),
                             //         ));
-                            Fluttertoast.showToast(
-                                msg:
-                                    'Unavailable,Kindly Contact Customer Support');
+                            showCustomToast(context,
+                                'Unavailable,Kindly Contact Customer Support');
                           },
                           child: _buildActionButton(Icons.add, "Add Money")),
                       GestureDetector(

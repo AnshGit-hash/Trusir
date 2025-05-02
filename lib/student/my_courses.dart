@@ -1,5 +1,5 @@
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import 'package:trusir/common/custom_toast.dart';
 // import 'package:trusir/common/delete.dart';
 import 'package:trusir/student/course.dart';
 // import 'package:trusir/student/main_screen.dart';
@@ -189,8 +189,7 @@ class _MyCourseCardState extends State<MyCourseCard> {
                 //                 );
                 //               }
                 //             : () {
-                //                 Fluttertoast.showToast(
-                //                     msg:
+                //                 showCustomToast(context,
                 //                         'Course Inactive, Please Contact Admin');
                 //               },
                 //         icon: Icon(
@@ -270,8 +269,8 @@ class _MyCourseCardState extends State<MyCourseCard> {
                   onPressed: widget.course['active'] == 1
                       ? () {
                           widget.course['teacherID'] == 'N/A'
-                              ? Fluttertoast.showToast(
-                                  msg: 'No Teachers Assigned Yet')
+                              ? showCustomToast(
+                                  context, 'No Teachers Assigned Yet')
                               : Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -280,8 +279,8 @@ class _MyCourseCardState extends State<MyCourseCard> {
                                 );
                         }
                       : () {
-                          Fluttertoast.showToast(
-                              msg: 'Course Inactive, Please Contact Admin');
+                          showCustomToast(
+                              context, 'Course Inactive, Please Contact Admin');
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: widget.course['active'] == 1

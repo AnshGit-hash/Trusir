@@ -35,7 +35,6 @@ dependencies:
   youtube_player_flutter:
   phonepe_payment_sdk:
   crypto:
-  fluttertoast:
   flutter_image_compress:
   multi_select_flutter:
   hexcolor:

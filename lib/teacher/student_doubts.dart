@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/drawpad.dart';
 import 'package:trusir/common/file_downloader.dart';
+
+import '../common/custom_toast.dart';
 
 class StudentDoubtsPage extends StatefulWidget {
   final String userID;
@@ -84,7 +85,7 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
       final XFile? pickedFile = await picker.pickImage(source: source);
 
       if (pickedFile == null) {
-        Fluttertoast.showToast(msg: 'No image selected.');
+        showCustomToast(context, 'No image selected.');
         setState(() {
           isimageUploading = false;
         });
@@ -95,7 +96,7 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
       final compressedImage = await compressImage(File(pickedFile.path));
 
       if (compressedImage == null) {
-        Fluttertoast.showToast(msg: 'Failed to compress image.');
+        showCustomToast(context, 'Failed to compress image.');
         setState(() {
           isimageUploading = false;
         });
@@ -111,16 +112,16 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
           imageUrl = newuploadedPath;
           isimageUploading = false;
         });
-        Fluttertoast.showToast(
-            msg: 'Image uploaded successfully: $newuploadedPath');
+        showCustomToast(
+            context, 'Image uploaded successfully: $newuploadedPath');
       } else {
-        Fluttertoast.showToast(msg: 'Failed to upload the image.');
+        showCustomToast(context, 'Failed to upload the image.');
         setState(() {
           isimageUploading = false;
         });
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error during image selection: $e');
+      showCustomToast(context, 'Error during image selection: $e');
       setState(() {
         isimageUploading = false;
       });
@@ -143,7 +144,7 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
 
       return compressedFile;
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error compressing image: $e');
+      showCustomToast(context, 'Error compressing image: $e');
       return null;
     }
   }
@@ -207,7 +208,7 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
       'status': 'Solved',
     };
     if (imageUrl == '') {
-      Fluttertoast.showToast(msg: 'Upload an Image first');
+      showCustomToast(context, 'Upload an Image first');
     }
 
     try {
@@ -222,8 +223,8 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
 
       // Check the response status
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Fluttertoast.showToast(
-            msg: 'Solution uploaded successfully: ${response.body}');
+        showCustomToast(
+            context, 'Solution uploaded successfully: ${response.body}');
         setState(() {
           isSolutionUploading = false;
         });
@@ -233,10 +234,10 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
         setState(() {
           isSolutionUploading = false;
         });
-        Fluttertoast.showToast(msg: 'Response body: ${response.body}');
+        showCustomToast(context, 'Response body: ${response.body}');
       }
     } catch (error) {
-      Fluttertoast.showToast(msg: 'An error occurred: $error');
+      showCustomToast(context, 'An error occurred: $error');
       setState(() {
         isSolutionUploading = false;
       });

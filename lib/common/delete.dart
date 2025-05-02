@@ -1,9 +1,11 @@
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 
 class DeleteUtility {
-  static Future<bool> deleteItem(String model, int id) async {
+  static Future<bool> deleteItem(
+      String model, int id, BuildContext context) async {
     // If canceled, do nothing
 
     final String url = "$baseUrl/delete/$model/$id";
@@ -12,14 +14,14 @@ class DeleteUtility {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        Fluttertoast.showToast(msg: "$model Deleted Successfully");
+        showCustomToast(context, "$model Deleted Successfully");
         return true;
       } else {
-        Fluttertoast.showToast(msg: "Error deleting $model with ID $id");
+        showCustomToast(context, "Error deleting $model with ID $id");
         return false;
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "Error deleting $model with ID $id: $e");
+      showCustomToast(context, "Error deleting $model with ID $id: $e");
       return false;
     }
   }

@@ -272,8 +272,8 @@ class _YourDoubtPageState extends State<YourDoubtPage> {
                                                     TextButton(
                                                       onPressed: () {
                                                         DeleteUtility
-                                                            .deleteItem(
-                                                                'doubt', gk.id);
+                                                            .deleteItem('doubt',
+                                                                gk.id, context);
                                                         Navigator.pop(context);
                                                         Navigator.pop(context);
                                                       }, // Confirm deletion
