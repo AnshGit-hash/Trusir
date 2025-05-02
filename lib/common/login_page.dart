@@ -8,40 +8,38 @@ import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
 import 'package:trusir/common/otp_screen.dart';
 
+// Custom class to handle responsive dimensions
 class ResponsiveDimensions {
   final double screenWidth;
   final double screenHeight;
   final double safeHeight;
-  final bool isWeb;
 
   ResponsiveDimensions({
     required this.screenWidth,
     required this.screenHeight,
     required this.safeHeight,
-    required this.isWeb,
   });
 
-  // Responsive sizing based on platform
-  double get titleSize => isWeb ? screenWidth * 0.03 : screenWidth * 0.06;
-  double get subtitleSize => isWeb ? screenWidth * 0.02 : screenWidth * 0.04;
-  double get horizontalPadding =>
-      isWeb ? screenWidth * 0.1 : screenWidth * 0.05;
-  double get verticalPadding => isWeb ? safeHeight * 0.05 : safeHeight * 0.02;
-  double get carouselImageHeight => isWeb ? safeHeight * 0.6 : safeHeight * 0.4;
-  double get carouselImageWidth => isWeb ? screenWidth * 0.6 : screenWidth;
-  double get flagIconSize => isWeb ? screenWidth * 0.03 : screenWidth * 0.06;
-  double get inputFieldHeight => isWeb ? safeHeight * 0.08 : safeHeight * 0.07;
-  double get buttonHeight => isWeb ? safeHeight * 0.08 : safeHeight * 0.1;
-  double get carouselArrowSize => isWeb ? 40 : 30;
-  double get indicatorSize => isWeb ? 12 : 8;
-  double get indicatorSpacing => isWeb ? 10 : 5;
-  EdgeInsets get contentPadding => isWeb
-      ? EdgeInsets.symmetric(horizontal: screenWidth * 0.1)
-      : EdgeInsets.zero;
+  // Responsive getters for common dimensions
+  double get titleSize => screenWidth * 0.06;
+  double get subtitleSize => screenWidth * 0.04;
+  double get horizontalPadding => screenWidth * 0.05;
+  double get verticalPadding => safeHeight * 0.02;
+
+  // Image dimensions - can be adjusted as needed
+  double get carouselImageHeight => safeHeight * 0.5;
+  double get carouselImageWidth => screenWidth;
+  double get flagIconSize => screenWidth * 0.06;
 }
 
 class TrusirLoginPage extends StatefulWidget {
-  const TrusirLoginPage({super.key});
+  // Allow customization of carousel image size ratio
+  final double carouselImageHeightRatio;
+
+  const TrusirLoginPage({
+    super.key,
+    this.carouselImageHeightRatio = 0.5,
+  });
 
   @override
   TrusirLoginPageState createState() => TrusirLoginPageState();
@@ -52,42 +50,27 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   String phonenum = '';
-  Timer? _carouselTimer;
 
   Future<void> storePhoneNo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('phone_number', phonenum);
-    debugPrint('Phone Number Stored to shared preferences: $phonenum');
+    print('Phone Number Stored to shared preferences: $phonenum');
   }
 
   @override
   void initState() {
     super.initState();
-    _startCarouselTimer();
-  }
-
-  @override
-  void dispose() {
-    _carouselTimer?.cancel();
-    _pageController.dispose();
-    _phonecontroller.dispose();
-    super.dispose();
-  }
-
-  void _startCarouselTimer() {
-    _carouselTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      if (_pageController.hasClients) {
-        if (_currentPage < pageContent.length - 1) {
-          _currentPage++;
-        } else {
-          _currentPage = 0;
-        }
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
+    Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+      if (_currentPage < pageContent.length - 1) {
+        _currentPage++;
+      } else {
+        _currentPage = 0;
       }
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
@@ -120,142 +103,129 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
   ];
 
   Widget _buildSendOTPButton(ResponsiveDimensions responsive) {
-    return SizedBox(
-      height: responsive.buttonHeight,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        onPressed: _handleOTPButtonPress,
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            phonenum = _phonecontroller.text;
+          });
+
+          if (phonenum.length < 10 || !RegExp(r'^[0-9]+$').hasMatch(phonenum)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Enter a valid phone number'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else if (phonenum == '7084696179' ||
+              phonenum == '9026154436' ||
+              phonenum == '8294448444' ||
+              phonenum == '8809575556' ||
+              phonenum == '9504072969' ||
+              phonenum == '8582040204' ||
+              phonenum == '9801458766') {
+            storePhoneNo();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => OTPScreen(
+                          phonenum: phonenum,
+                        )));
+          } else {
+            sendOTP(phonenum);
+          }
+        },
         child: Image.asset(
           'assets/send_otp.png',
+          width: responsive.screenWidth,
           fit: BoxFit.contain,
         ),
       ),
     );
   }
 
-  void _handleOTPButtonPress() {
-    setState(() {
-      phonenum = _phonecontroller.text;
-    });
-
-    if (phonenum.length < 10 || !RegExp(r'^[0-9]+$').hasMatch(phonenum)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter a valid phone number'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } else if (phonenum == '7084696179' ||
-        phonenum == '9026154436' ||
-        phonenum == '9504072969' ||
-        phonenum == '8582040204' ||
-        phonenum == '9801458766') {
-      storePhoneNo();
-      _navigateToOTPScreen();
-    } else {
-      sendOTP(phonenum);
-    }
-  }
-
-  void _navigateToOTPScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OTPScreen(phonenum: phonenum),
-      ),
-    );
-  }
-
-  Widget _buildSkipButton(ResponsiveDimensions responsive) {
-    return Container(
-      height: responsive.isWeb ? 45 : 40,
-      decoration: BoxDecoration(
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-        border: Border.all(width: 3, color: Colors.grey),
-        borderRadius: BorderRadius.circular(35),
-      ),
-      child: ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(Colors.grey[200]),
-          elevation: MaterialStateProperty.all(0),
-          padding: MaterialStateProperty.all(
-            EdgeInsets.symmetric(
-              horizontal: responsive.isWeb ? 20 : 6,
-              vertical: 0,
-            ),
-          ),
-        ),
-        onPressed: () => showPopupDialog(context),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Skip',
-              style: TextStyle(
-                color: const Color.fromRGBO(72, 17, 106, 1),
-                fontSize: responsive.isWeb ? 18 : 15,
-                fontWeight: FontWeight.w700,
+  Widget _buildSkipButton() {
+    return Center(
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
+            ],
+            border: Border.all(width: 3, color: Colors.grey),
+            borderRadius: BorderRadius.circular(35)),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.pressed)) {
+                  return Colors.grey[200]!; // Color when pressed
+                } else if (states.contains(MaterialState.hovered)) {
+                  return Colors.grey[200]!; // Color when hovered
+                }
+                return Colors.grey[200]!; // Default color
+              },
             ),
-            const SizedBox(width: 2),
-            Icon(
-              Icons.fast_forward,
-              color: const Color.fromRGBO(168, 0, 0, 1),
-              size: responsive.isWeb ? 22 : 19,
+            elevation: MaterialStateProperty.all(0),
+            padding: MaterialStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
             ),
-          ],
+          ),
+          onPressed: () => showPopupDialog(context),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Skip',
+                style: TextStyle(
+                  color: Color.fromRGBO(72, 17, 106, 1),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 2),
+              Icon(
+                Icons.fast_forward,
+                color: Color.from(alpha: 1, red: 0.659, green: 0, blue: 0),
+                size: 19,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Future<void> sendOTP(String phoneNumber) async {
-    final url = Uri.parse('$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP');
+    final url = Uri.parse(
+      '$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP',
+    );
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        debugPrint('OTP sent successfully: ${response.body}');
-        await storePhoneNo();
-        if (!mounted) return;
+        print('OTP sent successfully: ${response.body}');
+        storePhoneNo();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('OTP Sent Successfully'),
             duration: Duration(seconds: 1),
           ),
         );
-        _navigateToOTPScreen();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => OTPScreen(
+                      phonenum: phonenum,
+                    )));
       } else {
-        debugPrint('Failed to send OTP: ${response.body}');
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send OTP. Please try again.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        print('Failed to send OTP: ${response.body}');
       }
     } catch (e) {
-      debugPrint('Error sending OTP: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Network error. Please check your connection.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      print('Error sending OTP: $e');
     }
   }
 
@@ -264,216 +234,244 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
     final size = MediaQuery.of(context).size;
     final padding = MediaQuery.of(context).padding;
     final safeHeight = size.height - padding.top - padding.bottom;
-    final isWeb = size.width > 900;
 
     final responsive = ResponsiveDimensions(
       screenWidth: size.width,
       screenHeight: size.height,
       safeHeight: safeHeight,
-      isWeb: isWeb,
     );
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: true, // Adjust the layout when keyboard appears
       body: SafeArea(
-        child: Padding(
-          padding: responsive.contentPadding,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: isWeb ? 1200 : double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Switch between web and mobile layout
+            final isWeb = constraints.maxWidth > 900;
+
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: responsive.horizontalPadding,
+                vertical: responsive.verticalPadding,
               ),
               child: SingleChildScrollView(
                 child: isWeb
                     ? _buildWebLayout(responsive)
                     : _buildMobileLayout(responsive),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
+  // Web layout: Carousel on the left, Phone input on the right
   Widget _buildWebLayout(ResponsiveDimensions responsive) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: responsive.horizontalPadding,
-        vertical: responsive.verticalPadding,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Carousel Section
-          Expanded(
-            flex: 6,
-            child: Column(
-              children: [
-                _buildCarousel(responsive),
-                const SizedBox(height: 20),
-                _buildPageIndicators(responsive),
-              ],
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Left side: Carousel
+        Expanded(
+          flex: 2,
+          child: Column(
+            children: [
+              SizedBox(height: responsive.safeHeight * 0.03),
+              _buildCarousel(responsive, true),
+              SizedBox(height: responsive.safeHeight * 0.03),
+              _buildPageIndicators(responsive, true),
+            ],
           ),
-          const SizedBox(width: 40),
-          // Login Form Section
-          Expanded(
-            flex: 4,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _buildSkipButton(responsive),
-                ),
-                const SizedBox(height: 40),
-                _buildPhoneInput(responsive),
-                const SizedBox(height: 30),
-                _buildSendOTPButton(responsive),
-              ],
-            ),
+        ),
+        // Spacing between sections
+        // Right side: Phone input
+        Expanded(
+          flex: 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(responsive, true),
+              SizedBox(height: responsive.safeHeight * 0.1),
+              _buildPhoneInput(responsive, true),
+              SizedBox(height: responsive.safeHeight * 0.04),
+              _buildSendOTPButton(responsive),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
+  // Mobile layout: Stacked vertical layout
   Widget _buildMobileLayout(ResponsiveDimensions responsive) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: responsive.horizontalPadding,
-        vertical: responsive.verticalPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: _buildSkipButton(responsive),
-          ),
-          const SizedBox(height: 20),
-          _buildCarousel(responsive),
-          const SizedBox(height: 10),
-          _buildPageIndicators(responsive),
-          const SizedBox(height: 30),
-          _buildPhoneInput(responsive),
-          const SizedBox(height: 30),
-          _buildSendOTPButton(responsive),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeader(responsive, false),
+        SizedBox(height: responsive.safeHeight * 0.03),
+        _buildCarousel(responsive, false),
+        SizedBox(height: responsive.safeHeight * 0.01),
+        _buildPageIndicators(responsive, false),
+        SizedBox(height: responsive.safeHeight * 0.03),
+        _buildPhoneInput(responsive, false),
+        SizedBox(height: responsive.safeHeight * 0.04),
+        _buildSendOTPButton(responsive),
+      ],
     );
   }
 
-  Widget _buildCarousel(ResponsiveDimensions responsive) {
+  Widget _buildHeader(ResponsiveDimensions responsive, bool isWeb) {
+    return Row(
+      mainAxisAlignment:
+          isWeb ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [_buildSkipButton()],
+    );
+  }
+
+  Widget _buildCarousel(ResponsiveDimensions responsive, bool isWeb) {
     return SizedBox(
-      height: responsive.carouselImageHeight,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          PageView.builder(
-            physics: const BouncingScrollPhysics(),
-            controller: _pageController,
-            itemCount: pageContent.length,
-            onPageChanged: (int page) {
-              setState(() {
-                _currentPage = page;
-              });
-            },
-            itemBuilder: (context, index) {
-              final item = pageContent[index];
-              final hasText =
-                  item['title']!.isNotEmpty || item['subtitle']!.isNotEmpty;
+      height: isWeb ? 600 : 450,
+      width: isWeb ? 800 : 700,
+      child: PageView.builder(
+        physics:
+            const BouncingScrollPhysics(), // Standard touch physics for mobile
+        controller: _pageController,
+        itemCount: pageContent.length,
+        onPageChanged: (int page) {
+          setState(() {
+            _currentPage = page;
+          });
+        },
+        itemBuilder: (context, index) {
+          final hasText = pageContent[index]['title']!.isNotEmpty ||
+              pageContent[index]['subtitle']!.isNotEmpty;
 
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (hasText) ...[
-                    Text(
-                      item['title']!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: responsive.titleSize,
-                        fontWeight: FontWeight.w900,
-                        color: HexColor('#6e0096'),
-                        fontFamily: 'Poppins',
-                      ),
+          return isWeb
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      onPressed: () {
+                        if (_currentPage > 0) {
+                          _currentPage--;
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item['subtitle']!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: responsive.subtitleSize,
-                        fontWeight: FontWeight.bold,
-                        color: HexColor('#b617d4'),
-                        fontFamily: 'Poppins-semi bold',
-                      ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (hasText) ...[
+                          Text(
+                            pageContent[index]['title']!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isWeb ? 30 : 25,
+                              fontWeight: FontWeight.w900,
+                              color: HexColor('#6e0096'),
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          SizedBox(height: isWeb ? 16 : 8),
+                          Text(
+                            pageContent[index]['subtitle']!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isWeb ? 22 : responsive.subtitleSize,
+                              fontWeight: FontWeight.bold,
+                              color: HexColor('#b617d4'),
+                              fontFamily: 'Poppins-semi bold',
+                            ),
+                          ),
+                        ],
+                        Expanded(
+                          child: Image.asset(
+                            pageContent[index]['imagePath']!,
+                            width: isWeb ? 500 : responsive.carouselImageWidth,
+                            height:
+                                isWeb ? 400 : responsive.carouselImageHeight,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: () {
+                        if (_currentPage < pageContent.length - 1) {
+                          _currentPage++;
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                    ),
                   ],
-                  Expanded(
-                    child: Image.asset(
-                      item['imagePath']!,
-                      width: responsive.carouselImageWidth,
-                      fit: BoxFit.contain,
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (hasText) ...[
+                      Text(
+                        pageContent[index]['title']!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isWeb ? 30 : 25,
+                          fontWeight: FontWeight.w900,
+                          color: HexColor('#6e0096'),
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      SizedBox(height: isWeb ? 16 : 8),
+                      Text(
+                        pageContent[index]['subtitle']!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isWeb ? 22 : responsive.subtitleSize,
+                          fontWeight: FontWeight.bold,
+                          color: HexColor('#b617d4'),
+                          fontFamily: 'Poppins-semi bold',
+                        ),
+                      ),
+                    ],
+                    Expanded(
+                      child: Image.asset(
+                        pageContent[index]['imagePath']!,
+                        width: isWeb ? 500 : responsive.carouselImageWidth,
+                        height: isWeb ? 400 : responsive.carouselImageHeight,
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-          if (responsive.isWeb) ...[
-            Positioned(
-              left: 0,
-              child: IconButton(
-                iconSize: responsive.carouselArrowSize,
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: _goToPreviousPage,
-              ),
-            ),
-            Positioned(
-              right: 0,
-              child: IconButton(
-                iconSize: responsive.carouselArrowSize,
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: _goToNextPage,
-              ),
-            ),
-          ],
-        ],
+                  ],
+                );
+        },
       ),
     );
   }
 
-  void _goToPreviousPage() {
-    if (_currentPage > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _goToNextPage() {
-    if (_currentPage < pageContent.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  Widget _buildPageIndicators(ResponsiveDimensions responsive) {
+  Widget _buildPageIndicators(ResponsiveDimensions responsive, bool isWeb) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(pageContent.length, (index) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          margin: EdgeInsets.symmetric(horizontal: responsive.indicatorSpacing),
-          height: responsive.indicatorSize,
-          width: responsive.indicatorSize,
+          margin: EdgeInsets.symmetric(
+            horizontal: isWeb
+                ? responsive.screenWidth * 0.005
+                : responsive.screenWidth * 0.01,
+          ),
+          height: isWeb
+              ? responsive.screenWidth * 0.02
+              : responsive.screenWidth * 0.03,
+          width: isWeb
+              ? responsive.screenWidth * 0.02
+              : responsive.screenWidth * 0.03,
           decoration: BoxDecoration(
             color: _currentPage == index
                 ? const Color.fromRGBO(72, 17, 106, 1)
@@ -485,74 +483,133 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
     );
   }
 
-  Widget _buildPhoneInput(ResponsiveDimensions responsive) {
-    return Container(
-      height: responsive.inputFieldHeight,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(35),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: responsive.isWeb ? 30 : 20,
-      ),
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/indianflag.png',
-            width: responsive.flagIconSize,
-            height: responsive.flagIconSize,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            "+91 |",
-            style: TextStyle(
-              fontSize: responsive.isWeb ? 18 : 16,
-              color: Colors.black,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextFormField(
-              controller: _phonecontroller,
-              keyboardType: TextInputType.phone,
-              maxLength: 10,
-              buildCounter: (_,
-                      {required currentLength,
-                      required isFocused,
-                      maxLength}) =>
-                  null,
-              onChanged: (value) {
-                if (value.length == 10) {
-                  FocusScope.of(context).unfocus();
-                }
-              },
-              style: TextStyle(
-                fontSize: responsive.isWeb ? 18 : 16,
-                color: Colors.black,
-                fontFamily: 'Poppins',
+  Widget _buildPhoneInput(ResponsiveDimensions responsive, bool isWeb) {
+    return Stack(
+      children: [
+        // Background shape for the input field
+        Container(
+          width: double.infinity,
+          height: isWeb
+              ? responsive.safeHeight * 0.1
+              : responsive.safeHeight * 0.08,
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(35),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
               ),
-              decoration: InputDecoration(
-                hintText: 'Mobile Number',
-                hintStyle: TextStyle(
-                  fontSize: responsive.isWeb ? 18 : 16,
-                  color: Colors.grey,
-                  fontFamily: 'Poppins',
+            ],
+          ),
+        ),
+        // Input content
+        Container(
+          height: isWeb
+              ? responsive.safeHeight * 0.1
+              : responsive.safeHeight * 0.08,
+          padding: EdgeInsets.symmetric(
+            horizontal: isWeb
+                ? responsive.screenWidth * 0.02
+                : responsive.screenWidth * 0.04,
+          ),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center, // Add this
+              children: [
+                // Country flag icon
+                Center(
+                  child: Image.asset(
+                    'assets/indianflag.png',
+                    width: isWeb
+                        ? responsive.flagIconSize * 0.4
+                        : responsive.flagIconSize,
+                    height: isWeb
+                        ? responsive.flagIconSize * 0.4
+                        : responsive.flagIconSize,
+                  ),
                 ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.only(bottom: 0),
-              ),
+                SizedBox(
+                    width: isWeb
+                        ? responsive.screenWidth * 0.01
+                        : responsive.screenWidth * 0.02),
+                // Country code text
+                Center(
+                  child: Text(
+                    "+91 |",
+                    style: TextStyle(
+                      fontSize: isWeb
+                          ? responsive.screenWidth * 0.015
+                          : responsive.screenWidth * 0.04,
+                      color: Colors.black,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+                SizedBox(
+                    width: isWeb
+                        ? responsive.screenWidth * 0.01
+                        : responsive.screenWidth * 0.02),
+                // Mobile number input field
+                Expanded(
+                  child: Center(
+                    // Add this
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 7),
+                      child: TextFormField(
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
+                        buildCounter: (_,
+                                {required currentLength,
+                                required isFocused,
+                                maxLength}) =>
+                            null,
+                        onChanged: (value) {
+                          if (value.length == 10) {
+                            FocusScope.of(context).unfocus();
+                          }
+                        },
+                        controller: _phonecontroller,
+                        textAlignVertical:
+                            TextAlignVertical.center, // Modified this
+                        style: TextStyle(
+                          fontSize: isWeb
+                              ? responsive.screenWidth * 0.015
+                              : responsive.screenWidth * 0.04,
+                          color: Colors.black,
+                          fontFamily: 'Poppins',
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Mobile Number',
+                          hintStyle: TextStyle(
+                            fontSize: isWeb
+                                ? responsive.screenWidth * 0.015
+                                : responsive.screenWidth * 0.04,
+                            color: Colors.grey,
+                            fontFamily: 'Poppins',
+                          ),
+                          border: InputBorder.none,
+                          isDense: true, // Add this
+                          contentPadding:
+                              const EdgeInsets.only(top: 5), // Add this
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

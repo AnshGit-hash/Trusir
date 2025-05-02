@@ -451,16 +451,17 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
           padding: EdgeInsets.only(left: isWeb ? 20.0 : 10.0),
           child: Row(
             children: [
-              if (!isWeb)
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Image.asset('assets/back_button.png', height: 50),
+              ),
               if (!isWeb) const SizedBox(width: 20),
               Text(
                 'Attendance',
                 style: TextStyle(
-                  color: theme.primaryColor,
+                  color: const Color(0xFF48116A),
                   fontSize: isWeb ? 28 : 25,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w700,
@@ -477,7 +478,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: isWeb ? 40.0 : 15.0,
-                  vertical: 20.0,
+                  vertical: isWeb ? 20 : 0,
                 ),
                 child: isWeb
                     ? _buildWebLayout(theme, calendarWidth as double)
@@ -555,40 +556,42 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
         const SizedBox(height: 20),
         _buildCalendar(theme, calendarWidth),
         const SizedBox(height: 20),
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildSummaryCard(
-              'Present',
-              _summaryData['present'] ?? 0,
-              Colors.green,
-              theme,
-              false,
-            ),
-            _buildSummaryCard(
-              'Absent',
-              _summaryData['absent'] ?? 0,
-              Colors.red,
-              theme,
-              false,
-            ),
-            _buildSummaryCard(
-              'Holiday',
-              _summaryData['No class'] ?? 0,
-              Colors.grey,
-              theme,
-              false,
-            ),
-            _buildSummaryCard(
-              'Total Classes',
-              _summaryData['total_classes_taken'] ?? 0,
-              Colors.amber,
-              theme,
-              false,
-            ),
-          ],
+        SizedBox(
+          child: Column(
+            children: [
+              _buildSummaryCard(
+                'Present',
+                _summaryData['present'] ?? 0,
+                Colors.green,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Absent',
+                _summaryData['absent'] ?? 0,
+                Colors.red,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Holiday',
+                _summaryData['holiday'] ?? 0,
+                Colors.grey,
+                theme,
+                true,
+              ),
+              const SizedBox(height: 16),
+              _buildSummaryCard(
+                'Total Classes',
+                _summaryData['total_classes_taken'] ?? 0,
+                Colors.amber,
+                theme,
+                true,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -638,10 +641,10 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                     _fetchAttendanceData(selectedslotID!);
                   });
                 },
-                child: Text(
+                child: const Text(
                   'Today',
                   style: TextStyle(
-                    color: theme.primaryColor,
+                    color: Color(0xFF48116A),
                     fontSize: 16,
                   ),
                 ),
@@ -660,8 +663,8 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
                         child: Text(
                           day,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: theme.primaryColor,
+                          style: const TextStyle(
+                            color: Color(0xFF48116A),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

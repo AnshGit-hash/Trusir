@@ -70,6 +70,15 @@ class TeacherCourseCard extends StatelessWidget {
       return formattedDate;
     }
 
+    String formatPrice(double price) {
+      return price.toStringAsFixed(2); // Ensures exactly 2 decimal places
+    }
+
+    String capitalizeFirstLetter(String text) {
+      if (text.isEmpty) return text;
+      return text[0].toUpperCase() + text.substring(1).toLowerCase();
+    }
+
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -78,6 +87,7 @@ class TeacherCourseCard extends StatelessWidget {
         top: 5.0,
         left: isWeb ? 8 : 16,
         right: isWeb ? 8 : 16,
+        bottom: isWeb ? 8 : 4, // Reduced bottom padding for mobile
       ),
       child: Card(
         elevation: 4,
@@ -96,11 +106,12 @@ class TeacherCourseCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
-            padding: EdgeInsets.all(isWeb ? 16.0 : 16.0),
+            padding:
+                EdgeInsets.all(isWeb ? 16.0 : 8), // Reduced padding for mobile
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Course Image with Name
+                // Course Image with Name (unchanged)
                 Stack(
                   children: [
                     ClipRRect(
@@ -168,38 +179,38 @@ class TeacherCourseCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 8), // Consistent spacing
 
                 // Course Details
                 Text(
                   'Start from - ${formatDate(course.startDate)}',
                   style: TextStyle(
-                    fontSize: isWeb ? 16 : 15,
+                    fontSize: isWeb ? 16 : 14, // Slightly smaller on mobile
                     fontFamily: 'Poppins',
                     color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
                   ),
                 ),
 
-                const SizedBox(height: 2),
+                const SizedBox(height: 4), // Reduced spacing
 
                 Text(
                   'Time Slot: ${course.timeSlot}',
                   style: TextStyle(
-                    fontSize: isWeb ? 15 : 14,
+                    fontSize: isWeb ? 15 : 13, // Slightly smaller on mobile
                     fontFamily: 'Poppins',
                     color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
                   ),
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 8), // Consistent spacing
 
                 // Price and Type
                 Row(
                   children: [
                     Text(
-                      '₹${course.price}',
+                      '₹${formatPrice(double.parse(course.price))}', // Formatted price
                       style: TextStyle(
-                        fontSize: isWeb ? 24 : 22,
+                        fontSize: isWeb ? 24 : 20, // Slightly smaller on mobile
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.bold,
                         color: Colors.deepPurple,
@@ -210,8 +221,8 @@ class TeacherCourseCard extends StatelessWidget {
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isWeb ? 24 : 20,
-                          vertical: isWeb ? 20 : 10,
+                          horizontal: isWeb ? 24 : 16, // Reduced on mobile
+                          vertical: isWeb ? 20 : 0, // Reduced on mobile
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -219,11 +230,12 @@ class TeacherCourseCard extends StatelessWidget {
                         backgroundColor: Colors.deepPurpleAccent,
                       ),
                       child: Text(
-                        course.type,
+                        capitalizeFirstLetter(course.type), // Capitalized text
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Poppins',
-                          fontSize: isWeb ? 15 : 14,
+                          fontSize:
+                              isWeb ? 15 : 13, // Slightly smaller on mobile
                         ),
                       ),
                     ),
