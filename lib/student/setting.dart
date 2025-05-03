@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/contactus.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/parents_doubts.dart';
 import 'package:trusir/common/about_us.dart';
 import 'package:trusir/student/main_screen.dart';
@@ -9,7 +10,10 @@ import 'package:trusir/student/student_tnc.dart';
 import 'package:trusir/student/your_doubt.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final bool checking;
+  final String checkTitle;
+  const SettingsScreen(
+      {super.key, required this.checking, required this.checkTitle});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -146,12 +150,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     450,
                     settingsItems[i]['image'],
                     settingsItems[i]['color'],
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => settingsItems[i]['route'],
-                      ),
-                    ),
+                    () => widget.checking
+                        ? () {
+                            showCustomToast(context, widget.checkTitle);
+                          }
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => settingsItems[i]['route'],
+                            ),
+                          ),
                     settingsItems[i]['title'],
                   ),
                 ),
@@ -173,12 +181,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     450,
                     settingsItems[i]['image'],
                     settingsItems[i]['color'],
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => settingsItems[i]['route'],
-                      ),
-                    ),
+                    () => widget.checking
+                        ? () {
+                            showCustomToast(context, widget.checkTitle);
+                          }
+                        : Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => settingsItems[i]['route'],
+                            ),
+                          ),
                     settingsItems[i]['title'],
                   ),
                 ),

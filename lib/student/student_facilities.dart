@@ -574,7 +574,10 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const SettingsScreen(),
+                              builder: (context) => SettingsScreen(
+                                checkTitle: checkTitle,
+                                checking: checking,
+                              ),
                             ),
                           );
                         }, isWeb),
