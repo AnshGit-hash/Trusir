@@ -613,36 +613,44 @@ class _AttendancePageState extends State<AttendancePage> {
         SizedBox(
           child: Column(
             children: [
-              _buildSummaryCard(
-                'Present',
-                _summaryData['present'] ?? 0,
-                Colors.green,
-                theme,
-                true,
+              Row(
+                children: [
+                  _buildSummaryCard(
+                    'Present',
+                    _summaryData['present'] ?? 0,
+                    Colors.green,
+                    theme,
+                    true,
+                  ),
+                  const SizedBox(width: 5),
+                  _buildSummaryCard(
+                    'Absent',
+                    _summaryData['absent'] ?? 0,
+                    Colors.red,
+                    theme,
+                    true,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
-              _buildSummaryCard(
-                'Absent',
-                _summaryData['absent'] ?? 0,
-                Colors.red,
-                theme,
-                true,
-              ),
-              const SizedBox(height: 16),
-              _buildSummaryCard(
-                'Holiday',
-                _summaryData['holiday'] ?? 0,
-                Colors.grey,
-                theme,
-                true,
-              ),
-              const SizedBox(height: 16),
-              _buildSummaryCard(
-                'Total Classes',
-                _summaryData['total_classes_taken'] ?? 0,
-                Colors.amber,
-                theme,
-                true,
+              Row(
+                children: [
+                  _buildSummaryCard(
+                    'Holiday',
+                    _summaryData['holiday'] ?? 0,
+                    Colors.grey,
+                    theme,
+                    true,
+                  ),
+                  const SizedBox(width: 5),
+                  _buildSummaryCard(
+                    'Total Classes',
+                    _summaryData['total_classes_taken'] ?? 0,
+                    Colors.amber,
+                    theme,
+                    true,
+                  ),
+                ],
               ),
             ],
           ),
