@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:trusir/common/api.dart';
@@ -111,12 +112,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
           });
 
           if (phonenum.length < 10 || !RegExp(r'^[0-9]+$').hasMatch(phonenum)) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Enter a valid phone number'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+            showCustomToast(context, 'Enter a valid phone number');
           } else if (phonenum == '7084696179' ||
               phonenum == '9026154436' ||
               phonenum == '8294448444' ||
@@ -209,12 +205,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       if (response.statusCode == 200) {
         print('OTP sent successfully: ${response.body}');
         storePhoneNo();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP Sent Successfully'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'OTP Sent Successfully');
         Navigator.push(
             context,
             MaterialPageRoute(

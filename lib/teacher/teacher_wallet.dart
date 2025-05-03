@@ -5,13 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/payment__status_popup.dart';
+import 'package:trusir/teacher/teacher_fee_payment.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TeacherWalletPage extends StatefulWidget {
-  const TeacherWalletPage({super.key});
+  final List<HoldAmount> holdAmount;
+  final List<WithdrawalRequest> withdrawRequest;
+  const TeacherWalletPage(
+      {super.key, required this.holdAmount, required this.withdrawRequest});
 
   @override
   State<TeacherWalletPage> createState() => _TeacherWalletPageState();
@@ -29,79 +34,37 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
   List<Map<String, dynamic>> walletTransactions = [];
   PaymentService paymentService = PaymentService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  List<Map<String, String>> savedAccounts = [];
-  bool saveDetails = false;
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
     fetchBalance();
     fetchWalletTransactions();
     paymentService.initPhonePeSdk();
-    _loadSavedAccounts();
-  }
-
-  Future<void> _loadSavedAccounts() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? accountsJson = prefs.getString('savedAccounts');
-
-    if (accountsJson != null) {
-      setState(() {
-        savedAccounts = List<Map<String, String>>.from(
-          json
-              .decode(accountsJson)
-              .map((item) => Map<String, String>.from(item)),
-        );
-      });
-    }
-  }
-
-  Future<void> _saveAccountDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final Map<String, String> accountDetails = {
-      "accountNumber": accountController.text,
-      "name": nameController.text,
-      "ifsc": ifscController.text,
-      "upi": upiController.text,
-    };
-
-    savedAccounts.add(accountDetails);
-    await prefs.setString('savedAccounts', json.encode(savedAccounts));
-  }
-
-  String? _validatePaymentMethod() {
-    if ((accountController.text.isEmpty ||
-            nameController.text.isEmpty ||
-            ifscController.text.isEmpty) &&
-        upiController.text.isEmpty) {
-      return "Either UPI ID or complete bank details are required";
-    }
-    return null;
   }
 
   Future<double> fetchBalance() async {
     final prefs = await SharedPreferences.getInstance();
     userID = prefs.getString('userID');
-    // Replace with your API URL
     try {
       final response =
           await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(double.parse(data['balance']));
         setState(() {
           balance = double.parse(data['balance']);
           hold = double.parse(data['holdAmount']);
           prefs.setString('wallet_balance', '$balance');
         });
-        return balance; // Convert balance to an integer
+        return balance;
       } else {
         throw Exception('Failed to load balance');
       }
     } catch (e) {
       print('Error: $e');
-      return 0; // Return 0 in case of an error
+      return 0;
     }
   }
 
@@ -114,7 +77,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
 
-      // Filter transactions where transactionName is 'WALLET' or 'ByAdmin'
       List<Map<String, dynamic>> walletTransactions = data
           .where((transaction) =>
               transaction['transactionName'] == 'WALLET' ||
@@ -122,11 +84,10 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
           .map((transaction) => transaction as Map<String, dynamic>)
           .toList();
 
-      // Sort transactions by 'created_at' in descending order (latest first)
       walletTransactions.sort((a, b) {
         DateTime dateA = DateTime.parse(a['created_at']);
         DateTime dateB = DateTime.parse(b['created_at']);
-        return dateB.compareTo(dateA); // Descending order
+        return dateB.compareTo(dateA);
       });
 
       setState(() {
@@ -139,22 +100,48 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
     }
   }
 
+  Future<void> submitWithdrawalRequest(String amount) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userID = prefs.getString('id');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/withdraw-request/$userID/$amount'),
+      );
+
+      if (response.statusCode == 200) {
+        showCustomToast(context, 'Withdrawal request submitted successfully');
+        fetchBalance(); // Refresh balance after successful withdrawal
+      } else if (response.statusCode == 400) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        showCustomToast(
+            context, 'Failed to submit withdrawal request: ${data['message']}');
+      } else {
+        showCustomToast(context,
+            'Failed to submit withdrawal request: ${response.statusCode}');
+      }
+    } catch (e) {
+      showCustomToast(context, 'Error: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   String merchantTransactionID = '';
   bool paymentstatus = false;
   String? addMoneyamount;
 
   String body = "";
-  // Transaction details
   String checksum = "";
-  // Obtain this from your backend
   String? userID;
-
   String? phone;
   TextEditingController amountController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController accountController = TextEditingController();
-  TextEditingController ifscController = TextEditingController();
-  TextEditingController upiController = TextEditingController();
   TextEditingController promoController = TextEditingController();
   String transactionType = '';
 
@@ -177,7 +164,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
     };
 
     try {
-      // Wait for 30 seconds before making the request
       await Future.delayed(const Duration(seconds: 5));
 
       final response = await http.get(Uri.parse(url), headers: headers);
@@ -188,10 +174,8 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
         if (responseData["success"] &&
             responseData["code"] == "PAYMENT_SUCCESS" &&
             responseData["data"]["state"] == "COMPLETED") {
-          // Payment Success
           int adjustedAmount = (responseData["data"]['amount'] / 100).toInt();
 
-          // Show Success Dialog
           setState(() {
             transactionType =
                 responseData["data"]["paymentInstrument"]["type"] == 'CARD'
@@ -218,7 +202,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
           setState(() {
             paymentstatus = false;
           });
-          // Payment Failed
         }
       } else {
         setState(() {
@@ -227,7 +210,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
         throw Exception("Failed to fetch payment status");
       }
     } catch (e) {
-      // Show Error Dialog
       setState(() {
         paymentstatus = false;
       });
@@ -237,10 +219,10 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
   void showLoadingDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissal by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return WillPopScope(
-          onWillPop: () async => false, // Disable back navigation
+          onWillPop: () async => false,
           child: const AlertDialog(
             content: Row(
               children: [
@@ -319,10 +301,6 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        // actions: const [
-        //   Icon(Icons.help_outline, size: 24),
-        //   SizedBox(width: 16),
-        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -378,7 +356,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                           ),
                         ),
                         Text(
-                          "  (Amount on Hold : ₹ $hold)",
+                          "  (Amount on Hold : ₹ ${hold.abs().toStringAsFixed(2)})",
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
@@ -394,504 +372,105 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                     children: [
                       GestureDetector(
                           onTap: () {
-                            savedAccounts.isEmpty
-                                ? showDialog(
-                                    context: context,
-                                    builder: (context) => Dialog(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16)),
-                                      child: StatefulBuilder(
-                                          builder: (context, setState) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text("Withdrawal",
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w600)),
-                                                const SizedBox(height: 16),
-                                                // If saved accounts exist, show them first
-                                                Form(
-                                                  key: _formKey,
-                                                  child: Column(
-                                                    children: [
-                                                      TextFormField(
-                                                        autovalidateMode:
-                                                            AutovalidateMode
-                                                                .onUserInteraction,
-                                                        validator: (value) =>
-                                                            value!.isEmpty
-                                                                ? "Required"
-                                                                : null,
-                                                        controller:
-                                                            amountController,
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText: "Amount",
-                                                          prefixIcon:
-                                                              const Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    left: 25.0,
-                                                                    top: 11),
-                                                            child: Text("₹",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        18)),
-                                                          ),
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10)),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      // Bank Details Section
-                                                      TextFormField(
-                                                        autovalidateMode:
-                                                            AutovalidateMode
-                                                                .onUserInteraction,
-                                                        controller:
-                                                            accountController,
-                                                        keyboardType:
-                                                            TextInputType
-                                                                .number,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              "Account Number",
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10)),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      TextFormField(
-                                                        autovalidateMode:
-                                                            AutovalidateMode
-                                                                .onUserInteraction,
-                                                        controller:
-                                                            nameController,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText: "Name",
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10)),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-                                                      TextFormField(
-                                                        autovalidateMode:
-                                                            AutovalidateMode
-                                                                .onUserInteraction,
-                                                        controller:
-                                                            ifscController,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              "IFSC Code",
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10)),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-
-                                                      // OR Section
-                                                      const Row(
-                                                        children: [
-                                                          Expanded(
-                                                              child: Divider()),
-                                                          SizedBox(
-                                                            width: 10,
-                                                          ),
-                                                          Text("OR",
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .grey)),
-                                                          SizedBox(
-                                                            width: 10,
-                                                          ),
-                                                          Expanded(
-                                                              child: Divider()),
-                                                        ],
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-
-                                                      // UPI Section
-                                                      TextFormField(
-                                                        autovalidateMode:
-                                                            AutovalidateMode
-                                                                .onUserInteraction,
-                                                        controller:
-                                                            upiController,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText: "UPI ID",
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10)),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-
-                                                      // Checkbox to Save Details
-                                                      Row(
-                                                        children: [
-                                                          Checkbox(
-                                                            value: saveDetails,
-                                                            onChanged:
-                                                                (bool? value) {
-                                                              setState(() {
-                                                                saveDetails =
-                                                                    value ??
-                                                                        false;
-                                                              });
-                                                            },
-                                                          ),
-                                                          const Text(
-                                                              "Save these details for future use"),
-                                                        ],
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 16),
-
-                                                      // Confirm Button
-                                                      SizedBox(
-                                                        width: double.infinity,
-                                                        child: ElevatedButton(
-                                                          onPressed: () {
-                                                            if (_formKey
-                                                                    .currentState!
-                                                                    .validate() &&
-                                                                _validatePaymentMethod() ==
-                                                                    null) {
-                                                              if (saveDetails) {
-                                                                _saveAccountDetails();
-                                                              }
-                                                              Navigator.pop(
-                                                                  context);
-                                                              Navigator
-                                                                  .pushReplacement(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            const TeacherWalletPage()),
-                                                              );
-                                                            } else {
-                                                              ScaffoldMessenger
-                                                                      .of(context)
-                                                                  .showSnackBar(
-                                                                SnackBar(
-                                                                    content: Text(
-                                                                        _validatePaymentMethod() ??
-                                                                            "Please fill in the required fields")),
-                                                              );
-                                                            }
-                                                          },
-                                                          style: ElevatedButton
-                                                              .styleFrom(
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .deepPurple,
-                                                            foregroundColor:
-                                                                Colors.white,
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        10,
-                                                                    vertical:
-                                                                        8),
-                                                            textStyle:
-                                                                const TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold),
-                                                            shape: RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            12)),
-                                                            elevation: 6,
-                                                          ),
-                                                          child: const Text(
-                                                              "Confirm"),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                            showDialog(
+                              context: context,
+                              builder: (context) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Withdraw Amount",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Form(
+                                        key: _formKey,
+                                        child: Column(
+                                          children: [
+                                            TextFormField(
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
+                                              validator: (value) =>
+                                                  value!.isEmpty
+                                                      ? "Required"
+                                                      : null,
+                                              controller: amountController,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                              decoration: InputDecoration(
+                                                labelText: "Amount",
+                                                prefixIcon: const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 25.0, top: 11),
+                                                  child: Text("₹",
+                                                      style: TextStyle(
+                                                          fontSize: 18)),
                                                 ),
-                                              ],
+                                                border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  )
-                                : showDialog(
-                                    context: context,
-                                    builder: (context) => Dialog(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16)),
-                                      child: StatefulBuilder(
-                                          builder: (context, setState) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Text("Withdrawal",
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w600)),
-                                                const SizedBox(height: 16),
-                                                // If saved accounts exist, show them first
-                                                const Text("Saved Accounts:",
-                                                    style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                ListView.builder(
-                                                  shrinkWrap: true,
-                                                  itemCount:
-                                                      savedAccounts.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    final account =
-                                                        savedAccounts[index];
-                                                    return ListTile(
-                                                      title: account[
-                                                                  "accountNumber"]!
-                                                              .isNotEmpty
-                                                          ? Text(
-                                                              "Acc. No.: ${account["accountNumber"]}")
-                                                          : Text(
-                                                              "UPI: ${account["upi"]}"),
-                                                      subtitle: Text(
-                                                          account["name"] ??
-                                                              ""),
-                                                      onTap: () {
-                                                        setState(() {
-                                                          accountController
-                                                              .text = account[
-                                                                  "accountNumber"] ??
-                                                              "";
-                                                          nameController.text =
-                                                              account["name"] ??
-                                                                  "";
-                                                          ifscController.text =
-                                                              account["ifsc"] ??
-                                                                  "";
-                                                          upiController.text =
-                                                              account["upi"] ??
-                                                                  "";
-                                                          showDialog(
-                                                            context: context,
-                                                            builder:
-                                                                (context) =>
-                                                                    Dialog(
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              16)),
-                                                              child: StatefulBuilder(
-                                                                  builder: (context,
-                                                                      setState) {
-                                                                return Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          16),
-                                                                  child:
-                                                                      SingleChildScrollView(
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .start,
-                                                                      children: [
-                                                                        const Text(
-                                                                            "Withdrawal",
-                                                                            style:
-                                                                                TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                                                                        const SizedBox(
-                                                                            height:
-                                                                                16),
-                                                                        // If saved accounts exist, show them first
-                                                                        Form(
-                                                                          key:
-                                                                              _formKey,
-                                                                          child:
-                                                                              Column(
-                                                                            children: [
-                                                                              TextFormField(
-                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                                                validator: (value) => value!.isEmpty ? "Required" : null,
-                                                                                controller: amountController,
-                                                                                keyboardType: TextInputType.number,
-                                                                                decoration: InputDecoration(
-                                                                                  labelText: "Amount",
-                                                                                  prefixIcon: const Padding(
-                                                                                    padding: EdgeInsets.only(left: 25.0, top: 11),
-                                                                                    child: Text("₹", style: TextStyle(fontSize: 18)),
-                                                                                  ),
-                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-                                                                              // Bank Details Section
-                                                                              TextFormField(
-                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                                                controller: accountController,
-                                                                                keyboardType: TextInputType.number,
-                                                                                decoration: InputDecoration(
-                                                                                  labelText: "Account Number",
-                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-                                                                              TextFormField(
-                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                                                controller: nameController,
-                                                                                decoration: InputDecoration(
-                                                                                  labelText: "Name",
-                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-                                                                              TextFormField(
-                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                                                controller: ifscController,
-                                                                                decoration: InputDecoration(
-                                                                                  labelText: "IFSC Code",
-                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-
-                                                                              // OR Section
-                                                                              const Row(
-                                                                                children: [
-                                                                                  Expanded(child: Divider()),
-                                                                                  SizedBox(
-                                                                                    width: 10,
-                                                                                  ),
-                                                                                  Text("OR", textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey)),
-                                                                                  SizedBox(
-                                                                                    width: 10,
-                                                                                  ),
-                                                                                  Expanded(child: Divider()),
-                                                                                ],
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-
-                                                                              // UPI Section
-                                                                              TextFormField(
-                                                                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                                                controller: upiController,
-                                                                                decoration: InputDecoration(
-                                                                                  labelText: "UPI ID",
-                                                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                                                                ),
-                                                                              ),
-                                                                              const SizedBox(height: 16),
-                                                                              // Confirm Button
-                                                                              SizedBox(
-                                                                                width: double.infinity,
-                                                                                child: ElevatedButton(
-                                                                                  onPressed: () {
-                                                                                    if (_formKey.currentState!.validate() && _validatePaymentMethod() == null) {
-                                                                                      Navigator.pop(context);
-                                                                                      Navigator.pushReplacement(
-                                                                                        context,
-                                                                                        MaterialPageRoute(builder: (context) => const TeacherWalletPage()),
-                                                                                      );
-                                                                                    } else {
-                                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                                        SnackBar(content: Text(_validatePaymentMethod() ?? "Please fill in the required fields")),
-                                                                                      );
-                                                                                    }
-                                                                                  },
-                                                                                  style: ElevatedButton.styleFrom(
-                                                                                    backgroundColor: Colors.deepPurple,
-                                                                                    foregroundColor: Colors.white,
-                                                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                                                                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                                                    elevation: 6,
-                                                                                  ),
-                                                                                  child: const Text("Confirm"),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              }),
-                                                            ),
-                                                          );
-                                                        });
-                                                        // Close dialog and reopen with form filled
+                                            const SizedBox(height: 16),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                onPressed: isLoading
+                                                    ? null
+                                                    : () async {
+                                                        if (_formKey
+                                                            .currentState!
+                                                            .validate()) {
+                                                          await submitWithdrawalRequest(
+                                                              amountController
+                                                                  .text);
+                                                          Navigator.pop(
+                                                              context);
+                                                        }
                                                       },
-                                                    );
-                                                  },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.deepPurple,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 8),
+                                                  textStyle: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                  ),
+                                                  elevation: 6,
                                                 ),
-                                              ],
+                                                child: isLoading
+                                                    ? const CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                      )
+                                                    : const Text("Submit"),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      }),
-                                    ),
-                                  );
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                           child: _buildActionButton(Icons.add, "Withdraw")),
                       GestureDetector(
@@ -900,7 +479,9 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => WalletTransactions(
-                                      transactions: walletTransactions)),
+                                      transactions: walletTransactions,
+                                      withdrawRequest: widget.withdrawRequest,
+                                      holdAmount: widget.holdAmount)),
                             );
                           },
                           child: _buildActionButton(Icons.history, "History")),
@@ -962,7 +543,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                           (Route<dynamic> route) => false,
                         ),
                         child: _buildQuickAction(
-                            Icons.school, "Bought Course", Colors.blue),
+                            Icons.school, "Student Courses", Colors.blue),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -1005,10 +586,7 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
                                               width: double.infinity,
                                               child: ElevatedButton(
                                                 onPressed: () {
-                                                  // Pass the entered amount to the parent
                                                   Navigator.pop(context);
-
-                                                  // Close dialog after confirming
                                                 },
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor:
@@ -1061,33 +639,130 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
             ),
 
             // Recent Transactions
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (widget.withdrawRequest.isNotEmpty) ...[
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Withdrawal Requests",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...widget.withdrawRequest.map((request) {
+                            return _buildWithdrawalItem(
+                              "Withdrawal Request",
+                              double.tryParse(request.amount) ?? 0.0,
+                              request.date,
+                              request.status,
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (widget.holdAmount.isNotEmpty) ...[
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Amount on Hold",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ...widget.holdAmount.map((hold) {
+                            return _buildHoldItem(
+                              "Amount on Hold",
+                              double.tryParse(hold.amount) ?? 0.0,
+                              hold.date,
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                  Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: walletTransactions.isEmpty
+                        ? const Center(
+                            child: Text("No Wallet Transactions Found"))
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Wallet Transactions",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...walletTransactions.map((transaction) {
+                                return _buildTransactionItem(
+                                  transaction["transactionType"] ??
+                                      "Unknown Transaction",
+                                  double.tryParse(
+                                          transaction["amount"] ?? "0.0") ??
+                                      0.0,
+                                  formatDate(transaction["created_at"]),
+                                );
+                              }),
+                            ],
+                          ),
                   ),
                 ],
               ),
-              child: walletTransactions.isEmpty
-                  ? const Center(child: Text("No Wallet Transactions Found"))
-                  : Column(
-                      children: walletTransactions.map((transaction) {
-                        return _buildTransactionItem(
-                          transaction["transactionType"] ??
-                              "Unknown Transaction",
-                          double.tryParse(transaction["amount"] ?? "0.0") ??
-                              0.0,
-                          formatDate(transaction["created_at"]),
-                        );
-                      }).toList(),
-                    ),
             ),
           ],
         ),
@@ -1150,6 +825,134 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
     );
   }
 
+  Widget _buildWithdrawalItem(
+      String description, double amount, String date, String status) {
+    Color statusColor = Colors.orange;
+    if (status == 'approved') {
+      statusColor = Colors.green;
+    } else if (status == 'rejected') {
+      statusColor = Colors.red;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.currency_rupee_sharp,
+              color: Colors.amber,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "-₹${amount.abs().toStringAsFixed(2)}",
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              Text(
+                status.toUpperCase(),
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHoldItem(String description, double amount, String date) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.lock_clock,
+              color: Colors.blue,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "₹${amount.abs().toStringAsFixed(2)}",
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTransactionItem(String description, double amount, String date) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -1208,7 +1011,15 @@ class _TeacherWalletPageState extends State<TeacherWalletPage> {
 
 class WalletTransactions extends StatelessWidget {
   final List<Map<String, dynamic>> transactions;
-  const WalletTransactions({super.key, required this.transactions});
+  final List<WithdrawalRequest> withdrawRequest;
+  final List<HoldAmount> holdAmount;
+
+  const WalletTransactions({
+    super.key,
+    required this.transactions,
+    required this.withdrawRequest,
+    required this.holdAmount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1231,32 +1042,256 @@ class WalletTransactions extends StatelessWidget {
           ),
         ),
       ),
-      body: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            if (withdrawRequest.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Withdrawal Requests",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...withdrawRequest.map((request) {
+                      return _buildWithdrawalItem(
+                        "Withdrawal Request",
+                        double.tryParse(request.amount) ?? 0.0,
+                        request.date,
+                        request.status,
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+            if (holdAmount.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Amount on Hold",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...holdAmount.map((hold) {
+                      return _buildHoldItem(
+                        "Amount on Hold",
+                        double.tryParse(hold.amount) ?? 0.0,
+                        hold.date,
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: transactions.isEmpty
+                  ? const Center(child: Text("No Wallet Transactions Found"))
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Wallet Transactions",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...transactions.map((transaction) {
+                          return _buildTransactionItem(
+                            transaction["transactionType"] ??
+                                "Unknown Transaction",
+                            double.tryParse(transaction["amount"] ?? "0.0") ??
+                                0.0,
+                            formatDate(transaction["created_at"]),
+                          );
+                        }),
+                      ],
+                    ),
             ),
           ],
         ),
-        child: transactions.isEmpty
-            ? const Center(child: Text("No Wallet Transactions Found"))
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                children: transactions.map((transaction) {
-                  return _buildTransactionItem(
-                    transaction["transactionType"] ?? "Unknown Transaction",
-                    double.tryParse(transaction["amount"] ?? "0.0") ?? 0.0,
-                    formatDate(transaction["created_at"]),
-                  );
-                }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildWithdrawalItem(
+      String description, double amount, String date, String status) {
+    Color statusColor = Colors.orange;
+    if (status == 'approved') {
+      statusColor = Colors.green;
+    } else if (status == 'rejected') {
+      statusColor = Colors.red;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.money_off,
+              color: Colors.amber,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "-₹${amount.abs().toStringAsFixed(2)}",
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
               ),
+              Text(
+                status.toUpperCase(),
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHoldItem(String description, double amount, String date) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.lock_clock,
+              color: Colors.blue,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  date,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "₹${amount.abs().toStringAsFixed(2)}",
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
       ),
     );
   }

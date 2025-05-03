@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/image_viewer.dart';
 import 'package:trusir/common/notificationhelper.dart';
 
@@ -39,12 +40,7 @@ class FileDownloader {
 
       onDownloadComplete(filePath); // Refresh UI after download
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Download failed: $e'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      showCustomToast(context, 'Download failed: $e');
     }
   }
 

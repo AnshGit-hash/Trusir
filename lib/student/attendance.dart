@@ -276,12 +276,7 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   void _showNoDataMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('No attendance data available.'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    showCustomToast(context, 'No attendance data available.');
   }
 
   Future<void> markHoliday({

@@ -154,22 +154,12 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
     }
 
     if (formData.course == null || formData.course!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please Select a course!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Please Select a course!');
       return;
     }
 
     if (formData.photo == null || formData.photo!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload the image'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Upload the image');
       return;
     }
 
@@ -184,12 +174,7 @@ class _StudentDoubtScreenState extends State<StudentDoubtScreen> {
 
       if (response.statusCode == 200) {
         // Successfully submitted
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Doubt Submitted Successfully!'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'Doubt Submitted Successfully!');
         Navigator.pop(context);
 
         print(body);

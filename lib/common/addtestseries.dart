@@ -999,9 +999,7 @@ class _AddtestseriesState extends State<Addtestseries> {
                 question = 'No Question';
               });
             } else if (answer == '') {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Upload Answer')),
-              );
+              showCustomToast(context, 'Upload Answer');
               return;
             }
             _sendTestData(

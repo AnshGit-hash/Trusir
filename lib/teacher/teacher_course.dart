@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 
@@ -285,9 +286,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading student profiles: $e')),
-        );
+        showCustomToast(context, 'Error loading student profiles: $e');
       }
     }
   }
@@ -323,9 +322,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading courses: $e')),
-        );
+        showCustomToast(context, 'Error loading courses: $e');
       }
       rethrow;
     }

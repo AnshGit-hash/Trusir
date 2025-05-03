@@ -107,12 +107,7 @@ class _OTPScreenState extends State<OTPScreen> {
   void onPost(String phone, BuildContext context) async {
     String otp = otpControllers.map((controller) => controller.text).join();
     if (otp.length != 4 || !RegExp(r'^[0-9]+$').hasMatch(otp)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter a valid 4-digit OTP'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Enter a valid 4-digit OTP');
       return;
     }
 
@@ -139,12 +134,7 @@ class _OTPScreenState extends State<OTPScreen> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         print('OTP sent successfully: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP Sent Successfully'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'OTP Sent Successfully');
         setState(() {
           startTimer();
         });
@@ -177,12 +167,7 @@ class _OTPScreenState extends State<OTPScreen> {
           await fetchUserData(phone);
           showVerificationDialog(context);
         } else if (responseBody['Status'] == 'Error') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(responseBody['Details']),
-              duration: const Duration(seconds: 1),
-            ),
-          );
+          showCustomToast(context, responseBody['Details']);
           print('Failed to verify OTP: ${responseBody['Details']}');
         } else {
           print('Unexpected response: ${response.body}');

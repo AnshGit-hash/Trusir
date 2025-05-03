@@ -69,8 +69,37 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   String userID = '';
   String area = '';
   bool isWeb = false;
+  bool _isLoading = false;
+  List<Map<String, String>> slots = [];
+  List<String> filteredSlots = [];
 
   final apiBase = '$baseUrl/my-student';
+
+  Future<List<Map<String, String>>> fetchCourses(String studentUserID) async {
+    setState(() => _isLoading = true);
+    try {
+      final url = Uri.parse('$baseUrl/get-individual-slots/$studentUserID');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final List<Map<String, String>> tempSlots = data.map((course) {
+          return {
+            'teacherID': course['teacherID'] as String,
+            'slotID': course['id'].toString(),
+          };
+        }).toList();
+
+        // Update slots list for this student
+        slots.addAll(tempSlots);
+        return slots;
+      } else {
+        throw Exception('Failed to fetch courses');
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   Future<void> fetchStudentProfiles({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -90,6 +119,26 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
     } else {
       throw Exception('Failed to load student profiles');
     }
+  }
+
+  Future<List<String>> fetchAndFilterSlots() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String teacherUserID = prefs.getString('id') ?? '';
+    List<String> filteredSlotIDs = [];
+
+    for (var student in studentprofile) {
+      try {
+        final courses = await fetchCourses(student.userID);
+        for (var slot in courses) {
+          if (slot['teacherID'] == teacherUserID) {
+            filteredSlotIDs.add(slot['slotID']!);
+          }
+        }
+      } catch (e) {
+        debugPrint('Error fetching courses for student ${student.userID}: $e');
+      }
+    }
+    return filteredSlotIDs;
   }
 
   final List<Color> cardColors = [
@@ -120,11 +169,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   void initState() {
     super.initState();
     fetchProfileData();
-    fetchStudentProfiles();
   }
 
   Future<void> fetchProfileData() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await fetchStudentProfiles();
     setState(() {
       userID = prefs.getString('userID')!;
       name = prefs.getString('name')!;
@@ -132,6 +181,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
       address = prefs.getString('city')!;
       phone = prefs.getString('phone_number')!;
     });
+    filteredSlots = await fetchAndFilterSlots();
   }
 
   @override
@@ -175,7 +225,11 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
         ],
         toolbarHeight: isWeb ? 80 : 60,
       ),
-      body: isWeb ? _buildWebLayout() : _buildMobileLayout(),
+      body: _isLoading
+          ? const CircularProgressIndicator()
+          : isWeb
+              ? _buildWebLayout()
+              : _buildMobileLayout(),
     );
   }
 
@@ -379,7 +433,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const TeacherFeePaymentScreen(),
+                          builder: (context) => TeacherFeePaymentScreen(
+                            slots: filteredSlots,
+                          ),
                         ));
                   },
             web),

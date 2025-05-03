@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'dart:convert';
 import 'package:trusir/common/file_downloader.dart';
 
@@ -51,18 +52,14 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
           _isDeleting = false; // Stop loading indicator
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Image deleted successfully')),
-        );
+        showCustomToast(context, 'Image deleted successfully');
       }
     } catch (e) {
       setState(() {
         _isDeleting = false; // Stop loading indicator on error
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete image: $e')),
-      );
+      showCustomToast(context, 'Failed to delete image: $e');
     }
   }
 

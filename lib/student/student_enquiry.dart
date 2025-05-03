@@ -53,12 +53,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
 
   void _onEnquire(BuildContext context) {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please Fill all the required fields.'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      showCustomToast(context, 'Please Fill all the required fields.');
       return;
     }
     setState(() {
@@ -70,12 +65,7 @@ class _StudentEnquiryPageState extends State<StudentEnquiryPage> {
 
     // Validate gender
     if (formData.gender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select a Gender'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      showCustomToast(context, 'Select a Gender');
       return;
     }
 

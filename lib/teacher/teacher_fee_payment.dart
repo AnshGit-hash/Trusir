@@ -8,8 +8,6 @@ import 'dart:convert';
 
 import 'package:trusir/teacher/teacher_wallet.dart';
 
-// import 'package:trusir/student/student_payment_page.dart';
-
 class Fees {
   final String paymentType;
   final String transactionId;
@@ -28,30 +26,97 @@ class Fees {
   });
 
   factory Fees.fromJson(Map<String, dynamic> json) {
-    // Extract date and time from the created_at field
     final createdAt = json['created_at'] ?? '';
     final dateTime = DateTime.tryParse(createdAt);
 
-    // Format date and time
     final formattedDate =
         dateTime != null ? DateFormat('dd-MM-yyyy').format(dateTime) : '';
-    final formattedTime = dateTime != null
-        ? DateFormat('h:mm a').format(dateTime) // 12-hour format with AM/PM
-        : '';
+    final formattedTime =
+        dateTime != null ? DateFormat('h:mm a').format(dateTime) : '';
 
     return Fees(
       paymentType: json['transactionType'] ?? '',
       transactionId: json['transactionID'] ?? '',
       paymentMethod: json['transactionName'] ?? '',
-      amount: json['amount'] ?? '0', // Ensure a default value is provided
+      amount: json['amount'] ?? '0',
       date: formattedDate,
       time: formattedTime,
     );
   }
 }
 
+class HoldAmount {
+  final String id;
+  final String date;
+  final String amount;
+  final String time;
+
+  HoldAmount({
+    required this.id,
+    required this.date,
+    required this.amount,
+    required this.time,
+  });
+
+  factory HoldAmount.fromJson(Map<String, dynamic> json) {
+    final dateTime = DateTime.tryParse(json['created_at'] ?? '');
+    final formattedDate =
+        dateTime != null ? DateFormat('dd-MM-yyyy').format(dateTime) : '';
+    final formattedTime =
+        dateTime != null ? DateFormat('h:mm a').format(dateTime) : '';
+
+    String amountText = json['amount_added_to_teacher'] ?? '';
+    String holdAmount = '0';
+    RegExp regExp = RegExp(r'Teacher-Fee:\(Hold\) (\d+\.?\d*)');
+    Match? match = regExp.firstMatch(amountText);
+    if (match != null && match.groupCount >= 1) {
+      holdAmount = match.group(1) ?? '0';
+    }
+
+    return HoldAmount(
+      id: json['id'].toString(),
+      date: formattedDate,
+      amount: holdAmount,
+      time: formattedTime,
+    );
+  }
+}
+
+class WithdrawalRequest {
+  final String id;
+  final String amount;
+  final String date;
+  final String time;
+  final String status;
+
+  WithdrawalRequest({
+    required this.id,
+    required this.amount,
+    required this.date,
+    required this.time,
+    required this.status,
+  });
+
+  factory WithdrawalRequest.fromJson(Map<String, dynamic> json) {
+    final dateTime = DateTime.tryParse(json['created_at'] ?? '');
+    final formattedDate =
+        dateTime != null ? DateFormat('dd-MM-yyyy').format(dateTime) : '';
+    final formattedTime =
+        dateTime != null ? DateFormat('h:mm a').format(dateTime) : '';
+
+    return WithdrawalRequest(
+      id: json['id'].toString(),
+      amount: json['amount'] ?? '0',
+      date: formattedDate,
+      time: formattedTime,
+      status: json['status'] ?? 'pending',
+    );
+  }
+}
+
 class TeacherFeePaymentScreen extends StatefulWidget {
-  const TeacherFeePaymentScreen({super.key});
+  final List<String> slots;
+  const TeacherFeePaymentScreen({super.key, required this.slots});
 
   @override
   State<TeacherFeePaymentScreen> createState() =>
@@ -61,7 +126,6 @@ class TeacherFeePaymentScreen extends StatefulWidget {
 class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
   @override
   void dispose() {
-    // Reset status bar to default when leaving the page
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -73,35 +137,94 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
   }
 
   List<Fees> feepayment = [];
+  List<HoldAmount> holdAmounts = [];
+  List<WithdrawalRequest> withdrawalRequests = [];
   bool isLoading = true;
   bool isLoadingMore = false;
   int currentPage = 1;
   bool hasMore = true;
   double balance = 0;
+  bool isLoadingHoldAmounts = true;
+  bool isLoadingWithdrawals = true;
 
   final apiBase = '$baseUrl/get-fee-payment-info/';
 
   Future<double> fetchBalance() async {
     final prefs = await SharedPreferences.getInstance();
     final userID = prefs.getString('userID');
-    // Replace with your API URL
     try {
       final response =
           await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(double.parse(data['balance']));
         setState(() {
           balance = double.parse(data['balance']);
         });
-        return balance; // Convert balance to an integer
+        return balance;
       } else {
         throw Exception('Failed to load balance');
       }
     } catch (e) {
       print('Error: $e');
-      return 0; // Return 0 in case of an error
+      return 0;
+    }
+  }
+
+  Future<void> fetchHoldAmounts() async {
+    try {
+      // Fetch data for each slot ID sequentially
+      for (String slotID in widget.slots) {
+        final response =
+            await http.get(Uri.parse('$baseUrl/view-slot-attendance/$slotID'));
+
+        if (response.statusCode == 200) {
+          final List<dynamic> data = json.decode(response.body);
+          setState(() {
+            holdAmounts = data
+                .map((json) => HoldAmount.fromJson(json))
+                .where((hold) => hold.amount != '0')
+                .toList();
+            isLoadingHoldAmounts = false;
+          });
+        } else {
+          print(
+              'Failed to fetch data for slot $slotID: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      print('Error fetching attendance data: $e');
+      setState(() {
+        isLoadingHoldAmounts = false;
+      });
+      throw Exception(
+          'Failed to load hold amounts'); // Return empty list on error
+    }
+  }
+
+  Future<void> fetchWithdrawalRequests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final teacherID = prefs.getString('id');
+    try {
+      final response = await http.get(Uri.parse(
+          '$baseUrl/withdraw-requests/$teacherID?data_per_page=10&page=1'));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> requests = data['data'] ?? [];
+        setState(() {
+          withdrawalRequests =
+              requests.map((json) => WithdrawalRequest.fromJson(json)).toList();
+          isLoadingWithdrawals = false;
+        });
+      } else {
+        throw Exception('Failed to load withdrawal requests');
+      }
+    } catch (e) {
+      print('Error fetching withdrawal requests: $e');
+      setState(() {
+        isLoadingWithdrawals = false;
+      });
     }
   }
 
@@ -115,7 +238,6 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
       final List<dynamic> data = json.decode(response.body);
       setState(() {
         if (page == 1) {
-          // Initial fetch and filter out 'ByAdmin' transactions
           feepayment = data
               .map((json) => Fees.fromJson(json))
               .where((fee) =>
@@ -123,15 +245,12 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                   fee.paymentMethod != 'By Admin')
               .toList();
         } else {
-          // Append new data and filter out 'ByAdmin' transactions
           feepayment.addAll(data.map((json) => Fees.fromJson(json)).where(
               (fee) =>
                   fee.paymentMethod != 'ByAdmin' &&
                   fee.paymentMethod != 'By Admin'));
         }
-        print(feepayment);
 
-        // Sort transactions by created_at in descending order (latest first)
         feepayment.sort((a, b) {
           DateTime dateA = DateTime.tryParse(jsonDecode(response.body)
                       .firstWhere((e) => e['transactionID'] == a.transactionId)[
@@ -141,15 +260,12 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                       .firstWhere((e) => e['transactionID'] == b.transactionId)[
                   'created_at']) ??
               DateTime(0);
-          return dateB.compareTo(dateA); // Descending order
+          return dateB.compareTo(dateA);
         });
-
-        print(response.body);
 
         isLoading = false;
         isLoadingMore = false;
 
-        // Check if more data is available
         if (data.isEmpty) {
           hasMore = false;
         }
@@ -168,6 +284,8 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
     super.initState();
     fetchFeeDetails();
     fetchBalance();
+    fetchHoldAmounts();
+    fetchWithdrawalRequests();
   }
 
   final List<Color> cardColors = [
@@ -176,6 +294,22 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
     Colors.pink.shade100,
     Colors.green.shade100,
     Colors.purple.shade100,
+  ];
+
+  final List<Color> holdCardColors = [
+    Colors.orange.shade100,
+    Colors.cyan.shade100,
+    Colors.lime.shade100,
+    Colors.indigo.shade100,
+    Colors.teal.shade100,
+  ];
+
+  final List<Color> withdrawalCardColors = [
+    Colors.amber.shade100,
+    Colors.deepOrange.shade100,
+    Colors.brown.shade100,
+    Colors.blueGrey.shade100,
+    Colors.deepPurple.shade100,
   ];
 
   @override
@@ -215,7 +349,10 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const TeacherWalletPage(),
+                  builder: (context) => TeacherWalletPage(
+                    withdrawRequest: withdrawalRequests,
+                    holdAmount: holdAmounts,
+                  ),
                 ),
               );
             },
@@ -245,7 +382,7 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
         child: LayoutBuilder(builder: (context, constraints) {
           final isWideScreen = constraints.maxWidth > 900;
 
-          return isLoading
+          return isLoading || isLoadingHoldAmounts || isLoadingWithdrawals
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
@@ -260,11 +397,12 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                                 _buildCurrentMonthCard(
                                     MediaQuery.of(context).size.width * 0.4,
                                     isWideScreen),
-                                // _buildPayButton(context),
                               ],
                             ),
                             const SizedBox(width: 40),
-                            feepayment.isEmpty
+                            feepayment.isEmpty &&
+                                    holdAmounts.isEmpty &&
+                                    withdrawalRequests.isEmpty
                                 ? const Padding(
                                     padding:
                                         EdgeInsets.only(top: 20.0, left: 23),
@@ -278,164 +416,93 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         const SizedBox(height: 10),
-                                        const Padding(
-                                          padding: EdgeInsets.only(
-                                              top: 20.0, left: 23),
-                                          child: Text(
-                                            'Previous month',
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
+                                        if (withdrawalRequests.isNotEmpty) ...[
+                                          const Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 20.0, left: 23),
+                                            child: Text(
+                                              'Withdrawal Requests',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                              textAlign: TextAlign.center,
                                             ),
-                                            textAlign: TextAlign.center,
                                           ),
-                                        ),
-                                        const SizedBox(height: 20),
-                                        ...feepayment
-                                            .asMap()
-                                            .entries
-                                            .map((entry) {
-                                          int index = entry.key;
-                                          Fees payment = entry.value;
-
-                                          // Cycle through colors using the modulus operator
-                                          Color cardColor = cardColors[
-                                              index % cardColors.length];
-
-                                          // Extract transaction ID before the comma
-                                          String displayedTransactionId =
-                                              payment.transactionId.contains(
-                                                      ',')
-                                                  ? payment.transactionId
-                                                      .split(',')
-                                                      .first
-                                                      .trim()
-                                                  : payment.transactionId
-                                                      .trim();
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 5, right: 5, bottom: 15),
-                                            child: Container(
-                                              width: 386,
-                                              height: 100,
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    cardColor, // Apply dynamic color
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                          const SizedBox(height: 20),
+                                          ...withdrawalRequests
+                                              .asMap()
+                                              .entries
+                                              .map((entry) {
+                                            int index = entry.key;
+                                            WithdrawalRequest request =
+                                                entry.value;
+                                            Color cardColor =
+                                                withdrawalCardColors[index %
+                                                    withdrawalCardColors
+                                                        .length];
+                                            return _buildWithdrawalCard(
+                                                cardColor, request, index);
+                                          }),
+                                        ],
+                                        if (holdAmounts.isNotEmpty) ...[
+                                          const Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 20.0, left: 23),
+                                            child: Text(
+                                              'Amount on Hold',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
                                               ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 10.0, right: 10),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 5.0,
-                                                                top: 10),
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                              payment
-                                                                  .paymentType,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                color: Colors
-                                                                    .black,
-                                                              ),
-                                                            ),
-                                                            // Display only the part of transactionId before the comma
-                                                            Text(
-                                                              displayedTransactionId,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 14,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                                height: 18),
-                                                            Text(
-                                                              payment
-                                                                  .paymentMethod,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 14,
-                                                                color: Colors
-                                                                    .black,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Align(
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                top: 10.0),
-                                                        child: Column(
-                                                          children: [
-                                                            Text(
-                                                              '₹ ${payment.amount}',
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 16,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                            Text(
-                                                              payment.date,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 14,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(
-                                                                height: 18),
-                                                            Text(
-                                                              payment.time,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 14,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                              textAlign: TextAlign.center,
                                             ),
-                                          );
-                                        }),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ...holdAmounts
+                                              .asMap()
+                                              .entries
+                                              .map((entry) {
+                                            int index = entry.key;
+                                            HoldAmount hold = entry.value;
+                                            Color cardColor = holdCardColors[
+                                                index % holdCardColors.length];
+                                            return _buildHoldCard(
+                                                cardColor, hold, index);
+                                          }),
+                                        ],
+                                        if (feepayment.isNotEmpty) ...[
+                                          const Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 20.0, left: 23),
+                                            child: Text(
+                                              'Previous month',
+                                              style: TextStyle(
+                                                fontFamily: 'Poppins',
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ...feepayment
+                                              .asMap()
+                                              .entries
+                                              .map((entry) {
+                                            int index = entry.key;
+                                            Fees payment = entry.value;
+                                            Color cardColor = cardColors[
+                                                index % cardColors.length];
+                                            return _buildFeeCard(
+                                                cardColor, payment, index);
+                                          }),
+                                        ],
                                         if (hasMore)
                                           Padding(
                                             padding: const EdgeInsets.symmetric(
@@ -460,184 +527,119 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                                   ),
                           ],
                         )
-                      : Stack(
-                          children: [
-                            SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 10),
-                                  _buildCurrentMonthCard(
-                                      MediaQuery.of(context).size.width * 0.9,
-                                      isWideScreen),
-                                  feepayment.isEmpty
-                                      ? const Padding(
-                                          padding: EdgeInsets.only(top: 15.0),
-                                          child: Center(
-                                              child: Text(
-                                                  'No Transaction history available')),
-                                        )
-                                      : const Padding(
-                                          padding: EdgeInsets.only(
-                                            top: 15.0,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'Previous month',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                  const SizedBox(height: 15),
-                                  ...feepayment.asMap().entries.map((entry) {
-                                    int index = entry.key;
-                                    Fees payment = entry.value;
-                                    String displayedTransactionId =
-                                        payment.transactionId.contains(',')
-                                            ? payment.transactionId
-                                                .split(',')
-                                                .first
-                                                .trim()
-                                            : payment.transactionId.trim();
-
-                                    // Cycle through colors using the modulus operator
-                                    Color cardColor =
-                                        cardColors[index % cardColors.length];
-
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 5, right: 5, bottom: 15),
-                                      child: Container(
-                                        width: 386,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              cardColor, // Apply dynamic color
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 10.0, right: 10),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 5.0, top: 10),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        payment.paymentType,
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        displayedTransactionId,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 18),
-                                                      Text(
-                                                        payment.paymentMethod,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 10.0),
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        '₹ ${payment.amount}',
-                                                        style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        payment.date,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 18),
-                                                      Text(
-                                                        payment.time,
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 10),
+                              _buildCurrentMonthCard(
+                                  MediaQuery.of(context).size.width * 0.9,
+                                  isWideScreen),
+                              if (withdrawalRequests.isNotEmpty) ...[
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Center(
+                                    child: Text(
+                                      'Withdrawal Requests',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
-                                    );
-                                  }),
-                                  if (hasMore)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      child: isLoadingMore
-                                          ? const CircularProgressIndicator()
-                                          : TextButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  isLoadingMore = true;
-                                                  currentPage++;
-                                                });
-                                                fetchFeeDetails(
-                                                    page: currentPage);
-                                              },
-                                              child: const Text('Load More...'),
-                                            ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                ],
-                              ),
-                            ),
-                            // Positioned(
-                            //     bottom: -22,
-                            //     left: 0,
-                            //     right: 0,
-                            //     child: _buildPayButton(context)),
-                          ],
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                ...withdrawalRequests
+                                    .asMap()
+                                    .entries
+                                    .map((entry) {
+                                  int index = entry.key;
+                                  WithdrawalRequest request = entry.value;
+                                  Color cardColor = withdrawalCardColors[
+                                      index % withdrawalCardColors.length];
+                                  return _buildWithdrawalCard(
+                                      cardColor, request, index);
+                                }),
+                              ],
+                              if (holdAmounts.isNotEmpty) ...[
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Center(
+                                    child: Text(
+                                      'Amount on Hold',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                ...holdAmounts.asMap().entries.map((entry) {
+                                  int index = entry.key;
+                                  HoldAmount hold = entry.value;
+                                  Color cardColor = holdCardColors[
+                                      index % holdCardColors.length];
+                                  return _buildHoldCard(cardColor, hold, index);
+                                }),
+                              ],
+                              if (feepayment.isNotEmpty) ...[
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Center(
+                                    child: Text(
+                                      'Previous month',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                ...feepayment.asMap().entries.map((entry) {
+                                  int index = entry.key;
+                                  Fees payment = entry.value;
+                                  Color cardColor =
+                                      cardColors[index % cardColors.length];
+                                  return _buildFeeCard(
+                                      cardColor, payment, index);
+                                }),
+                              ],
+                              if (feepayment.isEmpty &&
+                                  holdAmounts.isEmpty &&
+                                  withdrawalRequests.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 15.0),
+                                  child: Center(
+                                      child: Text(
+                                          'No Transaction history available')),
+                                ),
+                              if (hasMore)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: isLoadingMore
+                                      ? const CircularProgressIndicator()
+                                      : TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              isLoadingMore = true;
+                                              currentPage++;
+                                            });
+                                            fetchFeeDetails(page: currentPage);
+                                          },
+                                          child: const Text('Load More...'),
+                                        ),
+                                ),
+                            ],
+                          ),
                         ),
                 );
         }),
@@ -645,7 +647,280 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
     );
   }
 
+  Widget _buildWithdrawalCard(
+      Color cardColor, WithdrawalRequest request, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 15),
+      child: Container(
+        width: 386,
+        height: 100,
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 5.0, top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Withdrawal Requests',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        'ID: ${request.id}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'Status: ${request.status}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: request.status == 'pending'
+                              ? Colors.orange
+                              : request.status == 'approved'
+                                  ? Colors.green
+                                  : Colors.red,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        '₹ ${request.amount}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        request.date,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        request.time,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHoldCard(Color cardColor, HoldAmount hold, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 15),
+      child: Container(
+        width: 386,
+        height: 100,
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 10),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 5.0, top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Amount on Hold',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        'Pending Payment',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      SizedBox(height: 18),
+                      Text(
+                        'Wallet',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        '₹ ${hold.amount}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        hold.date,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        hold.time,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeeCard(Color cardColor, Fees payment, int index) {
+    String displayedTransactionId = payment.transactionId.contains(',')
+        ? payment.transactionId.split(',').first.trim()
+        : payment.transactionId.trim();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 15),
+      child: Container(
+        width: 386,
+        height: 100,
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10.0, right: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 5.0, top: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        payment.paymentType,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        displayedTransactionId,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        payment.paymentMethod,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        '₹ ${payment.amount}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        payment.date,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        payment.time,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCurrentMonthCard(double width, bool isLargeScreen) {
+    DateTime now = DateTime.now();
+    DateTime firstOfMonth = DateTime(now.year, now.month, 1);
+    String formattedStart = DateFormat('d MMM yyyy').format(firstOfMonth);
     return Container(
       width: width,
       height: isLargeScreen ? 150 : 110,
@@ -667,12 +942,12 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Current Month',
                   style: TextStyle(
                     fontSize: 20,
@@ -680,12 +955,12 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
-                  '24 Jan 2025 - Today',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
+                  '$formattedStart - Today',
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
-                Text(
+                const Text(
                   'Total No. of Classes: 09',
                   style: TextStyle(fontSize: 12, color: Colors.white),
                 ),
@@ -701,25 +976,4 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
       ),
     );
   }
-
-  // Widget _buildPayButton(BuildContext context) {
-  //   return Center(
-  //     child: GestureDetector(
-  //       onTap: () {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const StudentPaymentPage(),
-  //           ),
-  //         );
-  //       },
-  //       child: Image.asset(
-  //         'assets/pay_fee.png',
-  //         width: 300,
-  //         height: 100,
-  //         fit: BoxFit.contain,
-  //       ),
-  //     ),
-  //   );
-  // }
 }

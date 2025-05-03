@@ -101,19 +101,12 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
         : descriptionController.text;
 
     if (formData.photo == null || formData.photo!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Upload the image'), duration: Duration(seconds: 2)),
-      );
+      showCustomToast(context, 'Upload the image');
       return;
     }
 
     if (selectedStudents.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Select at least one student'),
-            duration: Duration(seconds: 2)),
-      );
+      showCustomToast(context, 'Select at least one student');
       return;
     }
 

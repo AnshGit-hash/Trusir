@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 
 class AddNoticePage extends StatefulWidget {
   final String? userID;
@@ -43,22 +44,17 @@ class _AddNoticePageState extends State<AddNoticePage> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Success
         print("Notice added successfully!");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notice posted successfully!')),
-        );
+        showCustomToast(context, 'Notice posted successfully!');
         Navigator.pop(context);
       } else {
         // Error
-        print("Failed to post notice: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to post notice: ${response.body}')),
-        );
+        print("Failed to post notice: ${response.statusCode}");
+        showCustomToast(
+            context, 'Failed to post notice: ${response.statusCode}');
       }
     } catch (e) {
       print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred: $e')),
-      );
+      showCustomToast(context, 'Error occurred: $e');
     }
   }
 

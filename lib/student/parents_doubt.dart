@@ -139,12 +139,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
     }
 
     if (formData.photo == null || formData.photo!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload the image'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Upload the image');
       return;
     }
 
@@ -161,12 +156,7 @@ class ParentsDoubtScreenState extends State<ParentsDoubtScreen> {
       if (response.statusCode == 200) {
         print(response.body);
         // Successfully submitted
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Doubt Submitted Successfully!'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'Doubt Submitted Successfully!');
         Navigator.pop(context);
 
         print(body);

@@ -8,6 +8,7 @@ import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/teacher/teacher_facilities.dart';
 
 class AddNoticeTeacher extends StatefulWidget {
@@ -79,15 +80,11 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
         }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Notices posted successfully!')),
-      );
+      showCustomToast(context, 'Notices posted successfully!');
       Navigator.pop(context);
     } catch (e) {
       print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error occurred: $e')),
-      );
+      showCustomToast(context, 'Error occurred: $e');
     }
   }
 
@@ -265,9 +262,7 @@ class _AddNoticeTeacherState extends State<AddNoticeTeacher> {
           if (_titleController.text.isEmpty ||
               _descriptionController.text.isEmpty ||
               selectedStudents.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please fill in all fields')),
-            );
+            showCustomToast(context, 'Please fill in all fields');
           } else {
             _onPost();
           }

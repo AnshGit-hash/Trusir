@@ -94,12 +94,7 @@ class _AddGKState extends State<AddGK> {
     }
 
     if (formData.photo == null || formData.photo!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload the image'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Upload the image');
       return;
     }
 

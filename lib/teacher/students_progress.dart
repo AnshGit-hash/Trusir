@@ -226,6 +226,9 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
   }
 
   Widget _buildCurrentMonthCard() {
+    DateTime now = DateTime.now();
+    DateTime firstOfMonth = DateTime(now.year, now.month, 1);
+    String formattedStart = DateFormat('d MMM yyyy').format(firstOfMonth);
     return Padding(
       padding: const EdgeInsets.only(
         top: 5.0,
@@ -265,13 +268,13 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
               const EdgeInsets.only(left: 10.0, right: 10, bottom: 10, top: 0),
           child: Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(left: 20.0, top: 20),
+                  padding: const EdgeInsets.only(left: 20.0, top: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Current Month',
                         style: TextStyle(
                           fontSize: 20,
@@ -281,8 +284,8 @@ class _StudentProgressPageState extends State<StudentProgressPage> {
                         ),
                       ),
                       Text(
-                        '24 Jan 2025 - Today',
-                        style: TextStyle(
+                        '$formattedStart - Today',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w400,

@@ -77,12 +77,7 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
 
   void _onEnquire() {
     if (!_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Fill all the Required Fields'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      showCustomToast(context, 'Fill all the Required Fields');
       return;
     }
     setState(() {
@@ -96,12 +91,7 @@ class _TeacherEnquiryPageState extends State<TeacherEnquiryPage> {
         .any((location) => location.pincode == widget.formData.pincode);
 
     if (widget.formData.gender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Select a Gender'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      showCustomToast(context, 'Select a Gender');
       return;
     }
     submitForm(context, isLocationServiceable);

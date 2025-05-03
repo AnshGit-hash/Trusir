@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/student/main_screen.dart';
 
 class PopUpSplashScreen extends StatefulWidget {
@@ -101,12 +102,7 @@ class PopUpSplashScreenState extends State<PopUpSplashScreen> {
                     index: 0,
                   )),
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Successful!'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'Login Successful!');
       } else {
         // Handle API error
         print('Failed to fetch user data. Status code: ${response.statusCode}');

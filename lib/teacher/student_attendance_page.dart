@@ -262,15 +262,11 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
   }
 
   void _showNoDataMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('No attendance data available.')),
-    );
+    showCustomToast(context, 'No attendance data available.');
   }
 
   void _showErrorSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    showCustomToast(context, message);
   }
 
   Future<void> _navigateToYearMonthPicker() async {

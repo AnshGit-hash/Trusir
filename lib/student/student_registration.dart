@@ -392,12 +392,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
       }
     }
     if (!allFormsValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields in the forms.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showCustomToast(context, 'Please fill all required fields in the forms.');
       return; // Stop execution if validation fails
     }
 
@@ -407,42 +402,31 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
       int age = DateTime.now().year - student.dob!.year;
       if (age < 5) {
         allFormsValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content:
-                  Text('Invalid DOB: Student must be at least 5 years old')),
-        );
+        showCustomToast(
+            context, 'Invalid DOB: Student must be at least 5 years old');
         return;
       }
 
       if (student.photoPath == null || student.photoPath!.isEmpty) {
         allFormsValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile photo is required')),
-        );
+        showCustomToast(context, 'Profile photo is required');
         return;
       }
 
       if (student.aadharFrontPath == null || student.aadharFrontPath!.isEmpty) {
         allFormsValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aadhaar front image is required')),
-        );
+        showCustomToast(context, 'Aadhaar front image is required');
         return;
       }
 
       if (student.timeslot!.isEmpty) {
         allFormsValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Select atleast on TimeSlot.')),
-        );
+        showCustomToast(context, 'Select atleast on TimeSlot.');
         return;
       }
       if (student.aadharBackPath == null || student.aadharBackPath!.isEmpty) {
         allFormsValid = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aadhaar back image is required')),
-        );
+        showCustomToast(context, 'Aadhaar back image is required');
         return;
       }
     }
@@ -488,12 +472,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
       );
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration Successful'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'Registration Successful');
 
         userSkipped
             ? sendOTP(_phoneController.text)
@@ -509,19 +488,9 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
           context,
           MaterialPageRoute(builder: (context) => const TrusirLoginPage()),
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User Already Exists! Proceed to Login'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'User Already Exists! Proceed to Login');
       } else if (response.statusCode == 500) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Internal Server Error'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'Internal Server Error');
       }
     } catch (e) {
       print('Error occurred while posting data: $e');
@@ -538,12 +507,7 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         print('OTP sent successfully: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP Sent Successfully'),
-            duration: Duration(seconds: 1),
-          ),
-        );
+        showCustomToast(context, 'OTP Sent Successfully');
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -965,11 +929,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                           child: GestureDetector(
                             onTap: () {
                               if (studentForms[index].state == null) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                  content: Text('Please select a state first.'),
-                                  duration: Duration(seconds: 2),
-                                ));
+                                showCustomToast(
+                                    context, 'Please select a state first.');
                               } else {
                                 null;
                               }
@@ -1004,17 +965,11 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                           child: GestureDetector(
                             onTap: () {
                               if (studentForms[index].state == null) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                  content: Text('Please select a state first.'),
-                                  duration: Duration(seconds: 2),
-                                ));
+                                showCustomToast(
+                                    context, 'Please select a state first.');
                               } else if (studentForms[index].city == null) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(const SnackBar(
-                                  content: Text('Please select a city first.'),
-                                  duration: Duration(seconds: 2),
-                                ));
+                                showCustomToast(
+                                    context, 'Please select a city first.');
                               } else {
                                 null;
                               }
@@ -1561,11 +1516,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                   GestureDetector(
                     onTap: () {
                       if (studentForms[index].state == null) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Please select a state first.'),
-                          duration: Duration(seconds: 2),
-                        ));
+                        showCustomToast(
+                            context, 'Please select a state first.');
                       } else {
                         null;
                       }
@@ -1595,17 +1547,10 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
                   GestureDetector(
                     onTap: () {
                       if (studentForms[index].state == null) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Please select a state first.'),
-                          duration: Duration(seconds: 2),
-                        ));
+                        showCustomToast(
+                            context, 'Please select a state first.');
                       } else if (studentForms[index].city == null) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Please select a city first.'),
-                          duration: Duration(seconds: 2),
-                        ));
+                        showCustomToast(context, 'Please select a city first.');
                       } else {
                         null;
                       }
@@ -1981,12 +1926,8 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
         onTap: () {
           agreeToTerms == true
               ? postStudentData(studentFormsData: studentForms)
-              : ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please Agree to Terms and Conditions'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
+              : showCustomToast(
+                  context, 'Please Agree to Terms and Conditions');
         },
         child: Image.asset(
           'assets/register.png',

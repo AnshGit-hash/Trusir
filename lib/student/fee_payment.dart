@@ -645,6 +645,9 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
   }
 
   Widget _buildCurrentMonthCard(double width, bool isLargeScreen) {
+    DateTime now = DateTime.now();
+    DateTime firstOfMonth = DateTime(now.year, now.month, 1);
+    String formattedStart = DateFormat('d MMM yyyy').format(firstOfMonth);
     return Container(
       width: width,
       height: isLargeScreen ? 150 : 110,
@@ -666,12 +669,12 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Current Month',
                   style: TextStyle(
                     fontSize: 20,
@@ -679,12 +682,12 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
-                  '24 Jan 2025 - Today',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
+                  '$formattedStart - Today',
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
-                Text(
+                const Text(
                   'Total No. of Classes: 09',
                   style: TextStyle(fontSize: 12, color: Colors.white),
                 ),
