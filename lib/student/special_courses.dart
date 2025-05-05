@@ -288,6 +288,24 @@ class _CourseCardState extends State<CourseCard> {
   }
 
   void walletPayment(String amount, int courseID) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Processing wallet payment..."),
+            ],
+          ),
+        );
+      },
+    );
+
+    // Add 2-second delay
+    await Future.delayed(const Duration(seconds: 2));
     setState(() {
       payviawallet = true;
     });
