@@ -295,6 +295,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
           ? DateTime(_selectedDate.year - 1, 12)
           : DateTime(_selectedDate.year, _selectedDate.month - 1);
       _fetchAttendanceData(selectedslotID!);
+      _updateSummary();
     });
   }
 
@@ -304,6 +305,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
           ? DateTime(_selectedDate.year + 1, 1)
           : DateTime(_selectedDate.year, _selectedDate.month + 1);
       _fetchAttendanceData(selectedslotID!);
+      _updateSummary();
     });
   }
 
@@ -771,7 +773,7 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     bool isWeb,
   ) {
     return Container(
-      width: 170,
+      width: 165,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.cardColor,

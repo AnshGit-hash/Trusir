@@ -387,6 +387,7 @@ class _AttendancePageState extends State<AttendancePage> {
         _selectedDate = DateTime(_selectedDate.year, _selectedDate.month - 1);
       }
       _fetchAttendanceData(selectedslotID!);
+      _updateSummary();
     });
   }
 
@@ -399,6 +400,7 @@ class _AttendancePageState extends State<AttendancePage> {
         _selectedDate = DateTime(_selectedDate.year, _selectedDate.month + 1);
       }
       _fetchAttendanceData(selectedslotID!);
+      _updateSummary();
     });
   }
 
@@ -486,19 +488,17 @@ class _AttendancePageState extends State<AttendancePage> {
             ],
           ),
         ),
-        toolbarHeight: isWeb ? 80 : 70,
+        toolbarHeight: isWeb ? 80 : 60,
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isWeb ? 40.0 : 15.0,
-                vertical: isWeb ? 20.0 : 0,
-              ),
-              child: isWeb ? _buildWebLayout(theme) : _buildMobileLayout(theme),
+      body: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isWeb ? 40.0 : 15.0,
+              vertical: isWeb ? 20.0 : 20,
             ),
+            child: isWeb ? _buildWebLayout(theme) : _buildMobileLayout(theme),
           ),
         ),
       ),
@@ -583,7 +583,6 @@ class _AttendancePageState extends State<AttendancePage> {
 
   Widget _buildMobileLayout(ThemeData theme) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildSlotList(theme),
         // Calendar Section
@@ -668,7 +667,7 @@ class _AttendancePageState extends State<AttendancePage> {
           borderRadius: BorderRadius.circular(20),
           color: theme.cardColor,
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
           children: List.generate(slots.length, (index) {
             bool isSelected = selectedSlotIndex == index;
@@ -685,7 +684,7 @@ class _AttendancePageState extends State<AttendancePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? theme.primaryColor : theme.cardColor,
+                  color: isSelected ? const Color(0xFF48116A) : theme.cardColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color:
@@ -894,7 +893,7 @@ Widget _buildSummaryCard(
   bool isWeb,
 ) {
   return Container(
-    width: isWeb ? 300 : 100,
+    width: 165,
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       color: theme.cardColor,

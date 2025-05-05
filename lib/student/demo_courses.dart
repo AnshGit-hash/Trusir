@@ -321,7 +321,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
                   width: isWeb ? 200 : 142,
                   height: isWeb ? 40 : null,
                   child: ElevatedButton(
-                    onPressed: widget.course['active']
+                    onPressed: widget.course['active'] == 1
                         ? () {
                             widget.course['teacherID'] == 'N/A'
                                 ? showCustomToast(
