@@ -68,7 +68,7 @@ class _CourseCardState extends State<CourseCard> {
   @override
   void initState() {
     super.initState();
-    paymentService.initPhonePeSdk();
+    // paymentService.initPhonePeSdk();
     fetchProfileData();
     fetchBalance();
   }

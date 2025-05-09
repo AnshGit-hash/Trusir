@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 import 'package:trusir/common/api.dart';
-import 'package:trusir/common/custom_toast.dart';
+// import 'package:trusir/common/custom_toast.dart';
 
 class PaymentService {
   final String environmentValue =
@@ -46,34 +46,34 @@ class PaymentService {
   /// Generate checksum and return request body
 
   /// Start a transaction
-  void startTransaction(
-      String body,
-      String checksum,
-      final checkStatus,
-      final showLoadingDialog,
-      final paymentstatusnavigation,
-      BuildContext context) {
-    showLoadingDialog();
-    PhonePePaymentSdk.startTransaction(body, callback, checksum, packageName)
-        .then((response) {
-      if (response != null) {
-        String status = response['status'].toString();
-        if (status == 'SUCCESS') {
-          print("Payment Successful");
-          checkStatus();
-        } else {
-          print("Payment Failed: ${response['error']}");
-          paymentstatusnavigation();
-          showCustomToast(context, "Payment Failed");
-        }
-      } else {
-        print("Transaction Incomplete");
-        showCustomToast(context, 'Transaction Incomplete');
-      }
-    }).catchError((error) {
-      print("Error during transaction: $error");
-    });
-  }
+  // void startTransaction(
+  //     String body,
+  //     String checksum,
+  //     final checkStatus,
+  //     final showLoadingDialog,
+  //     final paymentstatusnavigation,
+  //     BuildContext context) {
+  //   showLoadingDialog();
+  //   PhonePePaymentSdk.startTransaction(body, callback, checksum, packageName)
+  //       .then((response) {
+  //     if (response != null) {
+  //       String status = response['status'].toString();
+  //       if (status == 'SUCCESS') {
+  //         print("Payment Successful");
+  //         checkStatus();
+  //       } else {
+  //         print("Payment Failed: ${response['error']}");
+  //         paymentstatusnavigation();
+  //         showCustomToast(context, "Payment Failed");
+  //       }
+  //     } else {
+  //       print("Transaction Incomplete");
+  //       showCustomToast(context, 'Transaction Incomplete');
+  //     }
+  //   }).catchError((error) {
+  //     print("Error during transaction: $error");
+  //   });
+  // }
 
   Future<bool> subWalletBalance(
       BuildContext context, String balance, String? userID) async {

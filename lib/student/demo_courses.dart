@@ -64,7 +64,7 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
   @override
   void initState() {
     super.initState();
-    paymentService.initPhonePeSdk();
+    // paymentService.initPhonePeSdk();
     fetchProfileData();
     fetchBalance();
   }
@@ -387,28 +387,30 @@ class _DemoCourseCardState extends State<DemoCourseCard> {
       payviawallet = true;
     });
     if (double.parse(amount) > balance) {
-      bool success =
-          await paymentService.subWalletBalance(context, '$balance', userID);
-      if (success) {
-        merchantTransactionID =
-            paymentService.generateUniqueTransactionId(userID!);
-        body = getChecksum(
-          int.parse('${double.parse(amount) - balance}00'),
-        ).toString();
-        paymentService.startTransaction(body, checksum, checkStatus,
-            showLoadingDialog, paymentstatusnavigation, context);
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentPopUpPage(
-                  isWallet: false,
-                  adjustedAmount: double.parse(amount),
-                  isSuccess: false,
-                  transactionID: 'transactionID',
-                  transactionType: 'WALLET')),
-        );
-      }
+      // bool success =
+      //     await paymentService.subWalletBalance(context, '$balance', userID);
+      // if (success) {
+      //   merchantTransactionID =
+      //       paymentService.generateUniqueTransactionId(userID!);
+      //   body = getChecksum(
+      //     int.parse('${double.parse(amount) - balance}00'),
+      //   ).toString();
+      //   paymentService.startTransaction(body, checksum, checkStatus,
+      //       showLoadingDialog, paymentstatusnavigation);
+      // } else {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentPopUpPage(
+      //             isWallet: false,
+      //             adjustedAmount: double.parse(amount),
+      //             isSuccess: false,
+      //             transactionID: 'transactionID',
+      //             transactionType: 'WALLET')),
+      //   );
+      // }
+      showCustomToast(
+          context, 'Insufficient Balance, Contact Customer Support');
     } else {
       bool success =
           await paymentService.subWalletBalance(context, amount, userID);

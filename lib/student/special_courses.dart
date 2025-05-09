@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
+import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/phonepe_payment.dart';
 import 'package:trusir/student/course.dart';
 import 'package:trusir/student/payment__status_popup.dart';
@@ -69,7 +70,7 @@ class _CourseCardState extends State<CourseCard> {
   @override
   void initState() {
     super.initState();
-    paymentService.initPhonePeSdk();
+    // paymentService.initPhonePeSdk();
     fetchProfileData();
     fetchBalance();
   }
@@ -221,18 +222,20 @@ class _CourseCardState extends State<CourseCard> {
                                 name: widget.course.name,
                                 balance: '$balance',
                                 onPhonePayment: () {
-                                  merchantTransactionID = paymentService
-                                      .generateUniqueTransactionId(userID!);
-                                  body = getChecksum(
-                                    int.parse('${widget.course.newAmount}00'),
-                                  ).toString();
-                                  paymentService.startTransaction(
-                                      body,
-                                      checksum,
-                                      checkStatus,
-                                      showLoadingDialog,
-                                      paymentstatusnavigation,
-                                      context);
+                                  // merchantTransactionID = paymentService
+                                  //     .generateUniqueTransactionId(userID!);
+                                  // body = getChecksum(
+                                  //   int.parse('${widget.course.newAmount}00'),
+                                  // ).toString();
+                                  // paymentService.startTransaction(
+                                  //     body,
+                                  //     checksum,
+                                  //     checkStatus,
+                                  //     showLoadingDialog,
+                                  //     paymentstatusnavigation,
+                                  //     context);
+                                  showCustomToast(context,
+                                      'Coming soon Kindly proceed with wallet payment');
                                 },
                                 onWalletPayment: () {
                                   Navigator.pop(context);
@@ -310,28 +313,30 @@ class _CourseCardState extends State<CourseCard> {
       payviawallet = true;
     });
     if (double.parse(amount) > balance) {
-      bool success =
-          await paymentService.subWalletBalance(context, '$balance', userID);
-      if (success) {
-        merchantTransactionID =
-            paymentService.generateUniqueTransactionId(userID!);
-        body = getChecksum(
-          int.parse('${double.parse(amount) - balance}00'),
-        ).toString();
-        paymentService.startTransaction(body, checksum, checkStatus,
-            showLoadingDialog, paymentstatusnavigation, context);
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentPopUpPage(
-                  isWallet: false,
-                  adjustedAmount: double.parse(amount),
-                  isSuccess: false,
-                  transactionID: 'transactionID',
-                  transactionType: 'WALLET')),
-        );
-      }
+      // bool success =
+      //     await paymentService.subWalletBalance(context, '$balance', userID);
+      // if (success) {
+      //   merchantTransactionID =
+      //       paymentService.generateUniqueTransactionId(userID!);
+      //   body = getChecksum(
+      //     int.parse('${double.parse(amount) - balance}00'),
+      //   ).toString();
+      //   paymentService.startTransaction(body, checksum, checkStatus,
+      //       showLoadingDialog, paymentstatusnavigation);
+      // } else {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentPopUpPage(
+      //             isWallet: false,
+      //             adjustedAmount: double.parse(amount),
+      //             isSuccess: false,
+      //             transactionID: 'transactionID',
+      //             transactionType: 'WALLET')),
+      //   );
+      // }
+      showCustomToast(
+          context, 'Insufficient Balance, Contact Customer Support');
     } else {
       bool success =
           await paymentService.subWalletBalance(context, amount, userID);
