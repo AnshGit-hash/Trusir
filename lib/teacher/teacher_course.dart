@@ -472,7 +472,7 @@ class _TeacherCoursePageState extends State<TeacherCoursePage> {
                             ? 2
                             : 1;
                     final childAspectRatio =
-                        constraints.maxWidth > 800 ? 16 / 12 : 16 / 14.5;
+                        constraints.maxWidth > 800 ? 16 / 14 : 16 / 14.5;
 
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

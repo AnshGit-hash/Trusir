@@ -26,13 +26,11 @@ class Fees {
   });
 
   factory Fees.fromJson(Map<String, dynamic> json) {
-    final createdAt = json['created_at'] ?? '';
-    final dateTime = DateTime.tryParse(createdAt);
+    final createdAt = json['created_at'] as String? ?? '';
+    final dateTime = DateTime.tryParse(createdAt) ?? DateTime.now();
 
-    final formattedDate =
-        dateTime != null ? DateFormat('dd-MM-yyyy').format(dateTime) : '';
-    final formattedTime =
-        dateTime != null ? DateFormat('h:mm a').format(dateTime) : '';
+    final formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
+    final formattedTime = DateFormat('h:mm a').format(dateTime);
 
     return Fees(
       paymentType: json['transactionType'] ?? '',
@@ -251,16 +249,16 @@ class _TeacherFeePaymentScreenState extends State<TeacherFeePaymentScreen> {
                   fee.paymentMethod != 'By Admin'));
         }
 
+        // Remove the problematic sorting code that uses firstWhere
+        // Replace it with a safer sorting method if needed
         feepayment.sort((a, b) {
-          DateTime dateA = DateTime.tryParse(jsonDecode(response.body)
-                      .firstWhere((e) => e['transactionID'] == a.transactionId)[
-                  'created_at']) ??
-              DateTime(0);
-          DateTime dateB = DateTime.tryParse(jsonDecode(response.body)
-                      .firstWhere((e) => e['transactionID'] == b.transactionId)[
-                  'created_at']) ??
-              DateTime(0);
-          return dateB.compareTo(dateA);
+          // Use the date/time you already have in the Fees object
+          final dateA =
+              DateFormat('dd-MM-yyyy h:mm a').tryParse('${a.date} ${a.time}');
+          final dateB =
+              DateFormat('dd-MM-yyyy h:mm a').tryParse('${b.date} ${b.time}');
+
+          return (dateB ?? DateTime(0)).compareTo(dateA ?? DateTime(0));
         });
 
         isLoading = false;

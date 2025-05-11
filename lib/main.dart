@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/login_page.dart';
+import 'package:trusir/common/login_splash_screen.dart';
 import 'package:trusir/connectivity_service.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
@@ -151,8 +155,21 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<Widget> getInitialPage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+
     final String? role = prefs.getString('role');
+    final userData = prefs.get('login');
     final bool isNewUser = prefs.getBool('new_user') ?? true;
+
+    final user = json.encode(userData);
+
+    final Map<String, dynamic> login = jsonDecode(user);
+    final String userID = login['uerID'];
+    prefs.setString('phone', login['phone_number']);
+    prefs.setString('userID', userID);
+
+    if (kIsWeb) {
+      return const LoginSplashScreen();
+    }
 
     if (role == null) {
       return const TrusirLoginPage();
@@ -200,6 +217,7 @@ class _SplashScreenState extends State<SplashScreen>
               opacity: _fadeAnimation,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
@@ -213,32 +231,65 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
-          Positioned(
-            left: 120,
-            right: 0,
-            bottom: 110,
-            child: ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [
-                  Color(0xFFF5AE08),
-                  Colors.white,
-                  Color(0xFFF5AE08), // Yellow
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-              blendMode: BlendMode.srcIn,
-              child: const Text(
-                'trusir.com',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white, // This gets overridden by the gradient
+          kIsWeb
+              ? Positioned(
+                  left: 100,
+                  right: 0,
+                  bottom: 110,
+                  child: Center(
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [
+                          Color(0xFFF5AE08),
+                          Colors.white,
+                          Color(0xFFF5AE08), // Yellow
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(
+                          Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                      blendMode: BlendMode.srcIn,
+                      child: const Text(
+                        'trusir.com',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                          color: Colors
+                              .white, // This gets overridden by the gradient
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : Positioned(
+                  left: 120,
+                  right: 0,
+                  bottom: 110,
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [
+                        Color(0xFFF5AE08),
+                        Colors.white,
+                        Color(0xFFF5AE08), // Yellow
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(
+                        Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                    blendMode: BlendMode.srcIn,
+                    child: const Text(
+                      'trusir.com',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        color: Colors
+                            .white, // This gets overridden by the gradient
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
         ],
       ),
     );

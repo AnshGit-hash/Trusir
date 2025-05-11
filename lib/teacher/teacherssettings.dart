@@ -47,7 +47,7 @@ class _TeacherssettingsState extends State<Teacherssettings> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => const TeacherMainScreen(
-                          index: 0,
+                          index: 2,
                         ),
                       ),
                     );
