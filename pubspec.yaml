@@ -41,6 +41,7 @@ dependencies:
   connectivity_plus:
   image:
   photo_view:
+  cached_network_image:
   rename:
 dev_dependencies:
   flutter_test:
