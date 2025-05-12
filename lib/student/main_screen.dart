@@ -19,15 +19,13 @@ class MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      currentIndex = widget.index;
-    });
+    currentIndex = widget.index;
   }
 
   // List of pages for each bottom navigation item
   final List<Widget> pages = [
     const StudentHomepage(enablephone: false, enableReg: false),
-    const CoursePage(), // Placeholder for Courses
+    const CoursePage(),
     const Studentfacilities(),
   ];
 
@@ -35,30 +33,29 @@ class MainScreenState extends State<MainScreen> {
   void onTabTapped(int index) {
     setState(() {
       currentIndex = index;
-      SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Colors.grey[50], // Transparent for the homepage
-          statusBarIconBrightness:
-              Brightness.dark, // White icons for a dark background
-        ),
-      );
     });
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.grey[50],
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        body: Stack(
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: Stack(
           children: [
+            // Main content with proper bottom padding
             Padding(
-              padding: EdgeInsets.only(
-                  bottom: currentIndex == 2
-                      ? 0
-                      : 80), // Adjust for bottom nav bar height
+              padding:
+                  const EdgeInsets.only(bottom: 80), // Space for bottom nav
               child: pages[currentIndex],
             ),
+            // Bottom navigation bar
             Positioned(
               bottom: 0,
               left: 0,

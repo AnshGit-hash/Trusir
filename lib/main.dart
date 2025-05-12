@@ -117,13 +117,12 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-        systemNavigationBarColor:
-            Colors.transparent, // Set navigation bar color
-        systemNavigationBarIconBrightness: Brightness.dark,
-        statusBarColor: Colors.transparent,
-        statusBarBrightness: Brightness.light));
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
+      statusBarBrightness: Brightness.light,
+    ));
 
-    // Set up fade animation
     _animationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -144,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> navigateToInitialPage() async {
-    await Future.delayed(const Duration(seconds: 2)); // Wait for 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
     final initialPage = await getInitialPage();
     if (mounted) {
       Navigator.of(context).pushReplacement(
@@ -155,19 +154,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<Widget> getInitialPage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-
     final String? role = prefs.getString('role');
-    final userData = prefs.get('login');
     final bool isNewUser = prefs.getBool('new_user') ?? true;
 
-    final user = json.encode(userData);
-
-    final Map<String, dynamic> login = jsonDecode(user);
-    final String userID = login['uerID'];
-    prefs.setString('phone', login['phone_number']);
-    prefs.setString('userID', userID);
-
     if (kIsWeb) {
+      final userData = prefs.get('login');
+      final user = json.encode(userData);
+      final Map<String, dynamic> login = jsonDecode(user);
+      final String userID = login['uerID'];
+      prefs.setString('phone_number', login['phone_number']);
+      prefs.setString('userID', userID);
       return const LoginSplashScreen();
     }
 
@@ -178,13 +174,9 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (role == 'teacher' && isNewUser) {
       return const TrusirLoginPage();
     } else if (role == 'student' && !isNewUser) {
-      return const MainScreen(
-        index: 0,
-      );
+      return const MainScreen(index: 0);
     } else if (role == 'teacher' && !isNewUser) {
-      return const TeacherMainScreen(
-        index: 0,
-      );
+      return const TeacherMainScreen(index: 0);
     } else {
       return const TrusirLoginPage();
     }
@@ -201,53 +193,49 @@ class _SplashScreenState extends State<SplashScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.accents[3].withValues(alpha: 0.9),
-                  const Color(0xFF3C006D).withValues(alpha: 0.9),
-                  const Color(0xFF5A008F).withValues(alpha: 0.9),
-                  Colors.accents[4].withValues(alpha: 0.5),
+                  Colors.accents[3].withOpacity(0.9),
+                  const Color(0xFF3C006D).withOpacity(0.9),
+                  const Color(0xFF5A008F).withOpacity(0.9),
+                  Colors.accents[4].withOpacity(0.5),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
-          // Logo with fade animation
+
+          // Main centered content
           Center(
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  // Logo
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      'assets/trusir.png', // Replace with your logo asset path
+                      'assets/trusir.png',
                       width: 200,
                       height: 200,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          kIsWeb
-              ? Positioned(
-                  left: 100,
-                  right: 0,
-                  bottom: 110,
-                  child: Center(
+                  const SizedBox(height: 200),
+
+                  // Text positioned slightly below center
+                  Transform.translate(
+                    offset: const Offset(
+                        0, 40), // Adjust this value to move text lower
                     child: ShaderMask(
                       shaderCallback: (bounds) => const LinearGradient(
                         colors: [
                           Color(0xFFF5AE08),
                           Colors.white,
-                          Color(0xFFF5AE08), // Yellow
+                          Color(0xFFF5AE08),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                      ).createShader(
-                          Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                      ).createShader(bounds),
                       blendMode: BlendMode.srcIn,
                       child: const Text(
                         'trusir.com',
@@ -255,41 +243,16 @@ class _SplashScreenState extends State<SplashScreen>
                           fontSize: 25,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                          color: Colors
-                              .white, // This gets overridden by the gradient
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
-                )
-              : Positioned(
-                  left: 120,
-                  right: 0,
-                  bottom: 110,
-                  child: ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        Color(0xFFF5AE08),
-                        Colors.white,
-                        Color(0xFFF5AE08), // Yellow
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(
-                        Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-                    blendMode: BlendMode.srcIn,
-                    child: const Text(
-                      'trusir.com',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                        color: Colors
-                            .white, // This gets overridden by the gradient
-                      ),
-                    ),
-                  ),
-                ),
+                  const SizedBox(height: 70)
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
