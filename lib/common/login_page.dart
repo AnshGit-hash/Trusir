@@ -117,6 +117,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
                     _isSendingOTP = true;
                     phonenum = phone;
                   });
+                  storePhoneNo();
                   sendOTP(phone);
                 } else {
                   showCustomToast(
@@ -195,7 +196,6 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: formattedPhone,
         verificationCompleted: (PhoneAuthCredential credential) async {
-          storePhoneNo();
           await FirebaseAuth.instance.signInWithCredential(credential);
           print("Auto-verified: ${credential.smsCode}");
           setState(() {
