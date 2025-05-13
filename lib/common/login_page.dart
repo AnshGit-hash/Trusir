@@ -195,6 +195,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: formattedPhone,
         verificationCompleted: (PhoneAuthCredential credential) async {
+          storePhoneNo();
           await FirebaseAuth.instance.signInWithCredential(credential);
           print("Auto-verified: ${credential.smsCode}");
           setState(() {
