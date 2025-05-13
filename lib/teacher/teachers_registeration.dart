@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -597,27 +598,42 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   }
 
   Future<void> sendOTP(String phoneNumber) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('phone_number', phoneNumber);
-    final url = Uri.parse(
-      '$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP',
-    );
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        print('OTP sent successfully: ${response.body}');
-        showCustomToast(context, 'OTP Sent Successfully');
-        Navigator.push(
+      // Format: +91XXXXXXXXXX
+      String formattedPhone = '+91$phoneNumber';
+
+      // Firebase Phone Auth
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: formattedPhone,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification (e.g., on Android devices)
+          await FirebaseAuth.instance.signInWithCredential(credential);
+          print("Auto-verified: ${credential.smsCode}");
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          print("Firebase OTP Error: ${e.message}");
+          showCustomToast(context, 'Failed to send OTP: ${e.message}');
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          // Navigate to OTP screen with verificationId
+          Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => OTPScreen(
-                      phonenum: phoneNumber,
-                    )));
-      } else {
-        print('Failed to send OTP: ${response.body}');
-      }
+              builder: (context) => OTPScreen(
+                phonenum: phoneNumber,
+                verificationId: verificationId, // Pass this to OTP screen
+              ),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print("OTP timeout: $verificationId");
+        },
+        timeout: const Duration(seconds: 60), // Adjust timeout as needed
+      );
     } catch (e) {
-      print('Error sending OTP: $e');
+      print("OTP Error: $e");
+      showCustomToast(context, 'Failed to send OTP');
     }
   }
 
@@ -951,7 +967,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                     isprofileuploading
                                         ? const CircularProgressIndicator()
                                         : _buildFileUploadField('Upload Image',
-                                            width: 220,
+                                            width: isWeb ? 170 : 220,
                                             onTap: isprofileEnabled
                                                 ? () {
                                                     showDialog(
@@ -1094,7 +1110,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                     isadhaarfuploading
                                         ? const CircularProgressIndicator()
                                         : _buildFileUploadField('Upload File',
-                                            width: 220,
+                                            width: isWeb ? 170 : 220,
                                             onTap: isadhaarfEnabled
                                                 ? () {
                                                     showDialog(
@@ -1238,7 +1254,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                     isadhaarbuploading
                                         ? const CircularProgressIndicator()
                                         : _buildFileUploadField('Upload File',
-                                            width: 220,
+                                            width: isWeb ? 170 : 220,
                                             onTap: isadhaarbEnabled
                                                 ? () {
                                                     showDialog(
@@ -1505,7 +1521,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                                     showCustomToast(context,
                                                         'Let the previous Upload finish first');
                                                   },
-                                            width: 220,
+                                            width: isWeb ? 170 : 220,
                                             displayPath:
                                                 formData.signaturePath),
                                   ],
@@ -1513,7 +1529,9 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               ],
                             ),
                             const SizedBox(height: 40),
-                            TimeSlotField(formData: formData, isWeb: isWeb),
+                            SingleChildScrollView(
+                                child: TimeSlotField(
+                                    formData: formData, isWeb: isWeb)),
                             const SizedBox(height: 50),
 
                             // Terms and Conditions Checkbox
@@ -1822,7 +1840,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               isprofileuploading
                                   ? const CircularProgressIndicator()
                                   : _buildFileUploadField('Upload Image',
-                                      width: 171,
+                                      width: isWeb ? 150 : 171,
                                       onTap: isprofileEnabled
                                           ? () {
                                               showDialog(
@@ -1955,7 +1973,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               isadhaarfuploading
                                   ? const CircularProgressIndicator()
                                   : _buildFileUploadField('Upload File',
-                                      width: 170,
+                                      width: isWeb ? 150 : 170,
                                       onTap: isadhaarfEnabled
                                           ? () {
                                               showDialog(
@@ -2087,7 +2105,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                               isadhaarbuploading
                                   ? const CircularProgressIndicator()
                                   : _buildFileUploadField('Upload File',
-                                      width: 170,
+                                      width: isWeb ? 150 : 170,
                                       onTap: isadhaarbEnabled
                                           ? () {
                                               showDialog(
@@ -2332,7 +2350,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
                                               showCustomToast(context,
                                                   'Let the previous Upload finish first');
                                             },
-                                      width: 171,
+                                      width: isWeb ? 150 : 171,
                                       displayPath: formData.signaturePath),
                             ],
                           ),
@@ -2839,7 +2857,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
     bool isWeb = MediaQuery.of(context).size.width > 600;
     return Container(
       height: 48,
-      width: isWeb ? 700 : double.infinity,
+      width: isWeb ? 550 : double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -2897,7 +2915,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
         bool isWeb = MediaQuery.of(context).size.width > 600;
         return Container(
           height: 48,
-          width: isWeb ? 700 : double.infinity,
+          width: isWeb ? 550 : double.infinity,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(22),
@@ -3094,12 +3112,12 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   Widget _buildFileUploadField(String placeholder,
       {required displayPath,
       required VoidCallback? onTap,
-      required int width}) {
+      required double width}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 48,
-        width: 171,
+        width: width,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22),

@@ -1,88 +1,96 @@
-// my_courses.dart
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:trusir/common/custom_toast.dart';
+// import 'package:trusir/common/delete.dart';
 import 'package:trusir/student/course.dart';
+// import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/special_courses.dart';
 import 'package:trusir/student/teacher_profile_page.dart';
 
 class Mycourses extends StatelessWidget {
   final List<Map<String, dynamic>> courses;
   final List<Course> specialCourses;
-
-  const Mycourses({
-    super.key,
-    required this.courses,
-    required this.specialCourses,
-  });
+  const Mycourses(
+      {super.key, required this.courses, required this.specialCourses});
 
   @override
   Widget build(BuildContext context) {
-    final isWeb = MediaQuery.of(context).size.width > 600;
-
+    bool isWeb = MediaQuery.of(context).size.width > 600;
     return SingleChildScrollView(
       child: Column(
         children: [
-          if (courses.isEmpty)
-            const Center(
-                child:
-                    Text('No Courses', style: TextStyle(fontFamily: "Poppins")))
-          else if (isWeb)
-            _buildWebGrid()
-          else
-            _buildMobileList(),
-          SpecialCourses(courses: specialCourses),
+          courses.isEmpty
+              ? const Center(
+                  child: Text(
+                  'No Courses',
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                  ),
+                ))
+              : isWeb
+                  ? GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2, mainAxisExtent: 560),
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        final course = courses[index];
+                        return MyCourseCard(
+                          course: course,
+                        );
+                      },
+                    )
+                  : ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      itemCount: courses.length,
+                      itemBuilder: (context, index) {
+                        final course = courses[index];
+                        return MyCourseCard(
+                          course: course,
+                        );
+                      },
+                    ),
+          SpecialCourses(courses: specialCourses)
         ],
       ),
     );
   }
-
-  Widget _buildWebGrid() {
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisExtent: 560,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-      ),
-      shrinkWrap: true,
-      padding: const EdgeInsets.all(16),
-      itemCount: courses.length,
-      itemBuilder: (context, index) => MyCourseCard(course: courses[index]),
-    );
-  }
-
-  Widget _buildMobileList() {
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: courses.length,
-      itemBuilder: (context, index) => MyCourseCard(course: courses[index]),
-    );
-  }
 }
 
-class MyCourseCard extends StatelessWidget {
+class MyCourseCard extends StatefulWidget {
   final Map<String, dynamic> course;
 
   const MyCourseCard({super.key, required this.course});
 
   @override
-  Widget build(BuildContext context) {
-    final isWeb = MediaQuery.of(context).size.width > 600;
-    final isActive = course['active'] == 1;
-    final discount = 100 -
-        (int.parse(course['new_amount']) / int.parse(course['amount']) * 100);
-    final formattedDiscount = discount.toStringAsFixed(2);
+  State<MyCourseCard> createState() => _MyCourseCardState();
+}
 
+class _MyCourseCardState extends State<MyCourseCard> {
+  bool isWeb = false;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    isWeb = MediaQuery.of(context).size.width > 600;
+    double discount = 100 -
+        int.parse(widget.course['new_amount']) /
+            int.parse(widget.course['amount']) *
+            100;
+
+    String formattedDiscount = discount.toStringAsFixed(2);
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isWeb ? 30 : 16,
-        vertical: isWeb ? 15 : 8,
-      ),
+          horizontal: isWeb ? 30 : 16, vertical: isWeb ? 15 : 8),
       decoration: BoxDecoration(
-        color: isActive ? Colors.white : Colors.grey[300],
+        color: widget.course['active'] == 1 ? Colors.white : Colors.grey,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -93,14 +101,108 @@ class MyCourseCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(isWeb ? 30 : 16),
+        padding: EdgeInsets.all(isWeb ? 30 : 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCourseImage(isWeb, isActive),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    widget.course['image'],
+                    width: double.infinity,
+                    height: isWeb ? 300 : 180,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Icon(
+                          Icons.error,
+                          size: 40,
+                          color: widget.course['active'] == 1
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: widget.course['active'] == 1
+                          ? Colors.pink
+                          : Colors.grey,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Best Seller',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: isWeb ? 18 : 14,
+                      ),
+                    ),
+                  ),
+                ),
+                // Positioned(
+                //     top: 0,
+                //     right: 0,
+                //     child: IconButton(
+                //         onPressed: widget.course['active'] == 1
+                //             ? () {
+                //                 showDialog(
+                //                   context: context,
+                //                   builder: (BuildContext context) {
+                //                     return AlertDialog(
+                //                       title: const Text("Confirm Deletion"),
+                //                       content: const Text(
+                //                           "Are you sure you want to delete?"),
+                //                       actions: [
+                //                         TextButton(
+                //                           onPressed: () => Navigator.pop(
+                //                               context), // Dismiss dialog
+                //                           child: const Text("Cancel"),
+                //                         ),
+                //                         TextButton(
+                //                           onPressed: () {
+                //                             DeleteUtility.deleteItem(
+                //                                 'individualSlot',
+                //                                 widget.course['slotID']);
+                //                             Navigator.pop(context);
+                //                             Navigator.pushReplacement(
+                //                                 context,
+                //                                 MaterialPageRoute(
+                //                                     builder: (context) =>
+                //                                         const MainScreen(
+                //                                             index: 1)));
+                //                           }, // Confirm deletion
+                //                           child: const Text("OK"),
+                //                         ),
+                //                       ],
+                //                     );
+                //                   },
+                //                 );
+                //               }
+                //             : () {
+                //                 showCustomToast(context,
+                //                         'Course Inactive, Please Contact Admin');
+                //               },
+                //         icon: Icon(
+                //           Icons.close,
+                //           color: widget.course['active'] == 1
+                //               ? Colors.redAccent
+                //               : Colors.grey,
+                //         )))
+              ],
+            ),
             const SizedBox(height: 12),
             Text(
-              course['name'],
+              widget.course['name'],
               style: TextStyle(
                 fontSize: isWeb ? 21 : 18,
                 fontFamily: 'Poppins',
@@ -109,7 +211,7 @@ class MyCourseCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              course['subject'],
+              widget.course['subject'],
               style: TextStyle(
                 fontSize: isWeb ? 18 : 14,
                 fontFamily: 'Poppins',
@@ -117,143 +219,90 @@ class MyCourseCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 5),
-            _buildPriceRow(formattedDiscount, isActive),
+            Row(
+              children: [
+                Text(
+                  '₹${widget.course['new_amount']}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold,
+                    color: widget.course['active'] == 1
+                        ? Colors.deepPurple
+                        : Colors.black,
+                  ),
+                ),
+                const SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  '₹${widget.course['amount']}', // Placeholder for original price
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Poppins',
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: Colors.grey,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  '$formattedDiscount% OFF', // Placeholder for original price
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    color: widget.course['active'] == 1
+                        ? Colors.green
+                        : Colors.black,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
-            _buildActionButton(context, isWeb, isActive),
+            Center(
+              child: SizedBox(
+                width: isWeb ? 200 : 300,
+                height: isWeb ? 40 : null,
+                child: ElevatedButton(
+                  onPressed: widget.course['active'] == 1
+                      ? () {
+                          widget.course['teacherID'] == 'N/A'
+                              ? showCustomToast(
+                                  context, 'No Teachers Assigned Yet')
+                              : Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => TeacherProfilePage(
+                                          userID: widget.course['teacherID'])),
+                                );
+                        }
+                      : () {
+                          showCustomToast(
+                              context, 'Course Inactive, Please Contact Admin');
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.course['active'] == 1
+                        ? Colors.blueAccent
+                        : Colors.black54,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Know More',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildCourseImage(bool isWeb, bool isActive) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: CachedNetworkImage(
-            imageUrl: course['image'],
-            width: double.infinity,
-            height: isWeb ? 300 : 180,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(
-              color: Colors.grey[200],
-              height: isWeb ? 300 : 180,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) => Center(
-              child: Icon(
-                Icons.error,
-                size: 40,
-                color: isActive ? Colors.red : Colors.grey,
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          top: 10,
-          left: 10,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: isActive ? Colors.pink : Colors.grey,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              'Best Seller',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: isWeb ? 18 : 14,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceRow(String formattedDiscount, bool isActive) {
-    return Row(
-      children: [
-        Text(
-          '₹${course['new_amount']}',
-          style: TextStyle(
-            fontSize: 18,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.bold,
-            color: isActive ? Colors.deepPurple : Colors.black,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Text(
-          '₹${course['amount']}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontFamily: 'Poppins',
-            decoration: TextDecoration.lineThrough,
-            decorationColor: Colors.grey,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(width: 7),
-        Text(
-          '$formattedDiscount% OFF',
-          style: TextStyle(
-            fontSize: 14,
-            fontFamily: 'Poppins',
-            color: isActive ? Colors.green : Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(BuildContext context, bool isWeb, bool isActive) {
-    return Center(
-      child: SizedBox(
-        width: isWeb ? 200 : 300,
-        height: isWeb ? 40 : null,
-        child: ElevatedButton(
-          onPressed: isActive
-              ? () => _handleKnowMore(context)
-              : () => _showInactiveToast(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isActive ? Colors.blueAccent : Colors.black54,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: const Text(
-            'Know More',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Poppins',
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleKnowMore(BuildContext context) {
-    if (course['teacherID'] == 'N/A') {
-      _showNoTeacherToast(context);
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TeacherProfilePage(userID: course['teacherID']),
-        ),
-      );
-    }
-  }
-
-  void _showInactiveToast(BuildContext context) {
-    // Implement toast for inactive course
-  }
-
-  void _showNoTeacherToast(BuildContext context) {
-    // Implement toast for no teacher assigned
   }
 }

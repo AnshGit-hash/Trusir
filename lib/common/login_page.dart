@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/menu.dart';
-import 'package:http/http.dart' as http;
-import 'package:trusir/common/api.dart';
 import 'package:trusir/common/otp_screen.dart';
 
 // Custom class to handle responsive dimensions
@@ -51,6 +50,7 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   String phonenum = '';
+  bool _isSendingOTP = false;
 
   Future<void> storePhoneNo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -105,38 +105,30 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
 
   Widget _buildSendOTPButton(ResponsiveDimensions responsive) {
     return Center(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            phonenum = _phonecontroller.text;
-          });
-
-          if (phonenum.length < 10 || !RegExp(r'^[0-9]+$').hasMatch(phonenum)) {
-            showCustomToast(context, 'Enter a valid phone number');
-          } else if (phonenum == '7084696179' ||
-              phonenum == '9026154436' ||
-              phonenum == '8294448444' ||
-              phonenum == '8809575556' ||
-              phonenum == '9504072969' ||
-              phonenum == '8582040204' ||
-              phonenum == '9801458766') {
-            storePhoneNo();
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OTPScreen(
-                          phonenum: phonenum,
-                        )));
-          } else {
-            sendOTP(phonenum);
-          }
-        },
-        child: Image.asset(
-          'assets/send_otp.png',
-          width: responsive.screenWidth,
-          fit: BoxFit.contain,
-        ),
-      ),
+      child: _isSendingOTP
+          ? const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF48116A)),
+            )
+          : GestureDetector(
+              onTap: () {
+                final phone = _phonecontroller.text.trim();
+                if (phone.length == 10) {
+                  setState(() {
+                    _isSendingOTP = true;
+                    phonenum = phone;
+                  });
+                  sendOTP(phone);
+                } else {
+                  showCustomToast(
+                      context, 'Enter a valid 10-digit phone number');
+                }
+              },
+              child: Image.asset(
+                'assets/send_otp.png',
+                width: responsive.screenWidth,
+                fit: BoxFit.contain,
+              ),
+            ),
     );
   }
 
@@ -197,26 +189,53 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
   }
 
   Future<void> sendOTP(String phoneNumber) async {
-    final url = Uri.parse(
-      '$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP',
-    );
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        print('OTP sent successfully: ${response.body}');
-        storePhoneNo();
-        showCustomToast(context, 'OTP Sent Successfully');
-        Navigator.push(
+      String formattedPhone = '+91$phoneNumber';
+
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: formattedPhone,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await FirebaseAuth.instance.signInWithCredential(credential);
+          print("Auto-verified: ${credential.smsCode}");
+          setState(() {
+            _isSendingOTP = false;
+          });
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          print("Firebase OTP Error: ${e.message}");
+          showCustomToast(context, 'Failed to send OTP: ${e.message}');
+          setState(() {
+            _isSendingOTP = false;
+          });
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => OTPScreen(
-                      phonenum: phonenum,
-                    )));
-      } else {
-        print('Failed to send OTP: ${response.body}');
-      }
+              builder: (context) => OTPScreen(
+                phonenum: phoneNumber,
+                verificationId: verificationId,
+              ),
+            ),
+          );
+          setState(() {
+            _isSendingOTP = false;
+          });
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print("OTP timeout: $verificationId");
+          setState(() {
+            _isSendingOTP = false;
+          });
+        },
+        timeout: const Duration(seconds: 60),
+      );
     } catch (e) {
-      print('Error sending OTP: $e');
+      print("OTP Error: $e");
+      showCustomToast(context, 'Failed to send OTP');
+      setState(() {
+        _isSendingOTP = false;
+      });
     }
   }
 

@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/login_page.dart';
 import 'package:trusir/common/login_splash_screen.dart';
 import 'package:trusir/connectivity_service.dart';
+import 'package:trusir/firebase_options.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/teacher/teacher_main_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -21,6 +22,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions
+        .currentPlatform, // Use this if you have platform-specific configs
+  );
+
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
   const InitializationSettings initializationSettings =
@@ -34,6 +40,7 @@ void main() async {
       }
     },
   );
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.grey[200], // Set navigation bar color

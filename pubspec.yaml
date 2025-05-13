@@ -41,8 +41,9 @@ dependencies:
   connectivity_plus:
   image:
   photo_view:
-  cached_network_image:
   rename:
+  firebase_core:
+  firebase_auth:
 dev_dependencies:
   flutter_test:
     sdk: flutter

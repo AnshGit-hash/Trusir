@@ -1,0 +1,2 @@
+C:/Users/anshc/Downloads/Amacle work/TrusirApp/android/app/.cxx/RelWithDebInfo/592i3k6i/x86/CMakeFiles/edit_cache.dir
+C:/Users/anshc/Downloads/Amacle work/TrusirApp/android/app/.cxx/RelWithDebInfo/592i3k6i/x86/CMakeFiles/rebuild_cache.dir

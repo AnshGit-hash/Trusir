@@ -1,5 +1,3 @@
-// course.dart
-import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,36 +23,85 @@ class Course {
   final String board;
   final String student;
 
-  Course({
-    required this.id,
-    required this.amount,
-    required this.active,
-    required this.name,
-    required this.subject,
-    required this.pincode,
-    required this.courseClass,
-    required this.newAmount,
-    required this.image,
-    required this.medium,
-    required this.student,
-    required this.board,
-  });
+  Course(
+      {required this.id,
+      required this.amount,
+      required this.active,
+      required this.name,
+      required this.subject,
+      required this.pincode,
+      required this.courseClass,
+      required this.newAmount,
+      required this.image,
+      required this.medium,
+      required this.student,
+      required this.board});
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
-      id: json['id'],
-      amount: json['amount'],
-      active: json['active'],
-      name: json['name'],
-      subject: json['subject'],
-      courseClass: json['class'],
-      pincode: json['pincode'],
-      newAmount: json['new_amount'],
-      image: json['image'],
-      medium: json['medium'] ?? 'N/A',
-      student: json['student'] ?? 'all',
-      board: json['board'] ?? 'N/A',
-    );
+        id: json['id'],
+        amount: json['amount'],
+        active: json['active'],
+        name: json['name'],
+        subject: json['subject'],
+        courseClass: json['class'],
+        pincode: json['pincode'],
+        newAmount: json['new_amount'],
+        image: json['image'],
+        medium: json['medium'] ?? 'N/A',
+        student: json['student'] ?? 'all',
+        board: json['board'] ?? 'N/A');
+  }
+}
+
+class Transaction {
+  final String transactionName;
+  final int amount;
+  final String transactionType;
+  final String transactionID;
+  final String description;
+  final String type;
+
+  Transaction(
+      {required this.transactionName,
+      required this.amount,
+      required this.transactionType,
+      required this.transactionID,
+      required this.description,
+      required this.type});
+
+  // Convert the Transaction object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      "transactionName": transactionName,
+      "amount": amount,
+      "transactionType": transactionType,
+      "transactionID": transactionID,
+      "des": description,
+      "type": type
+    };
+  }
+}
+
+class MyCourseModel {
+  final int id;
+  final String courseID;
+  final String teacherID;
+  final String type;
+  MyCourseModel({
+    required this.id,
+    required this.courseID,
+    required this.teacherID,
+    required this.type,
+  });
+
+  // Factory method for creating an instance from JSON
+  factory MyCourseModel.fromJson(Map<String, dynamic> json) {
+    return MyCourseModel(
+        id: json['id'],
+        courseID: json['courseID'],
+        teacherID: json['teacherID'],
+        type: json['type']);
   }
 }
 
@@ -69,189 +116,101 @@ class _CoursePageState extends State<CoursePage> {
   final PageController _pageController = PageController();
   final GlobalKey<FilterSwitchState> _filterSwitchKey =
       GlobalKey<FilterSwitchState>();
-
-  bool _isLoading = true;
+  bool isLoading = true;
   double balance = 0;
-  int _selectedIndex = 0;
-  bool isWeb = false;
 
-  // Course data
-  List<Course> _allCourses = [];
-  List<Course> _specialCourses = [];
-  List<Map<String, dynamic>> _myCourses = [];
-  List<Map<String, dynamic>> _demoCourses = [];
-  List<Course> filteredAllCourses = [];
-  List<MyCourseModel> _myCourseDetails = [];
+  Future<List<Course>> fetchAllCourses() async {
+    final url = Uri.parse('$baseUrl/get-courses');
+    final response = await http.get(url);
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeData();
-  }
-
-  Future<void> _initializeData() async {
-    try {
-      setState(() => _isLoading = true);
-
-      // First get all necessary user data
-      final prefs = await SharedPreferences.getInstance();
-      final userID = prefs.getString('userID');
-      final userPincode = prefs.getString('pincode');
-      final userClass = prefs.getString('class');
-      final medium = prefs.getString('medium');
-      final board = prefs.getString('board');
-
-      // Fetch balance in parallel with courses
-      final balanceFuture = _fetchBalance();
-      final allCoursesFuture = _fetchAllCourses();
-      final myCoursesFuture = _fetchMyCourses(userID);
-
-      // Wait for all parallel operations
-      final results =
-          await Future.wait([balanceFuture, allCoursesFuture, myCoursesFuture]);
-
-      balance = results[0] as double;
-      _allCourses = results[1] as List<Course>;
-      _myCourseDetails = results[2] as List<MyCourseModel>;
-
-      // Now filter the courses sequentially
-      await _filterMyCourses(userID);
-      await _filterDemoCourses(userID);
-      await _filterAllCourses(userPincode, userClass, medium, board);
-      await _filterSpecialCourses(userID);
-
-      setState(() => _isLoading = false);
-    } catch (e) {
-      debugPrint('Initialization error: $e');
-      setState(() => _isLoading = false);
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final responseData = data.map((json) => Course.fromJson(json)).toList();
+      _courses = responseData;
+      return _courses;
+    } else {
+      throw Exception('Failed to fetch courses');
     }
   }
 
-  Future<void> _filterMyCourses(String? userID) async {
-    if (userID == null) return;
-
-    final myCoursesList = _myCourseDetails
-        .where((c) => c.type == 'purchased' || c.type == 'Purchased')
-        .toList();
-    _myCourses = await _fetchCoursesByIds(myCoursesList);
-  }
-
-  Future<void> _filterDemoCourses(String? userID) async {
-    if (userID == null) return;
-
-    final demoCoursesList =
-        _myCourseDetails.where((c) => c.type == 'demo').toList();
-    _demoCourses = await _fetchCoursesByIds(demoCoursesList);
-  }
-
-  Future<void> _filterAllCourses(String? userPincode, String? userClass,
-      String? medium, String? board) async {
-    if (userPincode == null || userClass == null) return;
-
-    filteredAllCourses = _allCourses.where((course) {
-      final noMatchingDetail = !_myCourseDetails
-          .any((detail) => int.parse(detail.courseID) == course.id);
-
-      if (board == 'N/A') {
-        return noMatchingDetail &&
-            course.pincode == userPincode &&
-            course.active == 1 &&
-            course.courseClass == userClass &&
-            course.student == 'all';
-      } else {
-        return noMatchingDetail &&
-            course.pincode == userPincode &&
-            course.active == 1 &&
-            course.courseClass == userClass &&
-            course.board == board &&
-            course.student == 'all' &&
-            course.medium == medium;
-      }
-    }).toList();
-  }
-
-  Future<void> _filterSpecialCourses(String? userID) async {
-    if (userID == null) return;
-
-    _specialCourses = _allCourses.where((course) {
-      final isPurchased = _myCourseDetails
-          .any((myCourse) => int.parse(myCourse.courseID) == course.id);
-      return course.student == userID && !isPurchased;
-    }).toList();
-  }
-
-  Future<double> _fetchBalance() async {
+  Future<double> fetchBalance() async {
     final prefs = await SharedPreferences.getInstance();
     final userID = prefs.getString('userID');
+    // Replace with your API URL
     try {
       final response =
           await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final balance = double.parse(data['balance']);
-        prefs.setString('wallet_balance', '$balance');
-        return balance;
+        print(double.parse(data['balance']));
+        setState(() {
+          balance = double.parse(data['balance']);
+          prefs.setString('wallet_balance', '$balance');
+        });
+        return balance; // Convert balance to an integer
+      } else {
+        throw Exception('Failed to load balance');
       }
-      return 0;
     } catch (e) {
-      debugPrint('Balance fetch error: $e');
-      return 0;
+      print('Error: $e');
+      return 0; // Return 0 in case of an error
     }
   }
 
-  Future<List<Course>> _fetchAllCourses() async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/get-courses'));
-      if (response.statusCode == 200) {
-        return (json.decode(response.body) as List)
-            .map((json) => Course.fromJson(json))
-            .toList();
-      }
-      return [];
-    } catch (e) {
-      debugPrint('Fetch all courses error: $e');
-      return [];
+  Future<List<MyCourseModel>> fetchCourses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userID = prefs.getString('userID');
+    final url = Uri.parse('$baseUrl/get-courses/$userID');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final responseData =
+          data.map((json) => MyCourseModel.fromJson(json)).toList();
+      _courseDetails = responseData;
+      return _courseDetails;
+    } else {
+      throw Exception('Failed to fetch courses');
     }
   }
 
-  Future<List<MyCourseModel>> _fetchMyCourses(String? userID) async {
-    if (userID == null) return [];
-    try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/get-courses/$userID'));
-      if (response.statusCode == 200) {
-        return (json.decode(response.body) as List)
-            .map((json) => MyCourseModel.fromJson(json))
-            .toList();
-      }
-      return [];
-    } catch (e) {
-      debugPrint('Fetch my courses error: $e');
-      return [];
-    }
-  }
+  List<Course> _courses = [];
+  List<MyCourseModel> _courseDetails = [];
+  List<Course> allCourses = [];
+  List<Course> specialCourse = [];
+  List<MyCourseModel> myCourses = [];
+  List<MyCourseModel> demoCourses = [];
+  int _selectedIndex = 0;
+  List<Map<String, dynamic>> mycourses = [];
+  List<Map<String, dynamic>> democourses = [];
+  bool isWeb = false;
 
-  Future<List<Map<String, dynamic>>> _fetchCoursesByIds(
-      List<MyCourseModel> courses) async {
-    final List<Map<String, dynamic>> result = [];
+  Future<void> fetchCoursesByIds(List<MyCourseModel> data, int index) async {
     try {
-      for (final course in courses) {
-        final data = await _fetchCourseById(course.courseID);
-        if (data != null) {
-          result.add({
-            ...data,
-            'teacherID': course.teacherID,
-            'slotID': course.id,
+      for (int i = 0; i < data.length; i++) {
+        String courseId = data[i].courseID;
+        String teacherId = data[i].teacherID;
+        int slotID = data[i].id;
+        Map<String, dynamic>? courseData = await fetchCourseById((courseId));
+        if (courseData != null) {
+          courseData['teacherID'] = teacherId;
+          courseData['slotID'] = slotID;
+          setState(() {
+            if (index == 0) {
+              mycourses.add(courseData);
+            } else {
+              democourses.add(courseData);
+            }
           });
         }
       }
     } catch (e) {
-      debugPrint('Fetch courses by IDs error: $e');
+      print("Error fetching courses by IDs: $e");
     }
-    return result;
   }
 
-  Future<Map<String, dynamic>?> _fetchCourseById(String courseId) async {
+  Future<Map<String, dynamic>?> fetchCourseById(String courseId) async {
     try {
       final response =
           await http.get(Uri.parse("$baseUrl/get-course-by-id/$courseId"));
@@ -260,26 +219,107 @@ class _CoursePageState extends State<CoursePage> {
         if (data['success'] == true) {
           return data['data'] as Map<String, dynamic>;
         }
+      } else {
+        throw Exception("Failed to load course data for ID $courseId");
       }
     } catch (e) {
-      debugPrint('Fetch course by ID error: $e');
+      print("Error fetching course with ID $courseId: $e");
     }
     return null;
   }
 
+  Future<void> _filterCourses(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? userID = prefs.getString('userID');
+    final String? userPincode = prefs.getString('pincode');
+    final String? userClass = prefs.getString('class');
+    final String? medium = prefs.getString('medium');
+    final String? board = prefs.getString('board');
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await fetchCourses();
+      await fetchAllCourses();
+
+      setState(() {
+        final specialCourses = _courses.where((course) {
+          final isPurchased = myCourses
+              .any((myCourse) => int.parse(myCourse.courseID) == course.id);
+          return course.student == userID &&
+              !isPurchased; // Exclude purchased courses
+        }).toList();
+        final filteredAllCourses = _courses.where((course) {
+          final noMatchingDetail = !_courseDetails.any((detail) =>
+              int.parse(detail.courseID) == course.id); // No match for courseID
+          return board == 'N/A'
+              ? noMatchingDetail &&
+                  course.pincode == userPincode &&
+                  course.active == 1 && // Match pincode
+                  course.courseClass == userClass &&
+                  course.student == 'all'
+              : noMatchingDetail &&
+                  course.pincode == userPincode &&
+                  course.active == 1 && // Match pincode
+                  course.courseClass == userClass &&
+                  course.board == board &&
+                  course.student == 'all' &&
+                  course.medium == medium; // Match class
+        }).toList();
+        if (index == 0) {
+          myCourses = _courseDetails
+              .where((course) =>
+                  course.type == 'purchased' || course.type == 'Purchased')
+              .toList();
+        } else if (index == 1) {
+          demoCourses =
+              _courseDetails.where((course) => course.type == 'demo').toList();
+        } else if (index == 2) {
+          allCourses = filteredAllCourses;
+        } else if (index == 3) {
+          specialCourse = specialCourses;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void _onPageChanged(int index) {
-    if (_isLoading) {
+    if (isLoading) {
       return;
     }
-    if (_selectedIndex != index && mounted && !_isLoading) {
-      setState(() => _selectedIndex = index);
-    }
+    setState(() {
+      _selectedIndex = index;
+    });
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
     _filterSwitchKey.currentState?.setSelectedIndex(index);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
+    fetchBalance();
+  }
+
+  void initialize() async {
+    await _filterCourses(0);
+    await _filterCourses(1);
+    await _filterCourses(2);
+    await _filterCourses(3);
+    await fetchCoursesByIds(myCourses, 0);
+    await fetchCoursesByIds(demoCourses, 1);
   }
 
   @override
@@ -297,11 +337,16 @@ class _CoursePageState extends State<CoursePage> {
           child: Row(
             children: [
               GestureDetector(
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const MainScreen(index: 2)),
-                ),
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MainScreen(
+                        index: 0,
+                      ),
+                    ),
+                  );
+                },
                 child: Image.asset('assets/back_button.png', height: 50),
               ),
               const SizedBox(width: 20),
@@ -328,7 +373,7 @@ class _CoursePageState extends State<CoursePage> {
             option3: 'All Courses',
             initialSelectedIndex: _selectedIndex,
             onChanged: (index) {
-              if (_isLoading) {
+              if (isLoading) {
                 return;
               }
               _pageController.jumpToPage(
@@ -336,46 +381,27 @@ class _CoursePageState extends State<CoursePage> {
               );
             },
           ),
-          _isLoading
+          SizedBox(height: isLoading ? 100 : 0),
+          isLoading
               ? const Center(child: CircularProgressIndicator())
               : Expanded(
                   child: PageView(
                     controller: _pageController,
-                    onPageChanged: _onPageChanged,
+                    onPageChanged: _onPageChanged, // Update index on swipe
                     children: [
                       Mycourses(
-                          courses: _myCourses, specialCourses: _specialCourses),
-                      Democourses(courses: _demoCourses),
-                      AllCourses(courses: _allCourses),
+                        courses: mycourses,
+                        specialCourses: specialCourse,
+                      ),
+                      Democourses(courses: democourses),
+                      AllCourses(
+                        courses: allCourses,
+                      ),
                     ],
                   ),
                 ),
         ],
       ),
-    );
-  }
-}
-
-// Simplified model classes for brevity
-class MyCourseModel {
-  final int id;
-  final String courseID;
-  final String teacherID;
-  final String type;
-
-  MyCourseModel({
-    required this.id,
-    required this.courseID,
-    required this.teacherID,
-    required this.type,
-  });
-
-  factory MyCourseModel.fromJson(Map<String, dynamic> json) {
-    return MyCourseModel(
-      id: json['id'],
-      courseID: json['courseID'],
-      teacherID: json['teacherID'],
-      type: json['type'],
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/api.dart';
@@ -498,27 +499,42 @@ class StudentRegistrationPageState extends State<StudentRegistrationPage> {
   }
 
   Future<void> sendOTP(String phoneNumber) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('phone_number', phoneNumber);
-    final url = Uri.parse(
-      '$otpapi/SMS/+91$phoneNumber/AUTOGEN3/TRUSIR_OTP',
-    );
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        print('OTP sent successfully: ${response.body}');
-        showCustomToast(context, 'OTP Sent Successfully');
-        Navigator.push(
+      // Format: +91XXXXXXXXXX
+      String formattedPhone = '+91$phoneNumber';
+
+      // Firebase Phone Auth
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: formattedPhone,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification (e.g., on Android devices)
+          await FirebaseAuth.instance.signInWithCredential(credential);
+          print("Auto-verified: ${credential.smsCode}");
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          print("Firebase OTP Error: ${e.message}");
+          showCustomToast(context, 'Failed to send OTP: ${e.message}');
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          // Navigate to OTP screen with verificationId
+          Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => OTPScreen(
-                      phonenum: phoneNumber,
-                    )));
-      } else {
-        print('Failed to send OTP: ${response.body}');
-      }
+              builder: (context) => OTPScreen(
+                phonenum: phoneNumber,
+                verificationId: verificationId, // Pass this to OTP screen
+              ),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print("OTP timeout: $verificationId");
+        },
+        timeout: const Duration(seconds: 60), // Adjust timeout as needed
+      );
     } catch (e) {
-      print('Error sending OTP: $e');
+      print("OTP Error: $e");
+      showCustomToast(context, 'Failed to send OTP');
     }
   }
 

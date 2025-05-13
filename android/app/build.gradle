@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -11,7 +14,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.trusir.app"
+    namespace = "com.trusir.com"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -28,7 +31,7 @@ android {
 
     defaultConfig {
         applicationId "com.trusir.com"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -54,10 +57,14 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.play:integrity:1.4.0'
+    implementation 'com.google.firebase:firebase-appcheck-playintegrity'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
     // Core library desugaring dependency
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    implementation("com.google.firebase:firebase-auth")
 }
 
 flutter {
