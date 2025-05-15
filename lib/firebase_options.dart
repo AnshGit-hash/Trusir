@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyANean2Y_TDZbUet9S7NfCxYDpmTyghm5k',
-    appId: '1:1017485472778:android:46798d8ef16e812ce75bf3',
+    appId: '1:1017485472778:android:d21942a88fe0298be75bf3',
     messagingSenderId: '1017485472778',
     projectId: 'trusir-903a1',
     storageBucket: 'trusir-903a1.firebasestorage.app',
@@ -60,11 +60,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDXtMkP31KKEEAK2maqTvUl-G_1rKWyHtk',
-    appId: '1:1017485472778:ios:cefe58db38bac491e75bf3',
+    appId: '1:1017485472778:ios:3d748e52c2adf5b8e75bf3',
     messagingSenderId: '1017485472778',
     projectId: 'trusir-903a1',
     storageBucket: 'trusir-903a1.firebasestorage.app',
-    iosBundleId: 'com.trusir.com',
+    androidClientId: '1017485472778-l9g1anqv76f0erc14vdmns8age19hbur.apps.googleusercontent.com',
+    iosBundleId: 'com.trusir.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

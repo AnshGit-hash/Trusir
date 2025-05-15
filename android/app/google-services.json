@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1017485472778:android:46798d8ef16e812ce75bf3",
+        "mobilesdk_app_id": "1:1017485472778:android:d21942a88fe0298be75bf3",
         "android_client_info": {
-          "package_name": "com.trusir.com"
+          "package_name": "com.trusir.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1017485472778-5l9jd03svnsfcu6qig669uin20nshui6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyANean2Y_TDZbUet9S7NfCxYDpmTyghm5k"
@@ -20,7 +25,49 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017485472778-5l9jd03svnsfcu6qig669uin20nshui6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017485472778:android:46798d8ef16e812ce75bf3",
+        "android_client_info": {
+          "package_name": "com.trusir.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1017485472778-l9g1anqv76f0erc14vdmns8age19hbur.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trusir.com",
+            "certificate_hash": "dcf2248159306acfa94a90882a83a2a2f50517c8"
+          }
+        },
+        {
+          "client_id": "1017485472778-5l9jd03svnsfcu6qig669uin20nshui6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANean2Y_TDZbUet9S7NfCxYDpmTyghm5k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1017485472778-5l9jd03svnsfcu6qig669uin20nshui6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
