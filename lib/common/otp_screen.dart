@@ -278,8 +278,8 @@ class _OTPScreenState extends State<OTPScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(6, (index) {
                     return Container(
-                      height: isWeb ? 80 : 55,
-                      width: isWeb ? 80 : 55,
+                      height: isWeb ? 80 : 47,
+                      width: isWeb ? 80 : 47,
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(18),
@@ -311,13 +311,13 @@ class _OTPScreenState extends State<OTPScreen> {
                           maxLength: 1,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(
-                                left: 12, right: 10, top: isWeb ? 20 : 8),
+                                left: 12, right: 10, top: isWeb ? 20 : 0),
                             counterText: '',
                             border: InputBorder.none,
                           ),
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: isWeb ? 30 : 24,
+                            fontSize: isWeb ? 30 : 22,
                             fontWeight: FontWeight.bold,
                           ),
                           onChanged: (value) {
