@@ -191,6 +191,25 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
 
   Future<void> sendOTP(String phoneNumber) async {
     try {
+      setState(() {
+        _isSendingOTP = true;
+        phonenum = phoneNumber;
+      });
+
+      await storePhoneNo();
+
+      // Navigate to OTP screen immediately with loading state
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPScreen(
+            phonenum: phoneNumber,
+            verificationId: '', // Will be updated when code is sent
+            isLoading: true, // Show loading state initially
+          ),
+        ),
+      );
+
       String formattedPhone = '+91$phoneNumber';
 
       await FirebaseAuth.instance.verifyPhoneNumber(
@@ -198,42 +217,35 @@ class TrusirLoginPageState extends State<TrusirLoginPage> {
         verificationCompleted: (PhoneAuthCredential credential) async {
           await FirebaseAuth.instance.signInWithCredential(credential);
           print("Auto-verified: ${credential.smsCode}");
-          setState(() {
-            _isSendingOTP = false;
-          });
         },
         verificationFailed: (FirebaseAuthException e) {
           print("Firebase OTP Error: ${e.message}");
+          Navigator.pop(context); // Return to login if verification fails
           showCustomToast(context, 'Failed to send OTP: ${e.message}');
-          setState(() {
-            _isSendingOTP = false;
-          });
         },
         codeSent: (String verificationId, int? resendToken) {
-          Navigator.push(
+          // Replace the loading OTP screen with the actual one
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => OTPScreen(
                 phonenum: phoneNumber,
                 verificationId: verificationId,
+                isLoading: false,
               ),
             ),
           );
-          setState(() {
-            _isSendingOTP = false;
-          });
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           print("OTP timeout: $verificationId");
-          setState(() {
-            _isSendingOTP = false;
-          });
         },
         timeout: const Duration(seconds: 60),
       );
     } catch (e) {
       print("OTP Error: $e");
+      Navigator.pop(context); // Return to login if error occurs
       showCustomToast(context, 'Failed to send OTP');
+    } finally {
       setState(() {
         _isSendingOTP = false;
       });

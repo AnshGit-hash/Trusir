@@ -665,7 +665,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => StudentGKPage(
-                                      studentuserID: widget.userID),
+                                    studentuserID: widget.userID,
+                                    studentClass: widget.studentClass,
+                                  ),
                                 ),
                               );
                             },

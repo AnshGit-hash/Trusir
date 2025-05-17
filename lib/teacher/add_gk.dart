@@ -10,19 +10,23 @@ class GK {
   String? title;
   String? description;
   String? photo;
+  String? studclass;
 
   Map<String, dynamic> toJson() {
     return {
       'title': title,
       'description': description,
       'image': photo,
+      'class': studclass
     };
   }
 }
 
 class AddGK extends StatefulWidget {
   final String studentuserID;
-  const AddGK({super.key, required this.studentuserID});
+  final String studClass;
+  const AddGK(
+      {super.key, required this.studentuserID, required this.studClass});
 
   @override
   State<AddGK> createState() => _AddGKState();
@@ -79,6 +83,7 @@ class _AddGKState extends State<AddGK> {
     // Fetch the entered data
     formData.title = titleController.text;
     formData.description = descriptionController.text;
+    formData.studclass = widget.studClass;
 
     // Validation: Check if any field is empty
     if (formData.title == null || formData.title!.isEmpty) {

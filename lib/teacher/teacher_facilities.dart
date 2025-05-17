@@ -69,39 +69,35 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   String userID = '';
   String area = '';
   bool isWeb = false;
-  bool _isLoading = false;
+  bool _isLoading = true; // Initialize as true to show loading initially
   List<Map<String, String>> slots = [];
   List<String> filteredSlots = [];
 
   final apiBase = '$baseUrl/my-student';
 
   Future<List<Map<String, String>>> fetchCourses(String studentUserID) async {
-    setState(() => _isLoading = true);
     try {
       final url = Uri.parse('$baseUrl/get-individual-slots/$studentUserID');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final List<Map<String, String>> tempSlots = data.map((course) {
+        return data.map((course) {
           return {
             'teacherID': course['teacherID'] as String,
             'slotID': course['id'].toString(),
           };
         }).toList();
-
-        // Update slots list for this student
-        slots.addAll(tempSlots);
-        return slots;
       } else {
         throw Exception('Failed to fetch courses');
       }
-    } finally {
-      setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint('Error fetching courses: $e');
+      return [];
     }
   }
 
-  Future<void> fetchStudentProfiles({int page = 1}) async {
+  Future<List<StudentProfile>> fetchStudentProfiles({int page = 1}) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userID = prefs.getString('id');
     final url = '$apiBase/$userID';
@@ -109,13 +105,9 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-
-      setState(() {
-        studentprofile =
-            data.map((json) => StudentProfile.fromJson(json)).toList();
-      });
+      return data.map((json) => StudentProfile.fromJson(json)).toList();
     } else if (response.statusCode == 201) {
-      studentprofile = [];
+      return [];
     } else {
       throw Exception('Failed to load student profiles');
     }
@@ -139,6 +131,37 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
       }
     }
     return filteredSlotIDs;
+  }
+
+  Future<void> loadAllData() async {
+    try {
+      setState(() => _isLoading = true);
+
+      // Load profile data first
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        userID = prefs.getString('userID')!;
+        name = prefs.getString('name')!;
+        profile = prefs.getString('profile')!;
+        address = prefs.getString('city')!;
+        phone = prefs.getString('phone_number')!;
+      });
+
+      // Then load student profiles and slots in parallel
+      final profiles = await fetchStudentProfiles();
+      setState(() => studentprofile = profiles);
+
+      if (profiles.isNotEmpty) {
+        filteredSlots = await fetchAndFilterSlots();
+      }
+    } catch (e) {
+      debugPrint('Error loading data: $e');
+      showCustomToast(context, 'Failed to load data. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   final List<Color> cardColors = [
@@ -168,26 +191,13 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
   @override
   void initState() {
     super.initState();
-    fetchProfileData();
-  }
-
-  Future<void> fetchProfileData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await fetchStudentProfiles();
-    setState(() {
-      userID = prefs.getString('userID')!;
-      name = prefs.getString('name')!;
-      profile = prefs.getString('profile')!;
-      address = prefs.getString('city')!;
-      phone = prefs.getString('phone_number')!;
-    });
-    filteredSlots = await fetchAndFilterSlots();
+    loadAllData();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    isWeb = screenWidth > 800; // Increased threshold for web detection
+    isWeb = screenWidth > 800;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -226,7 +236,7 @@ class _TeacherFacilitiesState extends State<TeacherFacilities> {
         toolbarHeight: isWeb ? 80 : 60,
       ),
       body: _isLoading
-          ? const CircularProgressIndicator()
+          ? const Center(child: CircularProgressIndicator())
           : isWeb
               ? _buildWebLayout()
               : _buildMobileLayout(),

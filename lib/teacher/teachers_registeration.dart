@@ -103,6 +103,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
   String? gender;
   DateTime? selectedDOB;
   bool agreeToTerms = false;
+  bool isSendingOTP = false;
 
   final TeacherRegistrationData formData = TeacherRegistrationData();
 
@@ -571,7 +572,7 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
 
         showCustomToast(context, 'Registration Successful');
         userSkipped
-            ? sendOTP(_phoneController.text)
+            ? sendOTP(_phoneController.text, context)
             : Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -597,31 +598,49 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
     }
   }
 
-  Future<void> sendOTP(String phoneNumber) async {
+  Future<void> sendOTP(String phoneNumber, BuildContext context) async {
     try {
+      // Immediately navigate to OTP screen with loading state
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OTPScreen(
+            phonenum: phoneNumber,
+            verificationId: '', // Will be updated when code is sent
+            isLoading: true, // Show loading state initially
+          ),
+        ),
+      );
+
       // Format: +91XXXXXXXXXX
       String formattedPhone = '+91$phoneNumber';
+
+      // Store phone number in shared preferences
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('phone_number', phoneNumber);
 
       // Firebase Phone Auth
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: formattedPhone,
         verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification (e.g., on Android devices)
           await FirebaseAuth.instance.signInWithCredential(credential);
           print("Auto-verified: ${credential.smsCode}");
+          // Auto-verification will handle navigation automatically
         },
         verificationFailed: (FirebaseAuthException e) {
+          Navigator.pop(context); // Return to phone input if verification fails
           print("Firebase OTP Error: ${e.message}");
           showCustomToast(context, 'Failed to send OTP: ${e.message}');
         },
         codeSent: (String verificationId, int? resendToken) {
-          // Navigate to OTP screen with verificationId
-          Navigator.push(
+          // Replace the loading OTP screen with the actual one
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => OTPScreen(
                 phonenum: phoneNumber,
-                verificationId: verificationId, // Pass this to OTP screen
+                verificationId: verificationId,
+                isLoading: false,
               ),
             ),
           );
@@ -629,9 +648,10 @@ class TeacherRegistrationPageState extends State<TeacherRegistrationPage> {
         codeAutoRetrievalTimeout: (String verificationId) {
           print("OTP timeout: $verificationId");
         },
-        timeout: const Duration(seconds: 60), // Adjust timeout as needed
+        timeout: const Duration(seconds: 60),
       );
     } catch (e) {
+      Navigator.pop(context); // Return to phone input if error occurs
       print("OTP Error: $e");
       showCustomToast(context, 'Failed to send OTP');
     }

@@ -159,7 +159,7 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
     try {
       // Get the stored userID from shared preferences
       final prefs = await SharedPreferences.getInstance();
-      final storedUserID = prefs.getString('userID');
+      final storedUserID = prefs.getString('id');
 
       if (storedUserID == null) {
         throw Exception('User ID not found in shared preferences');
@@ -229,6 +229,11 @@ class _StudentDoubtsPageState extends State<StudentDoubtsPage> {
           isSolutionUploading = false;
         });
         Navigator.pop(context);
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    StudentDoubtsPage(userID: widget.userID)));
       } else {
         print('Failed to upload data. Status code: ${response.statusCode}');
         setState(() {

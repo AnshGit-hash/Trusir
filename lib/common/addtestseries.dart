@@ -190,124 +190,128 @@ class _AddtestseriesState extends State<Addtestseries> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.45,
-      width: MediaQuery.of(context).size.width,
+    return Card(
+      color: Colors.transparent,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Important for tight layout
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Test Name
-              const SizedBox(
-                height: 10,
-              ),
+              // Test Name Field
               Container(
-                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.4),
+                      color: Colors.black.withValues(alpha: 0.5),
                       offset: const Offset(2, 2),
                       blurRadius: 4,
                     ),
                   ],
                 ),
-                child: Center(
-                  child: TextFormField(
-                    controller: _testNameController,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: InputDecoration(
-                        fillColor: Colors.white,
-                        labelText: 'Test Name',
-                        labelStyle: TextStyle(color: Colors.grey.shade500),
-                        floatingLabelBehavior: FloatingLabelBehavior.auto,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.grey),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 13),
-                        isDense: true),
+                child: TextFormField(
+                  controller: _testNameController,
+                  decoration: InputDecoration(
+                    fillColor: Colors.white,
+                    filled: true,
+                    labelText: 'Test Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a test name';
+                    }
+                    return null;
+                  },
                 ),
               ),
-              const SizedBox(height: 15),
+
+              const SizedBox(height: 10),
+
               // Subject Dropdown
               Container(
-                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(22),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withValues(alpha: 0.5),
                       offset: const Offset(2, 2),
                       blurRadius: 4,
                     ),
                   ],
                 ),
                 child: DropdownButtonFormField<String>(
-                  iconSize: 25,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  value: _courses.isNotEmpty ? selectedSubject : null,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  items: _courses.isNotEmpty
-                      ? _courses.map((String subject) {
-                          return DropdownMenuItem<String>(
-                            value: subject,
-                            child: Text(subject),
-                          );
-                        }).toList()
-                      : [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('No courses available',
-                                style: TextStyle(color: Colors.grey)),
-                          ),
-                        ],
+                  value: selectedSubject,
                   decoration: InputDecoration(
+                    fillColor: Colors.white,
+                    filled: true,
                     labelText: 'Subject',
-                    labelStyle: TextStyle(color: Colors.grey.shade500),
-                    floatingLabelBehavior: FloatingLabelBehavior.auto,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(22),
+                      borderSide: const BorderSide(
+                        width: 1,
+                        color: Colors.blue,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 13),
-                    isDense: true,
+                        horizontal: 16, vertical: 14),
                   ),
-                  onChanged: _courses.isNotEmpty
-                      ? (String? value) {
-                          setState(() {
-                            selectedSubject = value;
-                          });
-                        }
-                      : null, // Disable onChanged when no courses are available
+                  items: _courses.map((String subject) {
+                    return DropdownMenuItem<String>(
+                      value: subject,
+                      child: Text(subject),
+                    );
+                  }).toList(),
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedSubject = value;
+                    });
+                  },
                   validator: (value) {
-                    if (_courses.isEmpty) {
-                      return null; // No validation when no courses are available
-                    }
                     if (value == null) {
                       return 'Please select a subject';
                     }
@@ -315,8 +319,10 @@ class _AddtestseriesState extends State<Addtestseries> {
                   },
                 ),
               ),
-              const SizedBox(height: 20),
 
+              const SizedBox(height: 16),
+
+              // Upload Buttons Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -972,11 +978,18 @@ class _AddtestseriesState extends State<Addtestseries> {
                 ],
               ),
 
-              // Submit Button
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: _buildCreateButton(context),
-              )
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () {
+                  _submitForm();
+                },
+                child: Image.asset(
+                  'assets/create_test.png',
+                  width: double.infinity,
+                  height: 60,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ],
           ),
         ),
@@ -984,37 +997,22 @@ class _AddtestseriesState extends State<Addtestseries> {
     );
   }
 
-  Widget _buildCreateButton(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          if (_formKey.currentState!.validate()) {
-            if (_testNameController.text.isEmpty) {
-              setState(() {
-                _testNameController.text = 'No Title';
-              });
-            }
-            if (question == '') {
-              setState(() {
-                question = 'No Question';
-              });
-            } else if (answer == '') {
-              showCustomToast(context, 'Upload Answer');
-              return;
-            }
-            _sendTestData(
-              _testNameController.text,
-              selectedSubject!,
-            );
-          }
-        },
-        child: Image.asset(
-          'assets/create_test.png',
-          width: double.infinity,
-          height: 60,
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      if (_testNameController.text.isEmpty) {
+        _testNameController.text = 'No Title';
+      }
+      if (question.isEmpty) {
+        question = 'No Question';
+      }
+      if (answer.isEmpty) {
+        showCustomToast(context, 'Please upload answers');
+        return;
+      }
+      _sendTestData(
+        _testNameController.text,
+        selectedSubject!,
+      );
+    }
   }
 }

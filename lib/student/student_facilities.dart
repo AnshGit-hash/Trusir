@@ -38,6 +38,7 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
   String checkTitle = '';
   List<MyCourseModel> _courseDetails = [];
   List<Teacher> teachers = [];
+  bool isLoading = false;
 
   final Map<String, Map<String, double>> imageSizes = {
     'assets/myprofile.png': {'width': 50, 'height': 50},
@@ -61,8 +62,14 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
   }
 
   Future<void> _initializeData() async {
+    setState(() {
+      isLoading = true;
+    });
     await fetchProfileData();
     await check();
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> check() async {
@@ -160,33 +167,35 @@ class _StudentfacilitiesState extends State<Studentfacilities> {
         ],
         toolbarHeight: 60,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final contentWidth = isWeb
-              ? 700
-              : constraints.maxWidth > 388
-                  ? 388
-                  : constraints.maxWidth - 40;
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final contentWidth = isWeb
+                    ? 700
+                    : constraints.maxWidth > 388
+                        ? 388
+                        : constraints.maxWidth - 40;
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.only(
-              left: isWeb ? 50 : 20.0,
-              right: isWeb ? 50 : 20.0,
-              top: 10.0,
-              bottom: 20.0, // Added bottom padding for scroll
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    left: isWeb ? 50 : 20.0,
+                    right: isWeb ? 50 : 20.0,
+                    top: 10.0,
+                    bottom: 20.0, // Added bottom padding for scroll
+                  ),
+                  child: Column(
+                    children: [
+                      _buildProfileCard(isWeb, double.parse('$contentWidth')),
+                      const SizedBox(height: 15),
+                      _buildGridTiles(isWeb, double.parse('$tileWidth'),
+                          double.parse('$tileHeight')),
+                    ],
+                  ),
+                );
+              },
             ),
-            child: Column(
-              children: [
-                _buildProfileCard(isWeb, double.parse('$contentWidth')),
-                const SizedBox(height: 15),
-                _buildGridTiles(isWeb, double.parse('$tileWidth'),
-                    double.parse('$tileHeight')),
-              ],
-            ),
-          );
-        },
-      ),
     );
   }
 

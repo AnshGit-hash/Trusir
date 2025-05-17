@@ -5,6 +5,7 @@ import 'package:trusir/common/contactus.dart';
 import 'package:trusir/common/custom_toast.dart';
 import 'package:trusir/common/parents_doubts.dart';
 import 'package:trusir/common/about_us.dart';
+import 'package:trusir/common/refund_policy.dart';
 import 'package:trusir/student/main_screen.dart';
 import 'package:trusir/student/student_tnc.dart';
 import 'package:trusir/student/your_doubt.dart';
@@ -71,6 +72,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'color': Colors.indigo.shade200,
         'title': 'Contact Us',
         'route': const Contactus(),
+      },
+      {
+        'image': 'assets/tnc.png',
+        'color': Colors.blue.shade200,
+        'title': 'Refund Policy',
+        'route': const RefundPolicyPage(),
       },
       {
         'image': 'assets/tnc.png',

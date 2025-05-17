@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/student/teacher_profile_page.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:trusir/common/api.dart'; // Assuming you've added your base URL here
+import 'package:trusir/common/api.dart';
 
 class TeacherProfileScreen extends StatefulWidget {
   const TeacherProfileScreen({super.key});
@@ -17,6 +17,7 @@ class TeacherProfileScreen extends StatefulWidget {
 class TeacherProfileScreenState extends State<TeacherProfileScreen> {
   List<Teacher> teachers = [];
   bool isLoading = true;
+  bool hasError = false;
   String? studentClass;
 
   @override
@@ -27,7 +28,6 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   @override
   void dispose() {
-    // Reset status bar to default when leaving the page
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -41,35 +41,34 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
   Future<Map<String, List<String>>> fetchTeacherSubjects() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userID = prefs.getString('userID');
-    final url = Uri.parse(
-        '$baseUrl/get-individual-slots/$userID'); // Replace with your actual URL
+    final url = Uri.parse('$baseUrl/get-individual-slots/$userID');
 
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        Map<String, List<String>> teacherSubjects = {};
 
-      // Create a map of teacherID to subject (if subject is not null)
-      Map<String, List<String>> teacherSubjects = {};
+        for (var item in data) {
+          final teacherID = item['teacherID'];
+          final subject = item['subject'] ?? 'No Subject';
 
-      for (var item in data) {
-        final teacherID = item['teacherID'];
-        final subject = item['subject'] ?? 'No Subject';
-
-        if (teacherID != null && subject != null) {
-          if (!teacherSubjects.containsKey(teacherID)) {
-            teacherSubjects[teacherID] = [];
-          }
-          if (!teacherSubjects[teacherID]!.contains(subject)) {
-            teacherSubjects[teacherID]!.add(subject);
+          if (teacherID != null && subject != null) {
+            if (!teacherSubjects.containsKey(teacherID)) {
+              teacherSubjects[teacherID] = [];
+            }
+            if (!teacherSubjects[teacherID]!.contains(subject)) {
+              teacherSubjects[teacherID]!.add(subject);
+            }
           }
         }
+        return teacherSubjects;
+      } else {
+        throw Exception('Failed to load subjects data');
       }
-      print(teacherSubjects);
-
-      return teacherSubjects;
-    } else {
-      throw Exception('Failed to load data');
+    } catch (e) {
+      throw Exception('Error fetching subjects: $e');
     }
   }
 
@@ -79,8 +78,7 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
     studentClass = prefs.getString('class');
 
     try {
-      final subjectsMap =
-          await fetchTeacherSubjects(); // fetch subject mappings
+      final subjectsMap = await fetchTeacherSubjects();
       final response = await http.get(Uri.parse('$baseUrl/teacher/$userID'));
 
       if (response.statusCode == 200) {
@@ -90,7 +88,6 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
         for (var jsonTeacher in data) {
           Teacher teacher = Teacher.fromJson(jsonTeacher);
 
-          // Replace the subject with the mapped subject(s) if available
           if (subjectsMap.containsKey(teacher.id.toString())) {
             teacher = Teacher(
               id: teacher.id,
@@ -100,8 +97,7 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
               motherName: teacher.motherName,
               gender: teacher.gender,
               teacherClass: teacher.teacherClass,
-              subject: subjectsMap[teacher.id.toString()]!
-                  .join(', '), // Overwrite subject
+              subject: subjectsMap[teacher.id.toString()]!.join(', '),
               dob: teacher.dob,
               phone: teacher.phone,
               role: teacher.role,
@@ -126,184 +122,274 @@ class TeacherProfileScreenState extends State<TeacherProfileScreen> {
         setState(() {
           teachers = loadedTeachers;
           isLoading = false;
+          hasError = false;
         });
       } else {
-        throw Exception('Failed to load teachers');
+        setState(() {
+          isLoading = false;
+          hasError = true;
+        });
       }
     } catch (e) {
       print("Error fetching teacher data: $e");
+      setState(() {
+        isLoading = false;
+        hasError = true;
+      });
     }
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF48116A)),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Loading teacher profiles...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset('assets/no_teachers.png', height: 120), // Add your asset
+          const SizedBox(height: 20),
+          const Text(
+            'No Teachers Assigned Yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF48116A),
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Your teachers will appear here once assigned',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 20),
+          const Text(
+            'Failed to load teacher data',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF48116A),
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: fetchTeachers,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF48116A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Try Again',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeacherGrid() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 8),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.72,
+              ),
+              itemCount: teachers.length,
+              itemBuilder: (context, index) {
+                final teacher = teachers[index];
+                return GestureDetector(
+                  onTap: () =>
+                      showPopupDialog(context, teacher.phone, teacher.userID),
+                  child: Stack(
+                    clipBehavior: Clip.hardEdge,
+                    children: [
+                      Container(
+                        width: 180,
+                        height: 251,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey, width: 1),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 98,
+                              height: 101,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(teacher.profile),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              teacher.name,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              teacher.phone,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              teacher.subject,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: -5,
+                        left: -30,
+                        child: Transform.rotate(
+                          angle: -0.785398,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 0, left: 0, right: 0),
+                            child: Container(
+                              width: 150,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 25, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.purple.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                teacher.teacherClass
+                                            .split(',')
+                                            .where((cls) =>
+                                                cls.trim() == studentClass)
+                                            .join(', ') ==
+                                        ''
+                                    ? studentClass!
+                                    : teacher.teacherClass
+                                        .split(',')
+                                        .where(
+                                            (cls) => cls.trim() == studentClass)
+                                        .join(', '),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
         backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          backgroundColor: Colors.grey[50],
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 1.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Image.asset('assets/back_button.png', height: 50)),
-                const SizedBox(width: 20),
-                const Text(
-                  'Teacher Profile',
-                  style: TextStyle(
-                    color: Color(0xFF48116A),
-                    fontSize: 25,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                  ),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Padding(
+          padding: const EdgeInsets.only(left: 1.0),
+          child: Row(
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Image.asset('assets/back_button.png', height: 50)),
+              const SizedBox(width: 20),
+              const Text(
+                'Teacher Profile',
+                style: TextStyle(
+                  color: Color(0xFF48116A),
+                  fontSize: 25,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          toolbarHeight: 70,
         ),
-        body: teachers.isEmpty
-            ? const Center(child: Text('No Teachers Assigned Yet'))
-            : isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    child: Column(children: [
-                    // Display the teacher profiles in a grid view
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 20, right: 20, top: 20, bottom: 8),
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.72,
-                        ),
-                        itemCount: teachers.length,
-                        itemBuilder: (context, index) {
-                          final teacher = teachers[index];
-
-                          return GestureDetector(
-                            onTap: () => showPopupDialog(
-                                context, teacher.phone, teacher.userID),
-                            child: Stack(
-                              clipBehavior: Clip.hardEdge,
-                              children: [
-                                Container(
-                                  width: 180,
-                                  height: 251,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: Colors.grey, width: 1),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // Image from network
-                                      Container(
-                                        width: 98,
-                                        height: 101,
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image:
-                                                NetworkImage(teacher.profile),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      // Name Text
-                                      Text(
-                                        teacher.name,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      // Phone Number
-                                      Text(
-                                        teacher.phone,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        teacher.subject,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Tag
-                                Positioned(
-                                  top: -5,
-                                  left: -30,
-                                  child: Transform.rotate(
-                                    angle: -0.785398,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 0, left: 0, right: 0),
-                                      child: Container(
-                                        width: 150,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 25, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.purple.shade100,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          teacher.teacherClass
-                                                      .split(',')
-                                                      .where((cls) =>
-                                                          cls.trim() ==
-                                                          studentClass)
-                                                      .join(', ') ==
-                                                  ''
-                                              ? studentClass!
-                                              : teacher.teacherClass
-                                                  .split(',')
-                                                  .where((cls) =>
-                                                      cls.trim() ==
-                                                      studentClass)
-                                                  .join(
-                                                      ', '), // Show only matching class
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  ])));
+        toolbarHeight: 70,
+      ),
+      body: isLoading
+          ? _buildLoadingState()
+          : hasError
+              ? _buildErrorState()
+              : teachers.isEmpty
+                  ? _buildEmptyState()
+                  : _buildTeacherGrid(),
+    );
   }
 }
 

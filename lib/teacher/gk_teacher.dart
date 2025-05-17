@@ -100,6 +100,8 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
         ? "No Description"
         : descriptionController.text;
 
+    formData.studclass = 'class';
+
     if (formData.photo == null || formData.photo!.isEmpty) {
       showCustomToast(context, 'Upload the image');
       return;
@@ -117,7 +119,7 @@ class _AddGkTeacherState extends State<AddGkTeacher> {
       String? studentUserID = nameUserMap[student];
       print(studentUserID);
 
-      final url = Uri.parse('$baseUrl/api/teacher-gks/$userId/$studentUserID');
+      final url = Uri.parse('$baseUrl/api/tecaher-gks/$userId/$studentUserID');
       final headers = {'Content-Type': 'application/json'};
       final body = json.encode(formData.toJson());
 

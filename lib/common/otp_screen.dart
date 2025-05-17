@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trusir/common/custom_toast.dart';
@@ -14,11 +12,12 @@ import 'package:trusir/common/login_splash_screen.dart';
 class OTPScreen extends StatefulWidget {
   final String phonenum;
   final String verificationId; // Added verificationId parameter
-  const OTPScreen({
-    super.key,
-    required this.phonenum,
-    required this.verificationId,
-  });
+  final bool isLoading;
+  const OTPScreen(
+      {super.key,
+      required this.phonenum,
+      required this.verificationId,
+      required this.isLoading});
 
   @override
   State<OTPScreen> createState() => _OTPScreenState();
@@ -33,11 +32,26 @@ class _OTPScreenState extends State<OTPScreen> {
   bool _isButtonEnabled = false;
   int _secondsRemaining = 30;
   Timer? _timer;
+  late bool _isLoading;
 
   @override
   void initState() {
     super.initState();
-    startTimer();
+    _isLoading = widget.isLoading;
+
+    if (!_isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        focusNodes[0].requestFocus();
+      });
+
+      for (int i = 0; i < focusNodes.length; i++) {
+        focusNodes[i].addListener(() {
+          setState(() {});
+        });
+      }
+
+      startTimer();
+    }
   }
 
   void startTimer() {
@@ -95,6 +109,101 @@ class _OTPScreenState extends State<OTPScreen> {
       print('Error fetching user data: $e');
       return null;
     }
+  }
+
+  Widget _buildOTPInput(double size, bool isWeb) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(6, (index) {
+        return SizedBox(
+          height: size,
+          width: size,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 100),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: focusNodes[index].hasFocus
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF48116A).withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      )
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+            ),
+            child: TextField(
+              controller: otpControllers[index],
+              focusNode: focusNodes[index],
+              textAlign: TextAlign.center,
+              textAlignVertical: TextAlignVertical.center,
+              keyboardType: TextInputType.number,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: isWeb ? 30 : 22,
+                fontWeight: FontWeight.bold,
+                height: 1.0,
+              ),
+              maxLength: 1,
+              decoration: InputDecoration(
+                counterText: '',
+                filled: true,
+                fillColor: Colors.white,
+                isDense: true,
+                contentPadding:
+                    const EdgeInsets.only(left: 13, right: 10, top: 25),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                    color: Colors.transparent,
+                    width: 0,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (value) {
+                // Handle forward movement
+                if (value.isNotEmpty && index < 5) {
+                  FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+                }
+
+                // Verify if all fields are filled
+                if (otpControllers
+                    .every((controller) => controller.text.isNotEmpty)) {
+                  FocusScope.of(context).unfocus();
+                  verifyOTP();
+                }
+              },
+              onTap: () {
+                // Select all text when tapping on a field
+                otpControllers[index].selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: otpControllers[index].text.length,
+                );
+              },
+              onSubmitted: (_) {
+                // Handle moving to next field on submission (for keyboard done button)
+                if (index < 5) {
+                  FocusScope.of(context).requestFocus(focusNodes[index + 1]);
+                }
+              },
+            ),
+          ),
+        );
+      }),
+    );
   }
 
   Future<void> verifyOTP() async {
@@ -220,6 +329,8 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   Widget build(BuildContext context) {
     final isWeb = MediaQuery.of(context).size.width > 900;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final otpFieldSize = isWeb ? 90.0 : screenWidth * 0.13;
 
     return Scaffold(
       appBar: AppBar(
@@ -255,7 +366,7 @@ class _OTPScreenState extends State<OTPScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Enter OTP',
+                  _isLoading ? 'Sending OTP' : 'Enter OTP',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: isWeb ? 45 : 35,
@@ -265,7 +376,9 @@ class _OTPScreenState extends State<OTPScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter the verification code \nwe just sent on your phone number.',
+                  _isLoading
+                      ? 'Sending OTP to ${widget.phonenum}'
+                      : 'Enter the verification code \nwe just sent on your phone number.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -274,100 +387,41 @@ class _OTPScreenState extends State<OTPScreen> {
                   ),
                 ),
                 const SizedBox(height: 44),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) {
-                    return Container(
-                      height: isWeb ? 80 : 47,
-                      width: isWeb ? 80 : 47,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 177, 177, 177),
-                          width: 1.5,
-                        ),
+                if (_isLoading)
+                  const CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF48116A)),
+                  ),
+                if (!_isLoading) ...[
+                  _buildOTPInput(otpFieldSize, isWeb),
+                  TextButton(
+                    onPressed: _isButtonEnabled ? resendOTP : null,
+                    child: Text(
+                      _isButtonEnabled ? 'Resend OTP' : '$_secondsRemaining',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: isWeb ? 18 : 16,
+                        color: _isButtonEnabled
+                            ? const Color(0xFF48116A)
+                            : Colors.grey,
                       ),
-                      child: RawKeyboardListener(
-                        focusNode: FocusNode(),
-                        onKey: (RawKeyEvent event) {
-                          if (event
-                                  .isKeyPressed(LogicalKeyboardKey.backspace) &&
-                              otpControllers[index].text.isEmpty &&
-                              index > 0) {
-                            FocusScope.of(context)
-                                .requestFocus(focusNodes[index - 1]);
-                            otpControllers[index].clear();
-                          }
-                        },
-                        child: TextFormField(
-                          controller: otpControllers[index],
-                          focusNode: focusNodes[index],
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.only(
-                                left: 12, right: 10, top: isWeb ? 20 : 0),
-                            counterText: '',
-                            border: InputBorder.none,
-                          ),
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: isWeb ? 30 : 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          onChanged: (value) {
-                            if (value.isNotEmpty && index < 5) {
-                              FocusScope.of(context)
-                                  .requestFocus(focusNodes[index + 1]);
-                            } else if (value.isEmpty && index > 0) {
-                              FocusScope.of(context)
-                                  .requestFocus(focusNodes[index - 1]);
-                            }
-
-                            bool allFilled = otpControllers.every(
-                                (controller) => controller.text.isNotEmpty);
-                            if (allFilled) {
-                              FocusScope.of(context).unfocus();
-                              verifyOTP();
-                            }
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                TextButton(
-                  onPressed: _isButtonEnabled ? resendOTP : null,
-                  child: Text(
-                    _isButtonEnabled ? 'Resend OTP' : '$_secondsRemaining',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: isWeb ? 18 : 16,
-                      color: _isButtonEnabled
-                          ? const Color(0xFF48116A)
-                          : Colors.grey,
                     ),
                   ),
-                ),
-                const SizedBox(height: 70),
-                Center(
-                  child: isVerifying
-                      ? const CircularProgressIndicator()
-                      : GestureDetector(
-                          onTap: verifyOTP,
-                          child: Image.asset(
-                            height: isWeb ? 150 : null,
-                            'assets/verify.png',
-                            width: double.infinity,
-                            fit: BoxFit.contain,
+                  const SizedBox(height: 70),
+                  Center(
+                    child: isVerifying
+                        ? const CircularProgressIndicator()
+                        : GestureDetector(
+                            onTap: verifyOTP,
+                            child: Image.asset(
+                              height: isWeb ? 150 : null,
+                              'assets/verify.png',
+                              width: double.infinity,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                        ),
-                ),
+                  ),
+                ],
               ],
             ),
           ),

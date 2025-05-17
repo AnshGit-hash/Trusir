@@ -8,8 +8,6 @@ import 'dart:convert';
 
 import 'package:trusir/student/wallet.dart';
 
-// import 'package:trusir/student/student_payment_page.dart';
-
 class Fees {
   final String paymentType;
   final String transactionId;
@@ -28,22 +26,19 @@ class Fees {
   });
 
   factory Fees.fromJson(Map<String, dynamic> json) {
-    // Extract date and time from the created_at field
     final createdAt = json['created_at'] ?? '';
     final dateTime = DateTime.tryParse(createdAt);
 
-    // Format date and time
     final formattedDate =
         dateTime != null ? DateFormat('dd-MM-yyyy').format(dateTime) : '';
-    final formattedTime = dateTime != null
-        ? DateFormat('h:mm a').format(dateTime) // 12-hour format with AM/PM
-        : '';
+    final formattedTime =
+        dateTime != null ? DateFormat('h:mm a').format(dateTime) : '';
 
     return Fees(
       paymentType: json['transactionType'] ?? '',
       transactionId: json['transactionID'] ?? '',
       paymentMethod: json['transactionName'] ?? '',
-      amount: json['amount'] ?? '0', // Ensure a default value is provided
+      amount: json['amount'] ?? '0',
       date: formattedDate,
       time: formattedTime,
     );
@@ -60,9 +55,6 @@ class FeePaymentScreen extends StatefulWidget {
 class _FeePaymentScreenState extends State<FeePaymentScreen> {
   List<Fees> feepayment = [];
   bool isLoading = true;
-  bool isLoadingMore = false;
-  int currentPage = 1;
-  bool hasMore = true;
   double balance = 0;
 
   final apiBase = '$baseUrl/get-fee-payment-info/';
@@ -70,7 +62,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
   Future<double> fetchBalance() async {
     final prefs = await SharedPreferences.getInstance();
     final userID = prefs.getString('userID');
-    // Replace with your API URL
     try {
       final response =
           await http.get(Uri.parse('$baseUrl/api/get-user/$userID'));
@@ -81,69 +72,51 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
         setState(() {
           balance = double.parse(data['balance']);
         });
-        return balance; // Convert balance to an integer
+        return balance;
       } else {
         throw Exception('Failed to load balance');
       }
     } catch (e) {
       print('Error: $e');
-      return 0; // Return 0 in case of an error
+      return 0;
     }
   }
 
-  Future<void> fetchFeeDetails({int page = 1}) async {
+  Future<void> fetchFeeDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userID = prefs.getString('userID');
-    final url = '$apiBase$userID?page=$page&data_per_page=10';
+    final url = '$apiBase$userID';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+
       setState(() {
-        if (page == 1) {
-          // Initial fetch and filter out 'ByAdmin' transactions
-          feepayment = data
-              .map((json) => Fees.fromJson(json))
-              .where((fee) =>
-                  fee.paymentMethod != 'ByAdmin' &&
-                  fee.paymentMethod != 'By Admin')
-              .toList();
-        } else {
-          // Append new data and filter out 'ByAdmin' transactions
-          feepayment.addAll(data.map((json) => Fees.fromJson(json)).where(
-              (fee) =>
-                  fee.paymentMethod != 'ByAdmin' &&
-                  fee.paymentMethod != 'By Admin'));
-        }
-        print(feepayment);
+        feepayment = data
+            .map((json) => Fees.fromJson(json))
+            .where((fee) =>
+                fee.paymentMethod != 'ByAdmin' &&
+                fee.paymentMethod != 'By Admin')
+            .toList();
+      });
 
-        // Sort transactions by created_at in descending order (latest first)
-        feepayment.sort((a, b) {
-          DateTime dateA = DateTime.tryParse(jsonDecode(response.body)
-                      .firstWhere((e) => e['transactionID'] == a.transactionId)[
-                  'created_at']) ??
-              DateTime(0);
-          DateTime dateB = DateTime.tryParse(jsonDecode(response.body)
-                      .firstWhere((e) => e['transactionID'] == b.transactionId)[
-                  'created_at']) ??
-              DateTime(0);
-          return dateB.compareTo(dateA); // Descending order
-        });
+      // Sort transactions by created_at in descending order (latest first)
+      feepayment.sort((a, b) {
+        DateTime dateA = DateTime.tryParse(jsonDecode(response.body).firstWhere(
+                (e) => e['transactionID'] == a.transactionId)['created_at']) ??
+            DateTime(0);
+        DateTime dateB = DateTime.tryParse(jsonDecode(response.body).firstWhere(
+                (e) => e['transactionID'] == b.transactionId)['created_at']) ??
+            DateTime(0);
+        return dateB.compareTo(dateA);
+      });
 
-        print(response.body);
-
+      setState(() {
         isLoading = false;
-        isLoadingMore = false;
-
-        // Check if more data is available
-        if (data.isEmpty) {
-          hasMore = false;
-        }
       });
     } else {
       setState(() {
         isLoading = false;
-        isLoadingMore = false;
       });
       throw Exception('Failed to load fees');
     }
@@ -163,9 +136,9 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
     Colors.green.shade100,
     Colors.purple.shade100,
   ];
+
   @override
   void dispose() {
-    // Reset status bar to default when leaving the page
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -258,7 +231,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                 _buildCurrentMonthCard(
                                     MediaQuery.of(context).size.width * 0.4,
                                     isWideScreen),
-                                // _buildPayButton(context),
                               ],
                             ),
                             const SizedBox(width: 40),
@@ -298,11 +270,9 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                           int index = entry.key;
                                           Fees payment = entry.value;
 
-                                          // Cycle through colors using the modulus operator
                                           Color cardColor = cardColors[
                                               index % cardColors.length];
 
-                                          // Extract transaction ID before the comma
                                           String displayedTransactionId =
                                               payment.transactionId.contains(
                                                       ',')
@@ -320,8 +290,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                               width: 386,
                                               height: 100,
                                               decoration: BoxDecoration(
-                                                color:
-                                                    cardColor, // Apply dynamic color
+                                                color: cardColor,
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                               ),
@@ -355,7 +324,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                                     .black,
                                                               ),
                                                             ),
-                                                            // Display only the part of transactionId before the comma
                                                             Text(
                                                               displayedTransactionId,
                                                               style:
@@ -435,25 +403,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                             ),
                                           );
                                         }),
-                                        if (hasMore)
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10),
-                                            child: isLoadingMore
-                                                ? const CircularProgressIndicator()
-                                                : TextButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        isLoadingMore = true;
-                                                        currentPage++;
-                                                      });
-                                                      fetchFeeDetails(
-                                                          page: currentPage);
-                                                    },
-                                                    child: const Text(
-                                                        'Load More...'),
-                                                  ),
-                                          ),
                                       ],
                                     ),
                                   ),
@@ -504,7 +453,6 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                                 .trim()
                                             : payment.transactionId.trim();
 
-                                    // Cycle through colors using the modulus operator
                                     Color cardColor =
                                         cardColors[index % cardColors.length];
 
@@ -515,8 +463,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                         width: 386,
                                         height: 100,
                                         decoration: BoxDecoration(
-                                          color:
-                                              cardColor, // Apply dynamic color
+                                          color: cardColor,
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -610,32 +557,9 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
                                       ),
                                     );
                                   }),
-                                  if (hasMore)
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      child: isLoadingMore
-                                          ? const CircularProgressIndicator()
-                                          : TextButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  isLoadingMore = true;
-                                                  currentPage++;
-                                                });
-                                                fetchFeeDetails(
-                                                    page: currentPage);
-                                              },
-                                              child: const Text('Load More...'),
-                                            ),
-                                    ),
                                 ],
                               ),
                             ),
-                            // Positioned(
-                            //     bottom: -22,
-                            //     left: 0,
-                            //     right: 0,
-                            //     child: _buildPayButton(context)),
                           ],
                         ),
                 );
@@ -703,25 +627,4 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
       ),
     );
   }
-
-  // Widget _buildPayButton(BuildContext context) {
-  //   return Center(
-  //     child: GestureDetector(
-  //       onTap: () {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const StudentPaymentPage(),
-  //           ),
-  //         );
-  //       },
-  //       child: Image.asset(
-  //         'assets/pay_fee.png',
-  //         width: 300,
-  //         height: 100,
-  //         fit: BoxFit.contain,
-  //       ),
-  //     ),
-  //   );
-  // }
 }

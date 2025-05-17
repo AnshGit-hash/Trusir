@@ -109,7 +109,9 @@ class GKDetailPage extends StatelessWidget {
 
 class StudentGKPage extends StatefulWidget {
   final String studentuserID;
-  const StudentGKPage({super.key, required this.studentuserID});
+  final String studentClass;
+  const StudentGKPage(
+      {super.key, required this.studentuserID, required this.studentClass});
 
   @override
   State<StudentGKPage> createState() => _StudentGKPageState();
@@ -485,6 +487,7 @@ class _StudentGKPageState extends State<StudentGKPage> {
               MaterialPageRoute(
                   builder: (context) => AddGK(
                         studentuserID: widget.studentuserID,
+                        studClass: widget.studentClass,
                       )));
         },
         child: Padding(
