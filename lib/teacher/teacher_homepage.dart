@@ -175,18 +175,20 @@ class _TeacherhomepageState extends State<Teacherhomepage> {
               child: _CallButton(isWeb: isWeb),
             ),
           ],
+          if (isPortrait) ...[
+            Positioned(
+              right: 13,
+              top: mediaQuery.size.height * 0.4,
+              child: _WhatsAppButton(isWeb: isWeb),
+            ),
+            Positioned(
+              right: 13,
+              top: (isWeb ? 0.55 : 0.48) * mediaQuery.size.height,
+              child: _CallButton(isWeb: isWeb),
+            ),
+          ],
         ],
       ),
-      floatingActionButton: isPortrait && !isWeb
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _WhatsAppButton(isWeb: isWeb),
-                const SizedBox(height: 16),
-                _CallButton(isWeb: isWeb),
-              ],
-            )
-          : null,
     );
   }
 }
