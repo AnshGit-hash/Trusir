@@ -1,0 +1,2 @@
+C:/Users/anshc/Downloads/Trusir/android/app/.cxx/RelWithDebInfo/72552b1t/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/anshc/Downloads/Trusir/android/app/.cxx/RelWithDebInfo/72552b1t/arm64-v8a/CMakeFiles/rebuild_cache.dir
